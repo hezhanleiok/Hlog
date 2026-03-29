@@ -5,4 +5,4 @@ pages_build_output_dir = "public"
 [[d1_databases]]
 binding = "DB"
 database_name = "hlog-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "13a4a56a-e1b2-4ddf-a0be-899ae1e5e41b"
