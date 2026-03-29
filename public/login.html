@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HLOG - 登录</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-sm p-6">
+    <h1 class="text-2xl font-bold mb-1">登录 HLOG</h1>
+    <p class="text-sm text-slate-500 mb-6">欢迎回来，继续写作与分享。</p>
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="text-sm text-slate-600">用户名</label>
+        <input id="username" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
+      </div>
+      <div>
+        <label class="text-sm text-slate-600">密码</label>
+        <input id="password" type="password" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
+      </div>
+      <button class="w-full bg-sky-600 text-white rounded-lg py-2 hover:bg-sky-700">登录</button>
+    </form>
+    <p class="text-sm text-slate-500 mt-4">没有账号？<a href="/register.html" class="text-sky-600">立即注册</a></p>
+    <a href="/" class="inline-block mt-4 text-sm text-slate-600 hover:text-slate-900">返回首页</a>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "登录失败");
+        localStorage.setItem("hlog_auth", JSON.stringify(data));
+        location.href = "/";
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+  </script>
+</body>
+</html>

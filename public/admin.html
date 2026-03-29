@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HLOG - 管理后台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-sky-600">HLOG Admin</h1>
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
+        <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm">退出登录</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <section class="lg:col-span-1 bg-white rounded-2xl shadow-sm p-5 h-fit">
+      <h2 class="text-xl font-semibold mb-4">发布 / 编辑文章</h2>
+      <form id="postForm" class="space-y-3">
+        <input id="postId" type="hidden" />
+        <div>
+          <label class="text-sm text-slate-600">标题</label>
+          <input id="title" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-600">摘要</label>
+          <textarea id="summary" rows="2" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"></textarea>
+        </div>
+        <div>
+          <label class="text-sm text-slate-600">封面图 URL（多张用英文逗号分隔）</label>
+          <input id="coverImages" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="https://... , https://..." />
+        </div>
+        <div>
+          <label class="text-sm text-slate-600">正文内容</label>
+          <textarea id="content" rows="8" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"></textarea>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700" id="saveBtn">保存文章</button>
+          <button type="button" class="px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300" id="resetBtn">清空</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-5">
+      <h2 class="text-xl font-semibold mb-4">文章管理</h2>
+      <div id="postList" class="space-y-3"></div>
+    </section>
+  </main>
+
+  <script>
+    const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
+    if (!auth?.token || auth.role !== "admin") {
+      alert("仅管理员可访问后台");
+      location.href = "/login.html";
+    }
+
+    async function api(path, options = {}) {
+      const headers = options.headers || {};
+      headers.Authorization = `Bearer ${auth.token}`;
+      const res = await fetch(path, { ...options, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "请求失败");
+      return data;
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("hlog_auth");
+      location.href = "/login.html";
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.getElementById("postId").value = "";
+      document.getElementById("postForm").reset();
+    });
+
+    async function loadPosts() {
+      const { posts } = await api("/api/post/list");
+      const container = document.getElementById("postList");
+      if (!posts.length) {
+        container.innerHTML = '<p class="text-sm text-slate-500">暂无文章</p>';
+        return;
+      }
+      container.innerHTML = posts.map((p) => `
+        <div class="border border-slate-200 rounded-xl p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h3 class="font-semibold">${p.title}</h3>
+              <p class="text-xs text-slate-500 mt-1">${new Date(p.created_at).toLocaleString()}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button data-edit="${p.id}" class="px-3 py-1.5 text-sm rounded-lg bg-sky-100 text-sky-700 hover:bg-sky-200">编辑</button>
+              <button data-delete="${p.id}" class="px-3 py-1.5 text-sm rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200">删除</button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      container.querySelectorAll("[data-edit]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = Number(btn.dataset.edit);
+          const { post } = await api(`/api/post/list?id=${id}`);
+          document.getElementById("postId").value = post.id;
+          document.getElementById("title").value = post.title;
+          document.getElementById("summary").value = post.summary || "";
+          document.getElementById("coverImages").value = (post.covers || []).join(", ");
+          document.getElementById("content").value = post.content;
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      container.querySelectorAll("[data-delete]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = Number(btn.dataset.delete);
+          if (!confirm("确认删除此文章？")) return;
+          try {
+            await api("/api/post/create", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id })
+            });
+            await loadPosts();
+          } catch (err) {
+            alert(err.message);
+          }
+        });
+      });
+    }
+
+    document.getElementById("postForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("postId").value;
+      const payload = {
+        id: id ? Number(id) : undefined,
+        title: document.getElementById("title").value.trim(),
+        summary: document.getElementById("summary").value.trim(),
+        content: document.getElementById("content").value.trim(),
+        covers: document.getElementById("coverImages").value.split(",").map((s) => s.trim()).filter(Boolean)
+      };
+      try {
+        await api("/api/post/create", {
+          method: id ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        document.getElementById("postForm").reset();
+        document.getElementById("postId").value = "";
+        await loadPosts();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    loadPosts().catch((err) => alert(err.message));
+  </script>
+</body>
+</html>

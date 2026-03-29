@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HLOG - Cloudflare 全栈博客</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="text-2xl font-bold text-sky-600">HLOG</a>
+      <nav class="flex items-center gap-3 text-sm">
+        <a href="/" class="px-3 py-2 rounded-lg hover:bg-slate-100">首页</a>
+        <a href="/login.html" id="loginLink" class="px-3 py-2 rounded-lg hover:bg-slate-100">登录</a>
+        <a href="/register.html" id="registerLink" class="px-3 py-2 rounded-lg hover:bg-slate-100">注册</a>
+        <a href="/admin.html" id="adminLink" class="px-3 py-2 rounded-lg bg-sky-600 text-white hidden">后台</a>
+        <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white hidden">退出</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <section id="homeView">
+      <div class="relative rounded-2xl overflow-hidden shadow-sm mb-8 bg-slate-200">
+        <div id="slideTrack" class="h-64 md:h-80 relative"></div>
+        <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-2" id="slideDots"></div>
+      </div>
+
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold">最新文章</h2>
+        <button id="reloadPostsBtn" class="text-sm px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">刷新</button>
+      </div>
+      <div id="postGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <section id="detailView" class="hidden">
+      <button id="backBtn" class="mb-4 text-sm px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">返回首页</button>
+      <article class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <img id="detailCover" class="w-full h-56 object-cover rounded-xl mb-4 hidden" alt="cover" />
+        <h1 id="detailTitle" class="text-3xl font-bold mb-2"></h1>
+        <p id="detailMeta" class="text-sm text-slate-500 mb-6"></p>
+        <div id="detailContent" class="prose prose-slate max-w-none whitespace-pre-wrap"></div>
+      </article>
+
+      <section class="bg-white rounded-2xl shadow-sm p-6">
+        <h3 class="text-xl font-semibold mb-4">评论</h3>
+        <form id="commentForm" class="space-y-3 mb-6">
+          <div>
+            <label class="text-sm text-slate-600">昵称（游客可选填）</label>
+            <input id="guestName" class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-300 outline-none" placeholder="例如：访客A" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">评论内容</label>
+            <textarea id="commentContent" rows="3" class="w-full mt-1 border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-300 outline-none" required></textarea>
+          </div>
+          <button class="px-4 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700">发表评论</button>
+        </form>
+        <div id="commentList" class="space-y-3"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
+    const loginLink = document.getElementById("loginLink");
+    const registerLink = document.getElementById("registerLink");
+    const adminLink = document.getElementById("adminLink");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (auth && auth.token) {
+      loginLink.classList.add("hidden");
+      registerLink.classList.add("hidden");
+      logoutBtn.classList.remove("hidden");
+      if (auth.role === "admin") adminLink.classList.remove("hidden");
+    }
+
+    logoutBtn?.addEventListener("click", () => {
+      localStorage.removeItem("hlog_auth");
+      location.reload();
+    });
+
+    async function api(path, options = {}) {
+      const headers = options.headers || {};
+      if (auth?.token) headers.Authorization = `Bearer ${auth.token}`;
+      const res = await fetch(path, { ...options, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "请求失败");
+      return data;
+    }
+
+    const postGrid = document.getElementById("postGrid");
+    const slideTrack = document.getElementById("slideTrack");
+    const slideDots = document.getElementById("slideDots");
+    const homeView = document.getElementById("homeView");
+    const detailView = document.getElementById("detailView");
+
+    let posts = [];
+    let slideIndex = 0;
+    let timer = null;
+
+    function renderSlides(items) {
+      if (!items.length) {
+        slideTrack.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-slate-200 text-slate-500">暂无封面图</div>';
+        slideDots.innerHTML = "";
+        return;
+      }
+
+      slideTrack.innerHTML = items.map((p, i) => `
+        <a href="/?post=${p.id}" class="absolute inset-0 transition-opacity duration-700 ${i === 0 ? "opacity-100" : "opacity-0"}" data-slide="${i}">
+          <img src="${p.covers[0] || "https://picsum.photos/1200/600?random=1"}" class="w-full h-full object-cover" alt="${p.title}">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+          <div class="absolute left-4 bottom-4 text-white">
+            <h3 class="text-2xl font-bold">${p.title}</h3>
+            <p class="text-sm mt-1 line-clamp-2">${p.summary || ""}</p>
+          </div>
+        </a>
+      `).join("");
+
+      slideDots.innerHTML = items.map((_, i) => `
+        <button class="w-2.5 h-2.5 rounded-full ${i === 0 ? "bg-white" : "bg-white/50"}" data-dot="${i}"></button>
+      `).join("");
+
+      slideDots.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          slideIndex = Number(btn.dataset.dot);
+          updateSlide(items.length);
+        });
+      });
+
+      clearInterval(timer);
+      timer = setInterval(() => {
+        slideIndex = (slideIndex + 1) % items.length;
+        updateSlide(items.length);
+      }, 3500);
+    }
+
+    function updateSlide(total) {
+      slideTrack.querySelectorAll("[data-slide]").forEach((el, idx) => {
+        el.classList.toggle("opacity-100", idx === slideIndex);
+        el.classList.toggle("opacity-0", idx !== slideIndex);
+      });
+      slideDots.querySelectorAll("[data-dot]").forEach((el, idx) => {
+        el.classList.toggle("bg-white", idx === slideIndex);
+        el.classList.toggle("bg-white/50", idx !== slideIndex);
+      });
+      if (slideIndex >= total) slideIndex = 0;
+    }
+
+    function renderCards(items) {
+      if (!items.length) {
+        postGrid.innerHTML = '<div class="col-span-full bg-white rounded-2xl p-8 text-center text-slate-500">还没有文章，快去后台发布第一篇吧。</div>';
+        return;
+      }
+      postGrid.innerHTML = items.map((p) => `
+        <a href="/?post=${p.id}" class="bg-white rounded-2xl shadow-sm hover:shadow-md transition overflow-hidden border border-slate-100">
+          <img src="${p.covers[0] || "https://picsum.photos/600/320?random=2"}" alt="${p.title}" class="w-full h-44 object-cover" />
+          <div class="p-4">
+            <h3 class="text-lg font-semibold mb-2">${p.title}</h3>
+            <p class="text-slate-600 text-sm line-clamp-2 mb-3">${p.summary || "暂无摘要"}</p>
+            <p class="text-xs text-slate-400">${new Date(p.created_at).toLocaleString()}</p>
+          </div>
+        </a>
+      `).join("");
+    }
+
+    async function loadPosts() {
+      const data = await api("/api/post/list");
+      posts = data.posts || [];
+      renderCards(posts);
+      const sliderPosts = posts.filter((p) => p.covers.length).slice(0, 5);
+      renderSlides(sliderPosts.length ? sliderPosts : posts.slice(0, 5));
+    }
+
+    async function loadPostDetail(postId) {
+      const { post } = await api(`/api/post/list?id=${encodeURIComponent(postId)}`);
+      if (!post) throw new Error("文章不存在");
+      homeView.classList.add("hidden");
+      detailView.classList.remove("hidden");
+      document.getElementById("detailTitle").textContent = post.title;
+      document.getElementById("detailMeta").textContent = `作者 ${post.author_name} · ${new Date(post.created_at).toLocaleString()}`;
+      document.getElementById("detailContent").textContent = post.content;
+      const cover = document.getElementById("detailCover");
+      if (post.covers[0]) {
+        cover.src = post.covers[0];
+        cover.classList.remove("hidden");
+      } else {
+        cover.classList.add("hidden");
+      }
+      await loadComments(postId);
+    }
+
+    async function loadComments(postId) {
+      const { comments } = await api(`/api/comment/list?post_id=${encodeURIComponent(postId)}`);
+      const list = document.getElementById("commentList");
+      if (!comments.length) {
+        list.innerHTML = '<p class="text-slate-500 text-sm">暂无评论，欢迎抢沙发。</p>';
+        return;
+      }
+      list.innerHTML = comments.map((c) => `
+        <div class="border border-slate-200 rounded-xl p-3">
+          <div class="text-xs text-slate-500 mb-1">${c.name} · ${new Date(c.created_at).toLocaleString()}</div>
+          <p class="text-sm whitespace-pre-wrap">${c.content}</p>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("reloadPostsBtn").addEventListener("click", loadPosts);
+    document.getElementById("backBtn").addEventListener("click", () => location.href = "/");
+
+    document.getElementById("commentForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const postId = new URLSearchParams(location.search).get("post");
+      const content = document.getElementById("commentContent").value.trim();
+      const guestName = document.getElementById("guestName").value.trim();
+      if (!content) return alert("请输入评论内容");
+      try {
+        await api("/api/comment/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ post_id: Number(postId), content, guest_name: guestName })
+        });
+        document.getElementById("commentContent").value = "";
+        await loadComments(postId);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    (async () => {
+      try {
+        const postId = new URLSearchParams(location.search).get("post");
+        if (postId) {
+          await loadPostDetail(postId);
+        } else {
+          await loadPosts();
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    })();
+  </script>
+</body>
+</html>
