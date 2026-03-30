@@ -8,6 +8,21 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" />
   <link rel="stylesheet" href="/admin-style.css" />
   <style>
+    /* 修正文字对比度，使左侧菜单更清晰 */
+    .admin-sidebar {
+      background-color: #1f2937; /* 深色背景 */
+    }
+    .admin-sidebar nav a {
+      color: #e5e7eb; /* 浅灰色文字，提高对比度 */
+      transition: all 0.2s;
+    }
+    .admin-sidebar nav a:hover {
+      background-color: #374151;
+      color: #ffffff;
+    }
+    .admin-sidebar .text-slate-400 {
+      color: #9ca3af !important;
+    }
     .line-clamp-1 {
       overflow: hidden;
       display: -webkit-box;
@@ -25,26 +40,26 @@
       overflow: auto;
     }
     .admin-menu-item-active {
-      background-color: #f0f9ff !important;
-      color: #0284c7 !important;
+      background-color: #374151 !important;
+      color: #ffffff !important;
       font-weight: 700;
-      border-right: 4px solid #0284c7;
+      border-right: 4px solid #3b82f6;
     }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
   <div class="admin-layout flex min-h-screen">
-    <aside class="admin-sidebar w-64 bg-white border-r border-slate-200 flex-shrink-0">
-      <div class="p-6 text-2xl font-black text-sky-600 italic border-b">HLOG Admin</div>
+    <aside class="admin-sidebar w-64 bg-gray-800 border-r border-gray-700 flex-shrink-0">
+      <div class="p-6 text-2xl font-black text-sky-400 italic border-b border-gray-700">HLOG Admin</div>
       <nav class="mt-4 px-4 space-y-1">
-        <a href="#dashboard" id="menu-dashboard" class="flex items-center px-4 py-3 rounded-xl hover:bg-slate-50 text-sm font-bold">仪表盘</a>
-        <div class="px-4 py-2 text-xs font-black text-slate-400 uppercase tracking-wider mt-4">内容</div>
-        <a href="#post-list" id="menu-post-list" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-slate-50">文章列表</a>
-        <a href="#publish" id="menu-post-publish" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-slate-50">发布文章</a>
-        <a href="#drafts" id="menu-post-drafts" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-slate-50">草稿箱</a>
-        <div class="px-4 py-2 text-xs font-black text-slate-400 uppercase tracking-wider mt-4">系统</div>
-        <a href="/admin-comments.html" class="flex items-center px-4 py-3 rounded-xl hover:bg-slate-50 text-sm font-bold">评论管理</a>
-        <a href="#settings" id="menu-settings" class="flex items-center px-4 py-3 rounded-xl hover:bg-slate-50 text-sm font-bold">系统设置</a>
+        <a href="#dashboard" id="menu-dashboard" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-700 text-sm font-bold">仪表盘</a>
+        <div class="px-4 py-2 text-xs font-black text-gray-400 uppercase tracking-wider mt-4">内容</div>
+        <a href="#post-list" id="menu-post-list" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-gray-700">文章列表</a>
+        <a href="#publish" id="menu-post-publish" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-gray-700">发布文章</a>
+        <a href="#drafts" id="menu-post-drafts" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-gray-700">草稿箱</a>
+        <div class="px-4 py-2 text-xs font-black text-gray-400 uppercase tracking-wider mt-4">系统</div>
+        <a href="/admin-comments.html" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-700 text-sm font-bold">评论管理</a>
+        <a href="#settings" id="menu-settings" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-700 text-sm font-bold">系统设置</a>
       </nav>
     </aside>
 
@@ -134,7 +149,6 @@
       return el;
     }
 
-    // 简易防XSS
     function escapeHtml(str) {
       if (!str) return '';
       return str.replace(/[&<>]/g, function(m) {
@@ -157,7 +171,7 @@
       location.href = '/login.html';
     }
 
-    // ========== API 请求封装 ==========
+    // ========== 增强 API 请求，处理非 JSON 响应 ==========
     async function api(path, options = {}) {
       const headers = options.headers || {};
       headers.Authorization = 'Bearer ' + auth.token;
@@ -170,6 +184,13 @@
           location.href = '/login.html';
           return null;
         }
+        // 检查响应是否是 JSON 格式
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await res.text();
+          console.error('响应不是 JSON，原始内容:', text);
+          throw new Error(`服务器返回了非 JSON 数据 (状态码 ${res.status})，请检查后端接口是否正确实现`);
+        }
         const data = await res.json();
         console.log(`响应 ${path}:`, data);
         return data;
@@ -180,7 +201,7 @@
       }
     }
 
-    // ========== 数据加载函数 ==========
+    // ========== 数据加载 ==========
     async function loadDashboard() {
       const stats = await api('/api/stats');
       if (stats) {
@@ -206,10 +227,9 @@
           <td class="px-6 py-4 border-b">
             <button class="edit-post-btn text-sky-600 font-bold" data-id="${p.id}" data-title="${escapeHtml(p.title)}" data-content="${escapeHtml(p.content || '')}">编辑</button>
           </td>
-        </tr>
+         </tr>
       `).join('');
 
-      // 绑定编辑按钮
       document.querySelectorAll(`#${tbodyId} .edit-post-btn`).forEach(btn => {
         btn.addEventListener('click', () => {
           const id = btn.dataset.id;
@@ -225,7 +245,7 @@
       });
     }
 
-    // ========== 保存文章 ==========
+    // ========== 保存文章（增强错误处理） ==========
     async function savePost() {
       const id = safeGetElement('postId')?.value;
       const title = safeGetElement('titleInput')?.value.trim();
@@ -244,7 +264,6 @@
       const result = await api(url, { method, body: JSON.stringify(payload) });
       if (result && result.success !== false) {
         alert(id ? '文章更新成功' : '发布成功');
-        // 清空表单
         const postIdInput = safeGetElement('postId');
         const titleInput = safeGetElement('titleInput');
         if (postIdInput) postIdInput.value = '';
@@ -254,11 +273,11 @@
         loadDashboard();
         location.hash = 'post-list';
       } else {
-        alert('操作失败，请重试');
+        alert('操作失败，请检查控制台查看具体错误');
       }
     }
 
-    // ========== 路由切换 ==========
+    // ========== 路由 ==========
     async function route() {
       const tab = location.hash.slice(1) || 'dashboard';
       const panels = ['dashboard', 'post-list', 'drafts', 'publish', 'settings'];
@@ -278,7 +297,6 @@
       const activeMenu = safeGetElement(activeId);
       if (activeMenu) activeMenu.classList.add('admin-menu-item-active');
 
-      // 加载数据
       if (tab === 'dashboard') await loadDashboard();
       if (tab === 'post-list') await loadPostsTable('published');
       if (tab === 'drafts') await loadPostsTable('drafts');
@@ -289,7 +307,6 @@
     function initQuill() {
       const editorContainer = safeGetElement('contentEditor');
       if (!editorContainer) {
-        console.warn('编辑器容器未找到，稍后重试');
         setTimeout(initQuill, 100);
         return;
       }
@@ -312,7 +329,7 @@
       }
     }
 
-    // ========== 绑定事件 ==========
+    // ========== 事件绑定 ==========
     window.addEventListener('hashchange', route);
     window.addEventListener('load', () => {
       initQuill();
