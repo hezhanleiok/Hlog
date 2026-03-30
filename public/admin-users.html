@@ -7,103 +7,36 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/admin-style.css" />
 </head>
-<body class="bg-slate-100 text-slate-800">
-  <div class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar-title">HLOG Admin</div>
-
-      <nav class="admin-menu-group">
-        <a href="/admin.html" class="admin-menu-item">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M3 13h8V3H3v10z"></path>
-            <path d="M14 21h7V11h-7v10z"></path>
-            <path d="M14 3h7v6h-7V3z"></path>
-            <path d="M3 21h8v-6H3v6z"></path>
-          </svg>
-          仪表盘
-        </a>
-
-        <div class="admin-menu-item" aria-hidden="true" style="cursor:default;">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M4 4h16v16H4z"></path>
-            <path d="M8 8h8"></path>
-            <path d="M8 12h8"></path>
-          </svg>
-          文章管理
-        </div>
-        <div class="admin-submenu">
-          <a href="/admin.html?box=published">文章列表</a>
-          <a href="/admin.html?box=drafts">草稿箱</a>
-        </div>
-
-        <a href="/admin-comments.html" class="admin-menu-item">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
-          </svg>
-          评论管理
-        </a>
-
-        <a href="/admin-users.html" id="menu-users" class="admin-menu-item admin-menu-item-active">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          用户管理
-        </a>
-
-        <a href="/admin-profile.html?tab=profile" class="admin-menu-item">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          个人中心
-        </a>
-
-        <a href="/admin-profile.html?tab=settings" class="admin-menu-item">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"></path>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          系统设置
-        </a>
+<body class="bg-[#f0f2f5] text-slate-800 font-sans antialiased">
+  <div class="admin-layout flex min-h-screen">
+    <aside class="w-64 bg-[#1e293b] text-slate-300 flex-shrink-0 shadow-xl z-20">
+      <div class="h-16 flex items-center px-6 bg-[#0f172a] text-xl font-black text-white tracking-widest">HLOG Admin</div>
+      <nav class="mt-4 py-2 space-y-1">
+        <a href="/admin.html#dashboard" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white">回到主面板</a>
+        <div class="px-6 py-2 mt-4 text-xs font-bold text-slate-500 uppercase">系统与用户</div>
+        <a href="/admin-comments.html" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white">评论审核</a>
+        <a href="/admin-users.html" class="flex items-center px-6 py-3 bg-[#334155] text-white border-l-4 border-sky-500">用户管理</a>
+        <a href="/admin-profile.html" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white">个人中心</a>
       </nav>
     </aside>
 
-    <div class="admin-content">
-      <header class="bg-white border-b border-slate-200">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <div class="text-2xl font-bold text-sky-600">用户管理</div>
-            <div class="text-sm text-slate-500 mt-1">Users & Enable/Disable</div>
-          </div>
-          <div class="flex items-center gap-2">
-            <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
-            <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm">退出登录</button>
-          </div>
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <header class="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0">
+        <h2 class="text-lg font-bold text-slate-700">用户管理</h2>
+        <div class="flex gap-4">
+          <a href="/" target="_blank" class="text-sm font-medium text-sky-600 hover:text-sky-700">查看前台</a>
+          <button id="logoutBtn" class="bg-slate-100 px-4 py-2 rounded-lg text-sm font-bold">退出</button>
         </div>
       </header>
 
-      <main class="max-w-6xl mx-auto px-4 py-6">
-        <div class="admin-card">
-          <div class="flex items-center justify-between gap-3 mb-4">
-            <h2 class="text-xl font-semibold">用户列表</h2>
-          </div>
-          <div class="overflow-auto">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>头像</th>
-                  <th>邮箱</th>
-                  <th>昵称</th>
-                  <th>注册时间</th>
-                  <th>状态</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody id="usersTbody"></tbody>
-            </table>
-          </div>
+      <main class="flex-1 overflow-auto p-8 relative">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <table class="w-full text-left">
+            <thead class="bg-slate-50 border-b border-slate-200">
+              <tr><th class="px-6 py-4">账号</th><th class="px-6 py-4">状态</th><th class="px-6 py-4">操作</th></tr>
+            </thead>
+            <tbody id="usersTbody" class="divide-y divide-slate-100"></tbody>
+          </table>
         </div>
       </main>
     </div>
@@ -111,81 +44,27 @@
 
   <script>
     const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
-    if (!auth?.token || auth.role !== "admin") {
-      alert("仅管理员可访问");
-      location.href = "/login.html";
-    }
-
+    if (!auth?.token || auth.role !== "admin") location.href = "/login.html";
     async function api(path, options = {}) {
-      const headers = options.headers || {};
-      headers.Authorization = \`Bearer \${auth.token}\`;
-      const res = await fetch(path, { ...options, headers });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "请求失败");
-      return data;
+      options.headers = { Authorization: `Bearer ${auth.token}`, "Content-Type": "application/json" };
+      return await (await fetch(path, options)).json().catch(() => ({}));
     }
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.removeItem("hlog_auth");
-      location.href = "/login.html";
-    });
-
-    function escapeHtml(s) {
-      return String(s ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
-
-    function badge(status) {
-      if (status) return '<span class="admin-badge admin-badge-draft">已禁用</span>';
-      return '<span class="admin-badge admin-badge-published">正常</span>';
-    }
+    document.getElementById("logoutBtn").addEventListener("click", () => { localStorage.removeItem("hlog_auth"); location.href = "/login.html"; });
 
     async function loadUsers() {
       const { users } = await api("/api/admin/users/list?limit=200");
-      const tbody = document.getElementById("usersTbody");
-      tbody.innerHTML = users && users.length
-        ? users.map((u) => {
-            const avatar = u.avatar_url || "https://picsum.photos/48/48?random=8";
-            const isDisabled = !!u.disabled;
-            return `
-              <tr>
-                <td>
-                  <img src="${avatar}" alt="avatar" class="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200" />
-                </td>
-                <td class="text-slate-700 whitespace-nowrap">${escapeHtml(u.email)}</td>
-                <td class="text-slate-900">${escapeHtml(u.display_name)}</td>
-                <td class="text-slate-600 whitespace-nowrap">${u.created_at ? new Date(u.created_at).toLocaleDateString() : ""}</td>
-                <td>${badge(isDisabled)}</td>
-                <td>
-                  <button type="button" data-toggle="${u.id}" class="admin-btn ${isDisabled ? "admin-btn-primary" : "admin-btn-danger"}">
-                    ${isDisabled ? "启用" : "禁用"}
-                  </button>
-                </td>
-              </tr>
-            `;
-          }).join("")
-        : '<tr><td colspan="6" class="text-sm text-slate-500 py-6">暂无用户</td></tr>';
-
-      tbody.querySelectorAll("[data-toggle]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const userId = Number(btn.dataset.toggle);
-          if (!confirm("确认切换该用户状态？")) return;
-          await api("/api/admin/users/toggle", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: userId })
-          });
-          await loadUsers();
-        });
-      });
+      document.getElementById("usersTbody").innerHTML = (users || []).map(u => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4 font-bold">${u.display_name} (${u.email})</td>
+          <td class="px-6 py-4">${u.disabled ? '<span class="text-red-600">已封禁</span>' : '<span class="text-emerald-600">正常</span>'}</td>
+          <td class="px-6 py-4"><button data-toggle="${u.id}" class="wp-btn text-xs">${u.disabled ? "解封" : "封禁"}</button></td>
+        </tr>
+      `).join("");
+      document.querySelectorAll("[data-toggle]").forEach(b => b.addEventListener("click", async () => {
+        if(confirm("确定操作？")) { await api("/api/admin/users/toggle", { method: "POST", body: JSON.stringify({ user_id: Number(b.dataset.toggle) }) }); loadUsers(); }
+      }));
     }
-
-    loadUsers().catch((err) => alert(err.message));
+    loadUsers();
   </script>
 </body>
 </html>
-
