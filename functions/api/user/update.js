@@ -46,7 +46,7 @@ export async function onRequestPost(context) {
     const binds = [display_name];
 
     if (avatarCol && avatar_url) {
-      setParts.push(\`\${avatarCol} = ?\`);
+      setParts.push(`${avatarCol} = ?`);
       binds.push(avatar_url);
     }
 
