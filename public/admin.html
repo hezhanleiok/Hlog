@@ -25,7 +25,7 @@
       <div class="admin-sidebar-title">HLOG Admin</div>
 
       <nav class="admin-menu-group">
-        <a href="/admin.html?tab=dashboard" id="menu-dashboard" class="admin-menu-item">
+        <a href="#dashboard" id="menu-dashboard" class="admin-menu-item">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 13h8V3H3v10z"></path>
             <path d="M14 21h7V11h-7v10z"></path>
@@ -45,9 +45,9 @@
           文章管理
         </div>
         <div class="admin-submenu">
-          <a href="/admin.html?tab=post-list" id="menu-post-list">文章列表</a>
-          <a href="/admin.html?tab=publish" id="menu-post-publish">发布文章</a>
-          <a href="/admin.html?tab=drafts" id="menu-post-drafts">草稿箱</a>
+          <a href="#post-list" id="menu-post-list">文章列表</a>
+          <a href="#publish" id="menu-post-publish">发布文章</a>
+          <a href="#drafts" id="menu-post-drafts">草稿箱</a>
         </div>
 
         <a href="/admin-comments.html" id="menu-comments" class="admin-menu-item">
@@ -73,7 +73,7 @@
           个人中心
         </a>
 
-        <a href="/admin-profile.html?tab=settings" id="menu-settings" class="admin-menu-item">
+        <a href="#settings" id="menu-settings" class="admin-menu-item">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"></path>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -127,7 +127,7 @@
           <div class="admin-card">
             <div class="flex items-center justify-between gap-3 mb-4">
               <h2 class="text-xl font-semibold">文章列表（已发布）</h2>
-              <a href="/admin.html?tab=publish" class="admin-btn admin-btn-primary">发布新文章</a>
+              <a href="#publish" class="admin-btn admin-btn-primary">发布新文章</a>
             </div>
             <div class="overflow-auto">
               <table class="admin-table">
@@ -151,7 +151,7 @@
           <div class="admin-card">
             <div class="flex items-center justify-between gap-3 mb-4">
               <h2 class="text-xl font-semibold">草稿箱</h2>
-              <a href="/admin.html?tab=publish" class="admin-btn admin-btn-primary">继续发布</a>
+              <a href="#publish" class="admin-btn admin-btn-primary">继续发布</a>
             </div>
             <div class="overflow-auto">
               <table class="admin-table">
@@ -243,6 +243,15 @@
             </aside>
           </div>
         </section>
+
+        <!-- settings -->
+        <section id="panel-settings" class="hidden">
+          <div class="admin-card">
+            <h2 class="text-xl font-semibold mb-2">系统设置</h2>
+            <p class="text-sm text-slate-600 mb-4">邀请码生成属于系统工具，可在下方跳转。</p>
+            <a href="/admin-invites.html" class="admin-btn admin-btn-primary">前往邀请码生成</a>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -281,7 +290,7 @@
 
     // 兼容旧参数：box -> tab
     function resolveTab() {
-      const tab = new URLSearchParams(window.location.search).get("tab");
+      const tab = location.hash.slice(1);
       if (tab) return tab;
       const box = new URLSearchParams(window.location.search).get("box");
       if (box === "published") return "post-list";
@@ -295,10 +304,11 @@
     const panelPostList = document.getElementById("panel-post-list");
     const panelPublish = document.getElementById("panel-publish");
     const panelDrafts = document.getElementById("panel-drafts");
+    const panelSettings = document.getElementById("panel-settings");
 
     const initPage = () => {
       // 隐藏所有面板
-      [panelDashboard, panelPostList, panelDrafts, panelPublish].forEach(p => p.classList.add("hidden"));
+      [panelDashboard, panelPostList, panelDrafts, panelPublish, panelSettings].forEach(p => p.classList.add("hidden"));
 
       // 根据 tab 显示对应面板
       if (tab === "dashboard") {
@@ -310,12 +320,10 @@
       } else if (tab === "publish") {
         panelPublish.classList.remove("hidden");
       } else if (tab === "settings") {
-        // 系统设置跳转到 admin-profile.html
-        location.href = "/admin-profile.html?tab=settings";
-        return;
+        panelSettings.classList.remove("hidden");
       } else {
         // 未知 tab，重定向到默认仪表盘
-        location.href = "/admin.html";
+        location.hash = "dashboard";
         return;
       }
 
@@ -327,7 +335,8 @@
         "dashboard": "menu-dashboard",
         "post-list": "menu-post-list",
         "publish": "menu-post-publish",
-        "drafts": "menu-post-drafts"
+        "drafts": "menu-post-drafts",
+        "settings": "menu-settings"
       };
       const activeId = activeMap[tab];
       if (activeId) {
@@ -335,6 +344,21 @@
         if (el) el.classList.add("admin-menu-item-active");
       }
     };
+
+    window.addEventListener("hashchange", () => {
+      const newTab = location.hash.slice(1) || "dashboard";
+      initPage();
+      // 加载数据
+      if (newTab === "dashboard") {
+        loadDashboard().catch(err => alert(err.message));
+      } else if (newTab === "post-list") {
+        loadPostsTable("published").catch(err => alert(err.message));
+      } else if (newTab === "drafts") {
+        loadPostsTable("draft").catch(err => alert(err.message));
+      } else if (newTab === "publish") {
+        maybeLoadEdit().catch(err => alert(err.message));
+      }
+    });
 
     // ========= Quill 初始化（强制两实例） =========
     function extractYouTubeId(url) {
@@ -473,7 +497,7 @@
       });
 
       // 保存后：保持在当前 tab（如果正在编辑则回到 publish）
-      location.href = "/admin.html?tab=publish" + (id ? \`&edit=\${id}\` : "");
+      location.href = "#publish" + (id ? `?edit=${id}` : "");
     });
 
     // ========= 数据加载 =========
@@ -516,7 +540,7 @@
       tbody.querySelectorAll("[data-edit]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const id = Number(btn.dataset.edit);
-          location.href = \`/admin.html?tab=publish&edit=\${id}\`;
+          location.href = `#publish?edit=${id}`;
         });
       });
       tbody.querySelectorAll("[data-del]").forEach((btn) => {
