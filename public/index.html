@@ -3,239 +3,246 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HLOG - 探索科技与生活的博客</title>
+  <title>HLOG - XIAOHE的互联网分享</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <style>
-    /* 导航菜单悬浮动画 */
-    .nav-link {
-      position: relative;
-      font-size: 1.1rem;
-      font-weight: 600;
-      transition: color 0.3s;
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    /* 导航菜单样式 */
+    .nav-link { 
+      position: relative; 
+      font-size: 1.1rem; /* 字体调大 */
+      font-weight: 600; 
+      transition: color 0.3s; 
     }
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 2px;
-      bottom: -4px;
-      left: 0;
-      background-color: #0ea5e9;
-      transition: width 0.3s;
-    }
-    .nav-link:hover::after { width: 100%; }
     .nav-link:hover { color: #0ea5e9; }
-
-    /* 下拉菜单样式 */
+    
+    /* 下拉菜单 */
     .dropdown:hover .dropdown-menu { display: block; }
     
-    /* 文章卡片图片裁剪 */
-    .post-card-img {
-      height: 240px;
-      object-fit: cover;
-      width: 100%;
-    }
-    
-    /* 幻灯片样式 */
-    .swiper-slide {
-      background-size: cover;
-      background-position: center;
-    }
+    /* Swiper 分页点 */
+    .home-hero-swiper .swiper-pagination-bullet { background: rgba(255, 255, 255, 0.45); opacity: 1; }
+    .home-hero-swiper .swiper-pagination-bullet-active { background: #fff; }
   </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-800">
-
+<body class="bg-slate-50 text-slate-800">
   <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-      
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-10">
         <a href="/" class="flex items-center gap-2 group">
-          <div class="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg group-hover:rotate-12 transition-transform">H</div>
-          <span class="text-2xl font-black tracking-tighter text-slate-800">HLOG<span class="text-sky-500">.</span></span>
+           <div class="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg group-hover:rotate-12 transition-transform">H</div>
+           <span class="text-2xl font-bold text-sky-600 tracking-tighter">HLOG</span>
         </a>
-
-        <nav class="hidden md:flex items-center gap-8">
+        <nav class="hidden md:flex items-center gap-6">
           <a href="/" class="nav-link text-slate-700">首页</a>
-          
           <div class="relative dropdown">
             <a href="#" class="nav-link text-slate-700 flex items-center gap-1">
               文章
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </a>
-            <div class="dropdown-menu hidden absolute left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl rounded-xl py-2 animate-in fade-in slide-in-from-top-2">
-              <a href="/?category=software" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 hover:text-sky-600 font-medium">精品软件</a>
-              <a href="/?category=tutorial" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 hover:text-sky-600 font-medium">技术教程</a>
+            <div class="dropdown-menu hidden absolute left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl rounded-xl py-2 z-50">
+              <a href="/?tag=精品软件" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 hover:text-sky-600 font-bold">精品软件</a>
+              <a href="/?tag=技术教程" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 hover:text-sky-600 font-bold">技术教程</a>
             </div>
           </div>
-
-          <a href="/?category=software" class="nav-link text-slate-700">精品软件</a>
-          <a href="/?category=tutorial" class="nav-link text-slate-700">技术教程</a>
           <a href="/about.html" class="nav-link text-slate-700">关于</a>
           <a href="/privacy.html" class="nav-link text-slate-700">隐私</a>
         </nav>
       </div>
 
-      <div class="flex items-center gap-4">
-        <div id="guestActions" class="flex items-center gap-4">
-          <a href="/login.html" class="text-sm font-bold text-slate-500 hover:text-sky-600">登录</a>
-          <a href="/register.html" class="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 transition shadow-md">立即注册</a>
-        </div>
-        <div id="userActions" class="hidden flex items-center gap-4">
-          <a href="/admin.html" class="bg-sky-50 text-sky-600 px-5 py-2.5 rounded-full text-sm font-bold hover:bg-sky-100 transition">管理后台</a>
-          <button id="logoutBtn" class="text-sm font-bold text-slate-400 hover:text-red-500">退出</button>
-        </div>
-      </div>
+      <nav class="flex items-center gap-3 text-sm">
+        <a href="/login.html" id="loginLink" class="px-3 py-2 rounded-lg hover:bg-slate-100 font-bold">登录</a>
+        <a href="/register.html" id="registerLink" class="px-3 py-2 rounded-lg hover:bg-slate-100 font-bold">注册</a>
+        <a href="/admin.html" id="adminLink" class="px-3 py-2 rounded-lg bg-sky-600 text-white hidden font-bold">后台</a>
+        <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white hidden font-bold">退出</button>
+      </nav>
     </div>
   </header>
 
-  <section class="max-w-7xl mx-auto px-4 mt-8">
-    <div id="bannerSlideshow" class="h-[480px] rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100 relative group bg-slate-900">
-      <div class="animate-pulse bg-slate-700 h-full w-full flex items-center justify-center text-slate-500 font-bold">加载最新Banner中...</div>
-    </div>
-  </section>
-
-  <main class="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-4 gap-12">
-    
-    <div class="lg:col-span-3">
-      <div class="mb-10">
-        <h2 class="text-4xl font-black text-slate-900 tracking-tight">最新发布</h2>
-        <p class="text-slate-500 mt-2 font-medium">发现最前沿的技术教程与优质软件分享。</p>
-      </div>
-
-      <div id="postList" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="animate-pulse bg-white rounded-3xl h-80 border border-slate-100"></div>
-        <div class="animate-pulse bg-white rounded-3xl h-80 border border-slate-100"></div>
-      </div>
-    </div>
-
-    <aside class="space-y-10">
-      <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-        <h3 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-          热门推荐
-        </h3>
-        <div id="hotPostsList" class="space-y-5">
-          <div class="animate-pulse bg-slate-50 h-16 rounded-xl"></div>
-          <div class="animate-pulse bg-slate-50 h-16 rounded-xl"></div>
-        </div>
-      </div>
-    </aside>
-  </main>
-
-  <footer class="bg-slate-900 text-slate-400 mt-20">
-    <div class="max-w-7xl mx-auto px-4 py-16 text-center text-sm">
-      <p class="font-bold text-white mb-2">HLOG<span class="text-sky-500">.</span></p>
-      <p>&copy; 2024 HLOG. 保留所有权利。</p>
-      <p class="mt-1 text-xs text-slate-600">基于 Cloudflare Pages & D1 构建</p>
-    </div>
-  </footer>
-
-  <script>
-    // 权限检查
-    const auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
-    if (auth?.token) {
-      document.getElementById('guestActions').classList.add('hidden');
-      document.getElementById('userActions').classList.remove('hidden');
-    }
-    document.getElementById('logoutBtn')?.addEventListener('click', () => { localStorage.removeItem('hlog_auth'); location.reload(); });
-
-    async function api(path) { return await (await fetch(path)).json(); }
-    const escapeHtml = s => String(s ?? "").replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-
-    // 🌟 辅助函数：从 Base64 内容中提取第一张图片的 Src
-    function extractFirstImage(htmlContent) {
-      if (!htmlContent) return null;
-      const imgRegex = /<img[^>]+src="([^">]+)"/g;
-      const match = imgRegex.exec(htmlContent);
-      return match ? match[1] : null;
-    }
-
-    // 🌟 加载顶部 Banner (使用最新文章封面图)
-    async function loadBanner() {
-      try {
-        const { posts } = await api('/api/posts?status=published&limit=3');
-        const container = document.getElementById('bannerSlideshow');
-        
-        if (!posts || posts.length === 0) {
-          container.innerHTML = `<div class="h-full w-full flex items-center justify-center text-slate-500 font-bold">欢迎访问 HLOG</div>`;
-          return;
-        }
-
-        // 目前默认显示最新一篇，未来可以结合 Swiper.js 实现轮播
-        const topPost = posts[0];
-        // 🌟 修复图片来源：优先 cover_url，其次提取正文图，最后使用纯色
-        const coverImage = topPost.cover_url || extractFirstImage(topPost.content) || 'rgba(14,165,233,0.1)';
-        
-        container.innerHTML = `
-          <div class="swiper-slide h-full w-full flex items-end" style="background-image: linear-gradient(to top, rgba(15,23,42,0.9), rgba(15,23,42,0)), url('${coverImage}')">
-            <div class="p-16 max-w-3xl">
-              <span class="bg-sky-500 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-4 inline-block">最新头条</span>
-              <a href="/post.html?post=${topPost.id}" class="block group">
-                <h1 class="text-5xl font-black text-white leading-tight group-hover:text-sky-400 transition-colors line-clamp-2">${escapeHtml(topPost.title)}</h1>
-                <p class="text-slate-300 mt-5 text-lg font-medium line-clamp-2">${escapeHtml(topPost.summary || '点击阅读全文，探索更多精彩内容...')}</p>
-              </a>
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <section id="homeView">
+      <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
+        <div class="w-full lg:w-[70%] lg:flex-[0_0_70%] min-w-0 order-1">
+          <div class="relative rounded-2xl overflow-hidden shadow-sm mb-8 bg-slate-200 isolate">
+            <div class="swiper home-hero-swiper h-64 md:h-80">
+              <div class="swiper-wrapper" id="swiperWrapper"></div>
+              <div class="swiper-pagination !bottom-3"></div>
             </div>
           </div>
-        `;
-      } catch (err) { console.error('Banner加载失败:', err); }
+
+          <div class="flex items-center justify-between mb-4 gap-3">
+            <h2 class="text-xl font-semibold">最新文章</h2>
+            <button id="reloadPostsBtn" type="button" class="text-sm px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">刷新</button>
+          </div>
+          <div id="postGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6"></div>
+        </div>
+
+        <aside class="w-full lg:w-[30%] lg:flex-[0_0_30%] shrink-0 order-2 lg:sticky lg:top-20 lg:self-start">
+          <div class="space-y-4">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+              <div class="flex flex-col items-center text-center">
+                <img id="profileAvatar" src="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" class="w-24 h-24 rounded-2xl object-cover ring-2 ring-slate-100 shadow-sm" />
+                <h2 class="mt-4 text-lg font-bold text-slate-900 tracking-tight">XIAOHE</h2>
+                <p class="mt-2 text-sm text-slate-600 leading-relaxed">一个互联网爱好分享者！</p>
+              </div>
+              <div class="mt-5 pt-5 border-t border-slate-100">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider text-center mb-3">Find me</p>
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                  <a href="https://x.com/xiaoheyiyi" target="_blank" class="social-link inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                  <a href="https://www.youtube.com/@xiaoheai" target="_blank" class="social-link inline-flex h-10 w-10 items-center justify-center rounded-xl bg-red-600 text-white hover:bg-red-500 transition"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                  <a href="https://github.com/hezhanleiok/Hlog" target="_blank" class="social-link inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-slate-700 transition"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/></svg></a>
+                  <a href="https://t.me/xiaoheok" target="_blank" class="social-link inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-white hover:bg-sky-400 transition"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+              <h3 class="text-sm font-semibold text-slate-900 mb-3 text-center">搜索文章</h3>
+              <form id="searchForm" class="flex gap-2">
+                <input id="searchInput" type="text" placeholder="关键词..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-sky-300" />
+                <button type="submit" class="shrink-0 px-4 py-2 rounded-xl bg-slate-900 text-white text-sm hover:bg-slate-800 font-bold">搜</button>
+              </form>
+              <div class="text-xs text-slate-500 mt-3 text-center"><span id="activeTagLabel" class="hidden"></span> <a id="clearFiltersLink" href="#" class="hidden text-sky-600 underline">清除筛选</a></div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-6">
+               <div><h3 class="text-sm font-bold border-l-4 border-sky-500 pl-2 mb-4">近期文章</h3><div id="recentList" class="space-y-4"></div></div>
+               <div><h3 class="text-sm font-bold border-l-4 border-amber-500 pl-2 mb-4">热门推荐</h3><div id="hotList" class="space-y-4"></div></div>
+               <div><h3 class="text-sm font-bold border-l-4 border-indigo-500 pl-2 mb-4">所有标签</h3><div id="tagCloud" class="flex flex-wrap gap-2"></div></div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+              <h3 class="text-sm font-bold border-l-4 border-emerald-500 pl-2 mb-4">站点统计</h3>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="rounded-xl bg-slate-50 p-3 text-center"><div class="text-xs text-slate-500">今日访问</div><div id="statTodayViews" class="text-lg font-bold text-slate-900">—</div></div>
+                <div class="rounded-xl bg-slate-50 p-3 text-center"><div class="text-xs text-slate-500">总用户数</div><div id="statTotalUsers" class="text-lg font-bold text-slate-900">—</div></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script>
+    const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
+    if (auth?.token) {
+      document.getElementById("loginLink").classList.add("hidden");
+      document.getElementById("registerLink").classList.add("hidden");
+      document.getElementById("logoutBtn").classList.remove("hidden");
+      if (auth.role === "admin") document.getElementById("adminLink").classList.remove("hidden");
+    }
+    document.getElementById("logoutBtn")?.addEventListener("click", () => { localStorage.removeItem("hlog_auth"); location.reload(); });
+
+    async function api(path, options = {}) {
+      const headers = options.headers || {};
+      if (auth?.token) headers.Authorization = `Bearer ${auth.token}`;
+      const res = await fetch(path, { ...options, headers });
+      return await res.json().catch(() => ({}));
     }
 
-    // 加载文章列表
-    async function loadPosts() {
-      try {
-        const { posts } = await api('/api/posts?status=published');
-        const container = document.getElementById('postList');
-        const hotContainer = document.getElementById('hotPostsList');
-        
-        if (!posts || posts.length === 0) {
-          container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">暂无文章发布</div>`;
-          hotContainer.innerHTML = '<div class="text-slate-400 text-xs">暂无推荐</div>';
-          return;
-        }
+    const postGrid = document.getElementById("postGrid");
+    const swiperWrapper = document.getElementById("swiperWrapper");
+    let state = { q: "", tag_id: null };
+    let homeSwiper = null;
 
-        // 1. 渲染左侧文章列表
-        container.innerHTML = posts.map(post => {
-          // 🌟 修复图片来源：优先 cover_url，其次提取正文图，最后使用 picsum (保险)
-          const coverImage = post.cover_url || extractFirstImage(post.content) || `https://picsum.photos/seed/${post.id}/800/600`;
-          
-          return `
-            <article class="group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all overflow-hidden">
-              <a href="/post.html?post=${post.id}" class="block">
-                <div class="overflow-hidden"><img src="${coverImage}" class="post-card-img group-hover:scale-105 transition-transform" alt="${post.title}"></div>
-                <div class="p-8">
-                  <h3 class="text-2xl font-bold text-slate-800 group-hover:text-sky-600 transition-colors line-clamp-2 leading-snug">${escapeHtml(post.title)}</h3>
-                  <p class="text-slate-500 mt-3 text-sm line-clamp-2 font-medium">${escapeHtml(post.summary || '点击阅读全文...')}</p>
-                  <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
-                    <span class="text-xs font-bold text-slate-600">HLOG 作者</span>
-                    <span class="text-xs font-bold text-slate-400">${new Date(post.created_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </a>
-            </article>
-          `;
-        }).join('');
+    // 🌟 图片抓取增强逻辑
+    function getPostCover(post) {
+      if (post.cover_url) return post.cover_url;
+      // 从正文提取第一个图片
+      const match = (post.content || "").match(/<img[^>]+src="([^">]+)"/);
+      return match ? match[1] : `https://picsum.photos/seed/${post.id}/800/450`;
+    }
 
-        // 2. 渲染右侧热门文章 (🌟 修复：图片使用文章封面)
-        hotContainer.innerHTML = posts.slice(0, 4).map(post => {
-           // 🌟 修复侧边栏图片来源
-           const coverImage = post.cover_url || extractFirstImage(post.content) || `https://picsum.photos/seed/${post.id}/100/100`;
-           return `
-            <a href="/post.html?post=${post.id}" class="flex items-center gap-4 group">
-              <img src="${coverImage}" class="w-16 h-16 rounded-xl object-cover shrink-0" alt="${post.title}">
-              <div class="flex-1 min-w-0">
-                <h4 class="text-sm font-bold text-slate-700 group-hover:text-sky-600 transition-colors line-clamp-2 leading-snug">${escapeHtml(post.title)}</h4>
-                <p class="text-xs text-slate-400 mt-1">${new Date(post.created_at).toLocaleDateString()}</p>
+    function renderHeroSwiper(items) {
+      if (homeSwiper) homeSwiper.destroy(true, true);
+      if (!items.length) {
+        swiperWrapper.innerHTML = `<div class="swiper-slide bg-slate-300 flex items-center justify-center text-sm font-bold">欢迎访问 HLOG</div>`;
+      } else {
+        swiperWrapper.innerHTML = items.slice(0, 5).map(p => `
+          <div class="swiper-slide relative">
+            <a href="/post.html?post=${p.id}" class="block h-full">
+              <img src="${getPostCover(p)}" class="w-full h-full object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+              <div class="absolute bottom-10 left-10 right-10 text-white">
+                <h3 class="text-2xl font-black mb-2">${escapeHtml(p.title)}</h3>
+                <p class="text-sm opacity-90 line-clamp-2">${escapeHtml(p.summary || '查看详情')}</p>
               </div>
             </a>
-           `;
-        }).join('');
-
-      } catch (err) { console.error('列表加载失败:', err); }
+          </div>
+        `).join("");
+      }
+      homeSwiper = new Swiper(".home-hero-swiper", {
+        loop: items.length > 1,
+        autoplay: { delay: 4000 },
+        pagination: { el: ".swiper-pagination", clickable: true }
+      });
     }
 
-    // 初始化
-    loadBanner();
+    function escapeHtml(s) { return String(s || "").replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m])); }
+
+    async function loadPosts() {
+      const params = new URLSearchParams(window.location.search);
+      const tag = params.get("tag");
+      const url = tag ? `/api/post/list?tag_id=${encodeURIComponent(tag)}&limit=12` : `/api/post/list?sort=recent&limit=12`;
+      const data = await api(url);
+      const posts = data.posts || [];
+      
+      // 渲染列表
+      postGrid.innerHTML = posts.map(p => `
+        <article class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 group">
+          <a href="/post.html?post=${p.id}">
+            <div class="relative overflow-hidden h-48">
+              <img src="${getPostCover(p)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div class="absolute top-4 left-4"><span class="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-sky-600 shadow-sm">${p.tags?.[0] || '默认'}</span></div>
+            </div>
+            <div class="p-6">
+              <h3 class="text-lg font-bold text-slate-800 line-clamp-2 mb-3 group-hover:text-sky-600">${escapeHtml(p.title)}</h3>
+              <p class="text-slate-500 text-xs line-clamp-2 font-medium mb-4">${escapeHtml(p.summary || '点击阅读全文...')}</p>
+              <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 border-t pt-4">
+                <span>${new Date(p.created_at).toLocaleDateString()}</span>
+                <span>${p.views || 0} 阅读</span>
+              </div>
+            </div>
+          </a>
+        </article>
+      `).join("");
+
+      renderHeroSwiper(posts);
+    }
+
+    async function loadSidebar() {
+      const data = await api("/api/post/list?sort=recent&limit=5");
+      const posts = data.posts || [];
+      // 近期
+      document.getElementById("recentList").innerHTML = posts.map(p => `
+        <a href="/post.html?post=${p.id}" class="flex items-center gap-3 group">
+          <img src="${getPostCover(p)}" class="w-12 h-10 rounded-lg object-cover" />
+          <div class="min-w-0"><h4 class="text-xs font-bold line-clamp-1 group-hover:text-sky-600">${escapeHtml(p.title)}</h4><p class="text-[10px] text-slate-400">${p.views} 阅读</p></div>
+        </a>`).join("");
+      
+      // 热门
+      const hotData = await api("/api/post/list?sort=views&limit=5");
+      document.getElementById("hotList").innerHTML = (hotData.posts || []).map(p => `
+        <a href="/post.html?post=${p.id}" class="flex items-center gap-3 group">
+          <img src="${getPostCover(p)}" class="w-12 h-10 rounded-lg object-cover" />
+          <div class="min-w-0"><h4 class="text-xs font-bold line-clamp-1 group-hover:text-amber-600">${escapeHtml(p.title)}</h4><p class="text-[10px] text-slate-400">${p.views} 阅读</p></div>
+        </a>`).join("");
+
+      // 标签 & 统计
+      const { tags } = await api("/api/tag/list");
+      document.getElementById("tagCloud").innerHTML = (tags || []).map(t => `<a href="/?tag=${t.name}" class="text-[10px] px-3 py-1 bg-slate-50 rounded-full border hover:bg-sky-50 transition font-bold">${escapeHtml(t.name)}</a>`).join("");
+      
+      const stats = await api("/api/stats");
+      document.getElementById("statTodayViews").textContent = stats.today_views ?? "0";
+      document.getElementById("statTotalUsers").textContent = stats.total_users ?? "0";
+    }
+
     loadPosts();
+    loadSidebar();
   </script>
 </body>
 </html>
