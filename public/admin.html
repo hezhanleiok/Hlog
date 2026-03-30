@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HLOG - 管理后台</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" />
+  <style>
+    .ql-editor { min-height: 220px; }
+    .hlog-quill .ql-toolbar { border-top-left-radius: 14px; border-top-right-radius: 14px; }
+    .hlog-quill .ql-container { border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; }
+    .hlog-prose pre { background: #0b1220; color: #e5e7eb; padding: 12px; border-radius: 12px; overflow: auto; }
+  </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
   <header class="bg-white border-b border-slate-200">
@@ -17,40 +24,141 @@
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <section class="lg:col-span-1 bg-white rounded-2xl shadow-sm p-5 h-fit">
-      <h2 class="text-xl font-semibold mb-4">发布 / 编辑文章</h2>
-      <form id="postForm" class="space-y-3">
-        <input id="postId" type="hidden" />
-        <div>
-          <label class="text-sm text-slate-600">标题</label>
-          <input id="title" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
-        </div>
-        <div>
-          <label class="text-sm text-slate-600">摘要</label>
-          <textarea id="summary" rows="2" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"></textarea>
-        </div>
-        <div>
-          <label class="text-sm text-slate-600">封面图 URL（多张用英文逗号分隔）</label>
-          <input id="coverImages" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="https://... , https://..." />
-        </div>
-        <div>
-          <label class="text-sm text-slate-600">正文内容</label>
-          <textarea id="content" rows="8" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"></textarea>
-        </div>
-        <div class="flex items-center gap-2">
-          <button class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700" id="saveBtn">保存文章</button>
-          <button type="button" class="px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300" id="resetBtn">清空</button>
-        </div>
-      </form>
-    </section>
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <section class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+        <h2 class="text-xl font-semibold mb-4">文章编辑</h2>
 
-    <section class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-5">
-      <h2 class="text-xl font-semibold mb-4">文章管理</h2>
-      <div id="postList" class="space-y-3"></div>
-    </section>
+        <input id="postId" type="hidden" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm text-slate-600">标题</label>
+            <input id="titleInput" required class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">封面图 URL</label>
+            <input id="coverUrlInput" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="https://..." />
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-sm text-slate-600">摘要</label>
+            <textarea id="summaryInput" rows="2" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"></textarea>
+          </div>
+        </div>
+
+        <div class="mt-5 space-y-5">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-semibold">正文内容</h3>
+            </div>
+
+            <div id="toolbarContent" class="hlog-quill">
+              <div class="ql-toolbar ql-snow">
+                <span class="ql-formats">
+                  <select class="ql-header">
+                    <option selected></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                  </select>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-bold" aria-label="Bold"></button>
+                  <select class="ql-color" aria-label="Color"></select>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-link" aria-label="Link"></button>
+                  <button class="ql-image" aria-label="Image"></button>
+                  <button class="ql-youtube" type="button" aria-label="YouTube">YT</button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-code-block" aria-label="Code Block"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-clean" aria-label="Clear Format"></button>
+                </span>
+              </div>
+            </div>
+            <div id="contentEditor" class="hlog-quill rounded-2xl overflow-hidden"></div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-sm font-semibold">登录可见内容（hidden_content）</h3>
+            </div>
+
+            <div id="toolbarHidden" class="hlog-quill">
+              <div class="ql-toolbar ql-snow">
+                <span class="ql-formats">
+                  <select class="ql-header">
+                    <option selected></option>
+                    <option value="1"></option>
+                    <option value="2"></option>
+                    <option value="3"></option>
+                  </select>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-bold" aria-label="Bold"></button>
+                  <select class="ql-color" aria-label="Color"></select>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-link" aria-label="Link"></button>
+                  <button class="ql-image" aria-label="Image"></button>
+                  <button class="ql-youtube" type="button" aria-label="YouTube">YT</button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-code-block" aria-label="Code Block"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-clean" aria-label="Clear Format"></button>
+                </span>
+              </div>
+            </div>
+            <div id="hiddenEditor" class="hlog-quill rounded-2xl overflow-hidden"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+        <h2 class="text-xl font-semibold mb-4">文章设置</h2>
+
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm text-slate-600">标签（逗号分隔）</label>
+            <input id="tagsInput" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="如：技术, 生活, 开源" />
+          </div>
+
+          <div>
+            <label class="text-sm text-slate-600">状态</label>
+            <select id="statusSelect" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300">
+              <option value="published">发布</option>
+              <option value="draft">草稿</option>
+            </select>
+          </div>
+
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <label class="text-sm text-slate-600">允许评论</label>
+              <div class="text-xs text-slate-500">开/关</div>
+            </div>
+            <input id="allowCommentsInput" type="checkbox" class="h-5 w-5 rounded border-slate-300 text-sky-600" checked />
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="saveBtn" class="flex-1 px-4 py-2 rounded-xl bg-sky-600 text-white hover:bg-sky-700">保存</button>
+            <button id="resetBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300">清空</button>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-5 border-t border-slate-100">
+          <h3 class="text-sm font-semibold mb-3">文章管理</h3>
+          <div id="postList" class="space-y-3 max-h-[52vh] overflow-auto pr-1"></div>
+        </div>
+      </aside>
+    </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
   <script>
     const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
     if (!auth?.token || auth.role !== "admin") {
@@ -60,7 +168,7 @@
 
     async function api(path, options = {}) {
       const headers = options.headers || {};
-      headers.Authorization = `Bearer ${auth.token}`;
+      headers.Authorization = \`Bearer \${auth.token}\`;
       const res = await fetch(path, { ...options, headers });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "请求失败");
@@ -74,40 +182,149 @@
 
     document.getElementById("resetBtn").addEventListener("click", () => {
       document.getElementById("postId").value = "";
-      document.getElementById("postForm").reset();
+      document.getElementById("titleInput").value = "";
+      document.getElementById("summaryInput").value = "";
+      document.getElementById("coverUrlInput").value = "";
+      document.getElementById("tagsInput").value = "";
+      document.getElementById("statusSelect").value = "published";
+      document.getElementById("allowCommentsInput").checked = true;
+      contentQuill.setText("");
+      hiddenQuill.setText("");
     });
 
-    async function loadPosts() {
-      const { posts } = await api("/api/post/list");
-      const container = document.getElementById("postList");
-      if (!posts.length) {
-        container.innerHTML = '<p class="text-sm text-slate-500">暂无文章</p>';
-        return;
+    function parseCoversFromInput() {
+      return document.getElementById("coverUrlInput").value.trim();
+    }
+
+    function parseTagsInput() {
+      const raw = document.getElementById("tagsInput").value.trim();
+      if (!raw) return [];
+      return raw.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 10);
+    }
+
+    function extractYouTubeId(url) {
+      try {
+        const u = new URL(url);
+        if (u.hostname === "youtu.be") return u.pathname.slice(1);
+        if (u.hostname.includes("youtube.com")) {
+          if (u.pathname.startsWith("/embed/")) return u.pathname.split("/embed/")[1];
+          if (u.pathname.startsWith("/shorts/")) return u.pathname.split("/shorts/")[1];
+          const v = u.searchParams.get("v");
+          if (v) return v;
+        }
+      } catch {}
+      // 兜底：直接匹配视频 ID（允许用户粘贴杂项）
+      const m = String(url).match(/(?:v=|be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{6,})/);
+      return m ? m[1] : null;
+    }
+
+    // 自定义 iframe blot：用于插入 YouTube embed
+    const BlockEmbed = Quill.import("blots/block/embed");
+    class IframeBlot extends BlockEmbed {
+      static create(src) {
+        const node = super.create();
+        node.setAttribute("src", src);
+        node.setAttribute("frameborder", "0");
+        node.setAttribute("allowfullscreen", "true");
+        node.style.width = "100%";
+        node.style.minHeight = "320px";
+        node.style.borderRadius = "14px";
+        return node;
       }
-      container.innerHTML = posts.map((p) => `
-        <div class="border border-slate-200 rounded-xl p-4">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <h3 class="font-semibold">${p.title}</h3>
-              <p class="text-xs text-slate-500 mt-1">${new Date(p.created_at).toLocaleString()}</p>
+      static value(node) {
+        return node.getAttribute("src");
+      }
+    }
+    IframeBlot.blotName = "iframe";
+    IframeBlot.tagName = "IFRAME";
+    Quill.register(IframeBlot);
+
+    function initEditor(containerId, toolbarId) {
+      return new Quill(containerId, {
+        theme: "snow",
+        modules: {
+          toolbar: {
+            container: "#" + toolbarId,
+            handlers: {
+              image: function () {
+                const url = prompt("请输入图片 URL（支持 https://...）");
+                if (!url) return;
+                const range = this.quill.getSelection(true);
+                this.quill.insertEmbed(range.index, "image", url, "user");
+                this.quill.setSelection(range.index + 1, 0);
+              },
+              youtube: function () {
+                const url = prompt("请输入 YouTube URL（例如：https://www.youtube.com/watch?v=...）");
+                if (!url) return;
+                const id = extractYouTubeId(url);
+                if (!id) return alert("无法解析 YouTube 链接");
+                const embed = \`https://www.youtube.com/embed/\${id}\`;
+                const range = this.quill.getSelection(true);
+                this.quill.insertEmbed(range.index, "iframe", embed, "user");
+                this.quill.setSelection(range.index + 1, 0);
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 初始化两个编辑器
+    const contentQuill = initEditor("#contentEditor", "toolbarContent");
+    const hiddenQuill = initEditor("#hiddenEditor", "toolbarHidden");
+
+    function setQuillHtml(quill, html) {
+      const safe = html || "";
+      // 直接 paste HTML：让 Quill 输出稳定（保存时用 root.innerHTML）
+      quill.setText("");
+      quill.clipboard.dangerouslyPasteHTML(0, safe, "silent");
+    }
+
+    function getQuillHtml(quill) {
+      const html = quill.root.innerHTML || "";
+      return html.trim();
+    }
+
+    function renderPostItem(p) {
+      const cover = p.cover_url ? p.cover_url : "https://picsum.photos/120/80?random=6";
+      return `
+        <div class="border border-slate-200 rounded-2xl p-3 bg-white hover:bg-slate-50 transition">
+          <div class="flex gap-3 items-center">
+            <img src="${cover}" alt="${p.title}" class="w-16 h-10 rounded-lg object-cover" />
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-semibold text-slate-900 line-clamp-1">${p.title}</div>
+              <div class="text-xs text-slate-500 mt-1">${p.status === "draft" ? "草稿" : "发布"} · ${Number(p.views ?? 0)} views</div>
             </div>
-            <div class="flex items-center gap-2">
-              <button data-edit="${p.id}" class="px-3 py-1.5 text-sm rounded-lg bg-sky-100 text-sky-700 hover:bg-sky-200">编辑</button>
-              <button data-delete="${p.id}" class="px-3 py-1.5 text-sm rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200">删除</button>
+          </div>
+          <div class="flex items-center justify-between gap-2 mt-3">
+            <div class="text-xs text-slate-400">${p.created_at ? new Date(p.created_at).toLocaleDateString() : ""}</div>
+            <div class="flex gap-2">
+              <button type="button" data-edit="${p.id}" class="px-3 py-1.5 text-xs rounded-xl bg-sky-50 text-sky-700 border border-sky-100 hover:bg-sky-100">编辑</button>
+              <button type="button" data-delete="${p.id}" class="px-3 py-1.5 text-xs rounded-xl bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100">删除</button>
             </div>
           </div>
         </div>
-      `).join("");
+      `;
+    }
+
+    async function loadPostsForAdmin() {
+      const { posts } = await api("/api/post/list?sort=recent&limit=30&include_drafts=1");
+      const container = document.getElementById("postList");
+      container.innerHTML = posts.length ? posts.map(renderPostItem).join("") : '<div class="text-sm text-slate-500">暂无文章</div>';
 
       container.querySelectorAll("[data-edit]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = Number(btn.dataset.edit);
-          const { post } = await api(`/api/post/list?id=${id}`);
+          const { post } = await api(\`/api/post/list?id=\${id}&include_drafts=1\`);
           document.getElementById("postId").value = post.id;
-          document.getElementById("title").value = post.title;
-          document.getElementById("summary").value = post.summary || "";
-          document.getElementById("coverImages").value = (post.covers || []).join(", ");
-          document.getElementById("content").value = post.content;
+          document.getElementById("titleInput").value = post.title || "";
+          document.getElementById("summaryInput").value = post.summary || "";
+          document.getElementById("coverUrlInput").value = post.cover_url || "";
+          document.getElementById("statusSelect").value = post.status || "published";
+          document.getElementById("allowCommentsInput").checked = Number(post.allow_comments ?? 1) === 1;
+          document.getElementById("tagsInput").value = (post.tags || []).join(", ");
+          setQuillHtml(contentQuill, post.content || "");
+          setQuillHtml(hiddenQuill, post.hidden_content || "");
           window.scrollTo({ top: 0, behavior: "smooth" });
         });
       });
@@ -115,46 +332,54 @@
       container.querySelectorAll("[data-delete]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           const id = Number(btn.dataset.delete);
-          if (!confirm("确认删除此文章？")) return;
-          try {
-            await api("/api/post/create", {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id })
-            });
-            await loadPosts();
-          } catch (err) {
-            alert(err.message);
-          }
+          if (!confirm("确认删除该文章吗？")) return;
+          await api("/api/post/create", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+          });
+          await loadPostsForAdmin();
         });
       });
     }
 
-    document.getElementById("postForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    document.getElementById("saveBtn").addEventListener("click", async () => {
       const id = document.getElementById("postId").value;
       const payload = {
         id: id ? Number(id) : undefined,
-        title: document.getElementById("title").value.trim(),
-        summary: document.getElementById("summary").value.trim(),
-        content: document.getElementById("content").value.trim(),
-        covers: document.getElementById("coverImages").value.split(",").map((s) => s.trim()).filter(Boolean)
+        title: document.getElementById("titleInput").value.trim(),
+        summary: document.getElementById("summaryInput").value.trim(),
+        cover_url: parseCoversFromInput(),
+        status: document.getElementById("statusSelect").value,
+        allow_comments: document.getElementById("allowCommentsInput").checked ? 1 : 0,
+        tags: parseTagsInput(),
+        content: getQuillHtml(contentQuill),
+        hidden_content: getQuillHtml(hiddenQuill)
       };
+
+      if (!payload.title) return alert("请输入标题");
+      if (!payload.content || payload.content === "<p><br></p>") return alert("正文不能为空");
+
+      const method = id ? "PUT" : "POST";
       try {
         await api("/api/post/create", {
-          method: id ? "PUT" : "POST",
+          method,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
-        document.getElementById("postForm").reset();
+        document.getElementById("postForm")?.reset?.();
         document.getElementById("postId").value = "";
-        await loadPosts();
+        contentQuill.setText("");
+        hiddenQuill.setText("");
+        await loadPostsForAdmin();
+        alert("保存成功");
       } catch (err) {
         alert(err.message);
       }
     });
 
-    loadPosts().catch((err) => alert(err.message));
+    loadPostsForAdmin().catch((err) => alert(err.message));
   </script>
 </body>
 </html>
+

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HLOG - 文章详情</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hlog-prose pre { background: #0b1220; color: #e5e7eb; padding: 12px; border-radius: 12px; overflow: auto; }
+    .hlog-prose code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .hlog-prose blockquote { border-left: 4px solid #38bdf8; padding-left: 12px; color: #0f172a; background: #f0f9ff; border-radius: 10px; padding-top: 6px; padding-bottom: 6px; }
+    .hlog-prose img { border-radius: 14px; max-width: 100%; height: auto; }
+    .hlog-prose a { color: #0284c7; text-decoration: underline; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="text-2xl font-bold text-sky-600">HLOG</a>
+      <nav class="flex items-center gap-3 text-sm">
+        <a href="/" class="px-3 py-2 rounded-lg hover:bg-slate-100">首页</a>
+        <a href="/login.html" id="loginLink" class="px-3 py-2 rounded-lg hover:bg-slate-100">登录</a>
+        <a href="/register.html" id="registerLink" class="px-3 py-2 rounded-lg hover:bg-slate-100">注册</a>
+        <a href="/admin.html" id="adminLink" class="px-3 py-2 rounded-lg bg-sky-600 text-white hidden">后台</a>
+        <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white hidden">退出</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <div id="pageSkeleton" class="hidden"></div>
+
+    <article id="postArticle" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div id="postCoverWrap" class="hidden">
+        <img id="postCover" class="w-full h-72 object-cover" alt="cover" />
+      </div>
+
+      <div class="p-6 md:p-8">
+        <div id="postTags" class="flex flex-wrap gap-2 mb-3"></div>
+        <h1 id="postTitle" class="text-3xl md:text-4xl font-bold text-slate-900 leading-tight"></h1>
+        <div id="postMeta" class="mt-3 text-sm text-slate-500 flex flex-wrap gap-x-4 gap-y-1"></div>
+        <div id="postContent" class="hlog-prose mt-6"></div>
+
+        <div id="hiddenContentWrap" class="mt-8"></div>
+      </div>
+    </article>
+
+    <section class="mt-6 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
+      <div class="flex items-center justify-between gap-3">
+        <h2 class="text-2xl font-semibold">评论</h2>
+      </div>
+
+      <div id="commentClosedNotice" class="hidden mt-3 text-sm text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3">
+        当前文章已关闭评论。
+      </div>
+
+      <form id="commentForm" class="mt-5 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm text-slate-600">昵称</label>
+            <input id="commentName" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="可选" />
+          </div>
+          <div>
+            <label class="text-sm text-slate-600">邮箱</label>
+            <input id="commentEmail" type="email" class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="可选（用于反垃圾）" />
+          </div>
+        </div>
+        <div>
+          <label class="text-sm text-slate-600">评论内容</label>
+          <textarea id="commentContent" rows="4" required class="w-full mt-1 border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="写点什么吧…" ></textarea>
+        </div>
+        <div>
+          <button class="px-5 py-2 rounded-xl bg-sky-600 text-white hover:bg-sky-700">发表评论</button>
+        </div>
+      </form>
+
+      <div id="commentList" class="mt-6 space-y-4"></div>
+    </section>
+  </main>
+
+  <script>
+    const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
+    const loginLink = document.getElementById("loginLink");
+    const registerLink = document.getElementById("registerLink");
+    const adminLink = document.getElementById("adminLink");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (auth && auth.token) {
+      loginLink.classList.add("hidden");
+      registerLink.classList.add("hidden");
+      logoutBtn.classList.remove("hidden");
+      if (auth.role === "admin") adminLink.classList.remove("hidden");
+    }
+
+    logoutBtn?.addEventListener("click", () => {
+      localStorage.removeItem("hlog_auth");
+      location.href = "/login.html";
+    });
+
+    async function api(path, options = {}) {
+      const headers = options.headers || {};
+      if (auth?.token) headers.Authorization = `Bearer ${auth.token}`;
+      const res = await fetch(path, { ...options, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "请求失败");
+      return data;
+    }
+
+    const params = new URLSearchParams(location.search);
+    const postId = Number(params.get("post"));
+    if (!postId) {
+      alert("缺少文章 ID");
+      throw new Error("missing post id");
+    }
+
+    const postCoverWrap = document.getElementById("postCoverWrap");
+    const postCover = document.getElementById("postCover");
+    const postTags = document.getElementById("postTags");
+    const postTitle = document.getElementById("postTitle");
+    const postMeta = document.getElementById("postMeta");
+    const postContent = document.getElementById("postContent");
+    const hiddenContentWrap = document.getElementById("hiddenContentWrap");
+
+    const commentClosedNotice = document.getElementById("commentClosedNotice");
+    const commentForm = document.getElementById("commentForm");
+    const commentName = document.getElementById("commentName");
+    const commentEmail = document.getElementById("commentEmail");
+    const commentContent = document.getElementById("commentContent");
+    const commentList = document.getElementById("commentList");
+
+    function isLoggedIn() {
+      return !!(auth && auth.token);
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderTags(tags) {
+      const items = Array.isArray(tags) ? tags : [];
+      postTags.innerHTML = items.length
+        ? items.map((t) => `<span class="inline-flex items-center rounded-full bg-sky-50 text-sky-700 border border-sky-100 px-3 py-1 text-xs">${escapeHtml(t)}</span>`).join("")
+        : "";
+    }
+
+    function renderHiddenContent(hiddenContent) {
+      if (hiddenContent) {
+        if (isLoggedIn()) {
+          hiddenContentWrap.innerHTML = `
+            <div class="text-sm text-slate-500 mb-2">登录可见</div>
+            <div class="hlog-prose">${hiddenContent}</div>
+          `;
+        } else {
+          hiddenContentWrap.innerHTML = `
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="font-semibold text-slate-900 mb-2">这部分内容需要登录查看</div>
+              <p class="text-sm text-slate-600 mb-3">登录后即可阅读隐藏内容。</p>
+              <a href="/login.html" class="inline-flex items-center rounded-xl bg-sky-600 text-white px-4 py-2 hover:bg-sky-700">去登录</a>
+            </div>
+          `;
+        }
+      }
+    }
+
+    async function loadPostAndComments() {
+      // 进入页面自动增加访问量
+      await api(`/api/post/view?post_id=${encodeURIComponent(String(postId))}`, { method: "GET" });
+
+      const { post } = await api(`/api/post/list?id=${encodeURIComponent(String(postId))}`);
+
+      renderTags(post.tags);
+      postTitle.textContent = post.title;
+      const views = Number(post.views ?? 0);
+      const createdAt = post.created_at ? new Date(post.created_at).toLocaleString() : "";
+      postMeta.innerHTML = `
+        <span>${escapeHtml(createdAt)}</span>
+        <span>阅读：${views}</span>
+      `;
+
+      postCoverWrap.classList.toggle("hidden", !post.cover_url);
+      if (post.cover_url) postCover.src = post.cover_url;
+
+      postContent.innerHTML = post.content || "";
+      renderHiddenContent(post.hidden_content);
+
+      const allowComments = Number(post.allow_comments ?? 1) === 1;
+      if (!allowComments) {
+        commentClosedNotice.classList.remove("hidden");
+        commentForm.querySelector("button").disabled = true;
+        commentName.disabled = true;
+        commentEmail.disabled = true;
+        commentContent.disabled = true;
+      } else {
+        commentClosedNotice.classList.add("hidden");
+        commentForm.querySelector("button").disabled = false;
+        commentName.disabled = false;
+        commentEmail.disabled = false;
+        commentContent.disabled = false;
+      }
+
+      await loadComments();
+    }
+
+    async function loadComments() {
+      const { comments } = await api(`/api/comment/list?post_id=${encodeURIComponent(String(postId))}`);
+      commentList.innerHTML = comments && comments.length
+        ? comments.map((c) => `
+            <div class="border border-slate-200 rounded-2xl p-4">
+              <div class="flex items-center justify-between gap-3">
+                <div class="text-sm font-semibold text-slate-900">${escapeHtml(c.author_name || c.name || "游客")}</div>
+                <div class="text-xs text-slate-500">${c.created_at ? new Date(c.created_at).toLocaleString() : ""}</div>
+              </div>
+              <div class="mt-2 text-sm text-slate-800 whitespace-pre-wrap">${escapeHtml(c.content || "")}</div>
+            </div>
+          `).join("")
+        : '<div class="text-sm text-slate-500">暂无评论，欢迎抢沙发。</div>';
+    }
+
+    commentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const content = commentContent.value.trim();
+      if (!content) return alert("请输入评论内容");
+      try {
+        await api("/api/comment/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            post_id: postId,
+            author_name: commentName.value.trim(),
+            author_email: commentEmail.value.trim(),
+            content
+          })
+        });
+        commentContent.value = "";
+        await loadComments();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    loadPostAndComments().catch((err) => alert(err.message));
+  </script>
+</body>
+</html>
+

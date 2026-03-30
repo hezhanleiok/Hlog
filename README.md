@@ -73,26 +73,57 @@ CREATE TABLE IF NOT EXISTS posts (
   title TEXT NOT NULL,
   summary TEXT,
   content TEXT NOT NULL,
-  cover_images TEXT NOT NULL DEFAULT '[]',
-  author_id INTEGER NOT NULL,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+  hidden_content TEXT,        -- 登录可见内容
+  cover_url TEXT,             -- 封面图字段
+  status TEXT DEFAULT 'published', -- published(发布), draft(草稿)
+  views INTEGER DEFAULT 0,    -- 阅读量
+  allow_comments INTEGER DEFAULT 1, -- 评论开关 (1开启, 0关闭)
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 标签体系
+CREATE TABLE IF NOT EXISTS tags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS post_tags (
+  post_id INTEGER,
+  tag_id INTEGER,
+  PRIMARY KEY (post_id, tag_id),
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+);
+
+-- 评论系统：支持审核与游客
 CREATE TABLE IF NOT EXISTS comments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  post_id INTEGER NOT NULL,
-  user_id INTEGER,
-  guest_name TEXT,
+  post_id INTEGER,
+  author_name TEXT,           -- 昵称
+  author_email TEXT,          -- 邮箱
   content TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+  status TEXT DEFAULT 'approved', -- approved(已准), pending(待审), spam(垃圾)
+  ip_address TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id, created_at DESC);
+-- 站点统计
+CREATE TABLE IF NOT EXISTS site_stats (
+  key TEXT PRIMARY KEY,
+  value INTEGER DEFAULT 0
+);
+
+-- 邀请码系统
+CREATE TABLE IF NOT EXISTS invitation_codes (
+  code TEXT PRIMARY KEY,
+  is_used INTEGER DEFAULT 0,
+  used_by TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_posts_status_created_at ON posts(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_posts_views ON posts(views DESC);
+CREATE INDEX IF NOT EXISTS idx_comments_post_id_created_at ON comments(post_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
 ```
 

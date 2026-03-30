@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HLOG - 评论审核</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <div class="text-2xl font-bold text-sky-600">评论审核</div>
+        <div class="text-sm text-slate-500 mt-1">Pending 评论管理</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
+        <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm">退出登录</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <div class="flex items-center justify-between gap-3 mb-4">
+      <h2 class="text-xl font-semibold">待审核评论</h2>
+      <button id="refreshBtn" class="text-sm px-3 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-100">刷新</button>
+    </div>
+
+    <div id="list" class="space-y-4"></div>
+  </main>
+
+  <script>
+    const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
+    if (!auth?.token || auth.role !== "admin") {
+      alert("仅管理员可访问");
+      location.href = "/login.html";
+    }
+
+    async function api(path, options = {}) {
+      const headers = options.headers || {};
+      headers.Authorization = \`Bearer \${auth.token}\`;
+      const res = await fetch(path, { ...options, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "请求失败");
+      return data;
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("hlog_auth");
+      location.href = "/login.html";
+    });
+    document.getElementById("refreshBtn").addEventListener("click", () => loadPending().catch((err) => alert(err.message)));
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderItem(c) {
+      return `
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-sm text-slate-500">
+                <span class="font-semibold text-slate-900">${escapeHtml(c.author_name || "游客")}</span>
+                <span class="mx-2">·</span>
+                <span>${escapeHtml(c.author_email || "")}</span>
+              </div>
+              <div class="text-xs text-slate-400 mt-1">${c.created_at ? new Date(c.created_at).toLocaleString() : ""}</div>
+              <div class="mt-3 text-sm text-slate-800 whitespace-pre-wrap">${escapeHtml(c.content || "")}</div>
+              <div class="text-xs text-slate-400 mt-3">文章：<span class="text-slate-700 font-medium">${escapeHtml(c.post_title || "")}</span></div>
+            </div>
+            <div class="flex flex-col gap-2 shrink-0">
+              <button type="button" data-approve="${c.id}" class="px-4 py-2 rounded-xl bg-sky-600 text-white hover:bg-sky-700 text-sm">批准</button>
+              <button type="button" data-delete="${c.id}" class="px-4 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-700 text-sm">删除</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadPending() {
+      const data = await api("/api/admin/comment/pending");
+      const list = document.getElementById("list");
+      const items = data.comments || [];
+      list.innerHTML = items.length ? items.map(renderItem).join("") : '<div class="text-sm text-slate-500 bg-white border border-slate-100 rounded-2xl p-5">暂无待审核评论。</div>';
+
+      list.querySelectorAll("[data-approve]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = Number(btn.dataset.approve);
+          await api("/api/admin/comment/approve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+          });
+          await loadPending();
+        });
+      });
+
+      list.querySelectorAll("[data-delete]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = Number(btn.dataset.delete);
+          if (!confirm("确认删除该评论吗？")) return;
+          await api("/api/admin/comment/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+          });
+          await loadPending();
+        });
+      });
+    }
+
+    loadPending().catch((err) => alert(err.message));
+  </script>
+</body>
+</html>
+
