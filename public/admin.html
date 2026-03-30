@@ -3,349 +3,455 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HLOG - 管理后台</title>
+  <title>HLOG - 现代化管理后台</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" />
   <link rel="stylesheet" href="/admin-style.css" />
-  <style>
-    /* 修正文字对比度，使左侧菜单更清晰 */
-    .admin-sidebar {
-      background-color: #1f2937; /* 深色背景 */
-    }
-    .admin-sidebar nav a {
-      color: #e5e7eb; /* 浅灰色文字，提高对比度 */
-      transition: all 0.2s;
-    }
-    .admin-sidebar nav a:hover {
-      background-color: #374151;
-      color: #ffffff;
-    }
-    .admin-sidebar .text-slate-400 {
-      color: #9ca3af !important;
-    }
-    .line-clamp-1 {
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 1;
-    }
-    .ql-editor {
-      min-height: 220px;
-    }
-    .hlog-prose pre {
-      background: #0b1220;
-      color: #e5e7eb;
-      padding: 12px;
-      border-radius: 12px;
-      overflow: auto;
-    }
-    .admin-menu-item-active {
-      background-color: #374151 !important;
-      color: #ffffff !important;
-      font-weight: 700;
-      border-right: 4px solid #3b82f6;
-    }
-  </style>
 </head>
-<body class="bg-slate-100 text-slate-800">
+<body class="bg-[#f0f2f5] text-slate-800 font-sans antialiased">
   <div class="admin-layout flex min-h-screen">
-    <aside class="admin-sidebar w-64 bg-gray-800 border-r border-gray-700 flex-shrink-0">
-      <div class="p-6 text-2xl font-black text-sky-400 italic border-b border-gray-700">HLOG Admin</div>
-      <nav class="mt-4 px-4 space-y-1">
-        <a href="#dashboard" id="menu-dashboard" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-700 text-sm font-bold">仪表盘</a>
-        <div class="px-4 py-2 text-xs font-black text-gray-400 uppercase tracking-wider mt-4">内容</div>
-        <a href="#post-list" id="menu-post-list" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-gray-700">文章列表</a>
-        <a href="#publish" id="menu-post-publish" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-gray-700">发布文章</a>
-        <a href="#drafts" id="menu-post-drafts" class="flex items-center px-4 py-2 rounded-lg text-sm hover:bg-gray-700">草稿箱</a>
-        <div class="px-4 py-2 text-xs font-black text-gray-400 uppercase tracking-wider mt-4">系统</div>
-        <a href="/admin-comments.html" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-700 text-sm font-bold">评论管理</a>
-        <a href="#settings" id="menu-settings" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-700 text-sm font-bold">系统设置</a>
+    <aside class="admin-sidebar w-64 bg-[#1e293b] text-slate-300 flex-shrink-0 shadow-xl z-20 transition-all">
+      <div class="h-16 flex items-center px-6 bg-[#0f172a] text-xl font-black text-white tracking-widest">
+        <span class="text-sky-400 mr-2">H</span>LOG Admin
+      </div>
+      <nav class="mt-4 py-2 space-y-1">
+        <div class="px-6 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">核心面板</div>
+        <a href="#dashboard" id="menu-dashboard" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white transition">仪表盘概览</a>
+        
+        <div class="px-6 py-2 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider">创作与内容</div>
+        <a href="#publish" id="menu-publish" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white transition">撰写新文章</a>
+        <a href="#post-list" id="menu-post-list" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white transition">已发布文章</a>
+        <a href="#drafts" id="menu-drafts" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white transition">草稿箱管理</a>
+        
+        <div class="px-6 py-2 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider">系统与用户</div>
+        <a href="#invites" id="menu-invites" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white transition text-amber-400">邀请码生成</a>
+        <a href="/admin-comments.html" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white transition">评论审核</a>
+        <a href="/admin-users.html" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white transition">用户管理</a>
+        <a href="/admin-profile.html" class="flex items-center px-6 py-3 hover:bg-[#334155] hover:text-white transition">个人中心</a>
       </nav>
     </aside>
 
-    <div class="admin-content flex-1 flex flex-col">
-      <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-        <h2 class="text-xl font-bold text-slate-800">管理面板</h2>
+    <div class="admin-content flex-1 flex flex-col h-screen overflow-hidden">
+      <header class="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between shadow-sm z-10 shrink-0">
+        <h2 id="pageTitle" class="text-lg font-bold text-slate-700">管理面板</h2>
         <div class="flex items-center gap-4">
-          <a href="/" class="text-sm font-bold text-slate-500 hover:text-sky-600">查看站点</a>
-          <button id="logoutBtn" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition">退出登录</button>
+          <a href="/" target="_blank" class="text-sm font-medium text-sky-600 hover:text-sky-700 flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            查看前台站点
+          </a>
+          <button id="logoutBtn" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-200 transition">退出登录</button>
         </div>
       </header>
 
-      <main class="p-8">
-        <section id="panel-dashboard" class="hidden">
-          <div class="flex items-center justify-between mb-8">
-            <h3 class="text-2xl font-black text-slate-800">数据概览</h3>
-            <button id="refreshStatsBtn" class="bg-white border px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50">刷新</button>
+      <main class="flex-1 overflow-auto p-8 relative">
+        
+        <section id="panel-dashboard" class="hidden space-y-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-2xl font-bold text-slate-800">站点概览</h3>
+            <button id="refreshStatsBtn" class="wp-btn">刷新数据</button>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm text-center">
-              <div class="text-xs font-black text-slate-400 uppercase tracking-widest">今日阅读</div>
-              <div id="statTodayViews" class="text-4xl font-black text-slate-900 mt-2">0</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between border-l-4 border-l-sky-500">
+              <div><div class="text-sm font-bold text-slate-400 uppercase">今日阅读量</div><div id="statTodayViews" class="text-3xl font-black text-slate-700 mt-1">0</div></div>
+              <div class="text-sky-100"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg></div>
             </div>
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm text-center">
-              <div class="text-xs font-black text-slate-400 uppercase tracking-widest">总文章数</div>
-              <div id="statTotalPosts" class="text-4xl font-black text-slate-900 mt-2">0</div>
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between border-l-4 border-l-emerald-500">
+              <div><div class="text-sm font-bold text-slate-400 uppercase">文章总数</div><div id="statTotalPosts" class="text-3xl font-black text-slate-700 mt-1">0</div></div>
+              <div class="text-emerald-100"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg></div>
             </div>
-            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm text-center">
-              <div class="text-xs font-black text-slate-400 uppercase tracking-widest">注册用户</div>
-              <div id="statTotalUsers" class="text-4xl font-black text-slate-900 mt-2">0</div>
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between border-l-4 border-l-amber-500">
+              <div><div class="text-sm font-bold text-slate-400 uppercase">注册用户数</div><div id="statTotalUsers" class="text-3xl font-black text-slate-700 mt-1">0</div></div>
+              <div class="text-amber-100"><svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path></svg></div>
             </div>
           </div>
         </section>
 
         <section id="panel-post-list" class="hidden">
-          <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+              <h3 class="font-bold text-slate-700">已发布文章</h3>
+              <a href="#publish" class="wp-btn wp-btn-primary text-sm">写新文章</a>
+            </div>
             <table class="w-full text-left border-collapse">
-              <thead class="bg-slate-50 text-xs font-black text-slate-400 uppercase">
-                <tr><th class="px-6 py-4">标题</th><th class="px-6 py-4">数据</th><th class="px-6 py-4">操作</th></tr>
+              <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
+                <tr><th class="px-6 py-3">标题</th><th class="px-6 py-3">阅读量</th><th class="px-6 py-3">操作</th></tr>
               </thead>
-              <tbody id="postsTbodyPublished"></tbody>
+              <tbody id="postsTbodyPublished" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
         </section>
 
         <section id="panel-drafts" class="hidden">
-          <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+              <h3 class="font-bold text-slate-700">草稿箱</h3>
+            </div>
             <table class="w-full text-left border-collapse">
-              <thead class="bg-slate-50 text-xs font-black text-slate-400 uppercase">
-                <tr><th class="px-6 py-4">标题</th><th class="px-6 py-4">最后修改</th><th class="px-6 py-4">操作</th></tr>
+              <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
+                <tr><th class="px-6 py-3">标题</th><th class="px-6 py-3">最后修改</th><th class="px-6 py-3">操作</th></tr>
               </thead>
-              <tbody id="postsTbodyDrafts"></tbody>
+              <tbody id="postsTbodyDrafts" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
         </section>
 
-        <section id="panel-publish" class="hidden">
-          <div class="max-w-4xl bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
-            <input id="postId" type="hidden" />
-            <input id="titleInput" type="text" placeholder="请输入标题..." class="w-full mb-6 p-4 bg-slate-50 border rounded-2xl font-bold outline-none focus:ring-2 focus:ring-sky-500" />
-            <div id="contentEditor" class="mb-6"></div>
-            <button id="saveBtn" class="w-full bg-sky-600 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-sky-700 transition">保存并发布文章</button>
+        <section id="panel-invites" class="hidden">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden max-w-4xl">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+              <h3 class="font-bold text-slate-700">系统邀请码管理</h3>
+              <button id="genInviteBtn" class="wp-btn wp-btn-primary">生成 10 个新邀请码</button>
+            </div>
+            <div class="p-6">
+              <p class="text-sm text-slate-500 mb-4">新生成的邀请码将显示在下方，你可以复制发给需要注册的用户。</p>
+              <div id="inviteCodesWrap" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-lg">
+                <div class="flex flex-wrap gap-2" id="inviteCodesList"></div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section id="panel-settings" class="hidden">
-          <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-center text-slate-500">
-            ⚙️ 系统设置功能开发中，敬请期待。
+        <section id="panel-publish" class="hidden max-w-5xl mx-auto space-y-4">
+          <input id="postId" type="hidden" />
+          
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <input id="titleInput" type="text" placeholder="在此输入文章标题..." class="w-full text-2xl font-bold text-slate-800 outline-none placeholder-slate-300" />
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            <div id="editorToolbar" class="bg-slate-50 border-b border-slate-200 p-2">
+              </div>
+            <div id="contentEditor" class="min-h-[400px] text-base text-slate-800"></div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <div class="flex items-center gap-2 mb-3">
+              <svg class="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+              <h3 class="font-bold text-slate-800">隐藏内容 (仅登录用户可见)</h3>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">在此处填写的文字、网盘链接或下载密码，必须登录账号后才能查看，留空则不启用。</p>
+            <textarea id="hiddenContentInput" rows="4" class="w-full border border-slate-300 rounded-lg p-3 text-sm outline-none focus:border-sky-500" placeholder="请输入隐秘内容..."></textarea>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center justify-between sticky bottom-4 z-50">
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-bold text-slate-500">文章状态管理：</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button id="previewBtn" class="wp-btn text-sky-600 border-sky-200 hover:bg-sky-50">全屏预览</button>
+              <button id="saveDraftBtn" class="wp-btn">保存为草稿</button>
+              <button id="savePublishBtn" class="wp-btn wp-btn-primary px-8">发布文章</button>
+            </div>
           </div>
         </section>
+
       </main>
+    </div>
+  </div>
+
+  <div id="previewModal" class="fixed inset-0 bg-slate-900/50 hidden z-[100] flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-white w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <div class="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
+        <h3 class="font-bold text-lg">文章预览</h3>
+        <button id="closePreviewBtn" class="text-slate-500 hover:text-red-500 font-bold text-xl">&times;</button>
+      </div>
+      <div class="flex-1 overflow-auto p-8 prose max-w-none" id="previewContainer"></div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
   <script>
-    // ========== 全局错误捕获 ==========
-    window.addEventListener('error', function(event) {
-      console.error('全局错误捕获:', event.error);
-      alert('页面发生错误，请查看控制台（F12）获取详细信息。');
-    });
-
-    // ========== 工具函数 ==========
-    function safeGetElement(id) {
-      const el = document.getElementById(id);
-      if (!el) console.warn(`元素 #${id} 不存在`);
-      return el;
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-      });
-    }
-
-    // ========== 认证检查 ==========
-    let auth = null;
-    try {
-      auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
-    } catch(e) {
-      console.error('解析 localStorage 失败', e);
-    }
+    // ========== 核心鉴权 ==========
+    const auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
     if (!auth || !auth.token || auth.role !== 'admin') {
-      alert('登录失效，请重新登录');
+      alert('权限不足，请重新登录');
       location.href = '/login.html';
     }
 
-    // ========== 增强 API 请求，处理非 JSON 响应 ==========
+    // ========== 封装 API 请求 (拦截 401 等错误) ==========
     async function api(path, options = {}) {
       const headers = options.headers || {};
       headers.Authorization = 'Bearer ' + auth.token;
       headers['Content-Type'] = 'application/json';
       try {
-        console.log(`请求 ${options.method || 'GET'} ${path}`, options.body);
         const res = await fetch(path, { ...options, headers });
         if (res.status === 401) {
           localStorage.removeItem('hlog_auth');
           location.href = '/login.html';
           return null;
         }
-        // 检查响应是否是 JSON 格式
         const contentType = res.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
-          const text = await res.text();
-          console.error('响应不是 JSON，原始内容:', text);
-          throw new Error(`服务器返回了非 JSON 数据 (状态码 ${res.status})，请检查后端接口是否正确实现`);
+          throw new Error(`服务器返回了异常数据 (HTTP ${res.status})，请检查后端配置。`);
         }
         const data = await res.json();
-        console.log(`响应 ${path}:`, data);
         return data;
       } catch (err) {
-        console.error('API 请求失败:', err);
-        alert(`网络错误：${err.message}`);
+        console.error('API Error:', err);
+        alert(`系统提示: ${err.message}`);
         return null;
       }
     }
 
-    // ========== 数据加载 ==========
+    // ========== DOM 工具 ==========
+    const el = id => document.getElementById(id);
+    const escapeHtml = str => String(str || '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+    // ========== 初始化 Quill 增强版编辑器 ==========
+    let quill = null;
+    function initQuill() {
+      // 自定义增强工具栏
+      const toolbarOptions = [
+        [{ 'size': ['small', false, 'large', 'huge'] }], // 字号
+        ['bold', 'italic', 'underline', 'strike'],       // 基础格式
+        [{ 'color': [] }, { 'background': [] }],         // 颜色
+        [{ 'align': [] }],                               // 左右中对齐
+        [{ 'header': 1 }, { 'header': 2 }, 'blockquote', 'code-block'], // 标题段落
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],    // 列表
+        ['link', 'image', 'video', 'formula'],           // 媒体链接
+        ['clean']                                        // 清除格式
+      ];
+
+      quill = new Quill('#contentEditor', {
+        theme: 'snow',
+        placeholder: '支持直接粘贴图文，或者在此尽情书写...',
+        modules: { toolbar: toolbarOptions }
+      });
+
+      // 覆盖默认图片上传逻辑：改为 Base64 直传
+      quill.getModule('toolbar').addHandler('image', function() {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+        input.onchange = () => {
+          const file = input.files[0];
+          if (/^image\//.test(file.type)) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const range = quill.getSelection(true);
+              quill.insertEmbed(range.index, 'image', e.target.result); // 插入Base64
+              quill.setSelection(range.index + 1);
+            };
+            reader.readAsDataURL(file);
+          } else {
+            alert('请选择有效的图片文件。');
+          }
+        };
+      });
+
+      // 覆盖默认视频逻辑：支持解析 B站/YouTube 链接
+      quill.getModule('toolbar').addHandler('video', function() {
+        let url = prompt('请输入视频链接 (支持国内 Bilibili、优酷或国外 YouTube 等):');
+        if (!url) return;
+        
+        // 解析 B站链接转化为 iframe
+        let bvidMatch = url.match(/(BV[a-zA-Z0-9]+)/);
+        if (bvidMatch) url = `//player.bilibili.com/player.html?bvid=${bvidMatch[1]}&page=1&high_quality=1&danmaku=0`;
+        
+        // 解析 YouTube 链接转化为 iframe
+        let ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+        if (ytMatch) url = `//www.youtube.com/embed/${ytMatch[1]}`;
+
+        const range = quill.getSelection(true);
+        quill.insertEmbed(range.index, 'video', url);
+        quill.setSelection(range.index + 1);
+      });
+    }
+
+    // ========== 数据加载与渲染 ==========
     async function loadDashboard() {
       const stats = await api('/api/stats');
       if (stats) {
-        const todayViews = safeGetElement('statTodayViews');
-        const totalPosts = safeGetElement('statTotalPosts');
-        const totalUsers = safeGetElement('statTotalUsers');
-        if (todayViews) todayViews.textContent = stats.today_views || 0;
-        if (totalPosts) totalPosts.textContent = stats.total_posts || 0;
-        if (totalUsers) totalUsers.textContent = stats.total_users || 0;
+        if(el('statTodayViews')) el('statTodayViews').textContent = stats.today_views || 0;
+        if(el('statTotalPosts')) el('statTotalPosts').textContent = stats.total_posts || 0;
+        if(el('statTotalUsers')) el('statTotalUsers').textContent = stats.total_users || 0;
       }
     }
 
     async function loadPostsTable(status) {
-      const tbodyId = status === 'published' ? 'postsTbodyPublished' : 'postsTbodyDrafts';
-      const tbody = safeGetElement(tbodyId);
+      const tbody = el(status === 'published' ? 'postsTbodyPublished' : 'postsTbodyDrafts');
       if (!tbody) return;
       const data = await api(`/api/posts?status=${status}`);
       const posts = data?.posts || [];
       tbody.innerHTML = posts.map(p => `
-        <tr>
-          <td class="px-6 py-4 font-bold border-b">${escapeHtml(p.title)}</td>
-          <td class="px-6 py-4 border-b">${p.views || 0} views</td>
-          <td class="px-6 py-4 border-b">
-            <button class="edit-post-btn text-sky-600 font-bold" data-id="${p.id}" data-title="${escapeHtml(p.title)}" data-content="${escapeHtml(p.content || '')}">编辑</button>
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-6 py-4 font-bold text-slate-800">${escapeHtml(p.title)}</td>
+          <td class="px-6 py-4 text-slate-500">${p.views || 0} 次阅读</td>
+          <td class="px-6 py-4">
+            <button class="text-sky-600 hover:text-sky-800 font-bold mr-3" onclick="editPost(${p.id})">编辑</button>
+            <button class="text-red-500 hover:text-red-700 font-bold" onclick="deletePost(${p.id})">删除</button>
           </td>
-         </tr>
+        </tr>
       `).join('');
-
-      document.querySelectorAll(`#${tbodyId} .edit-post-btn`).forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.dataset.id;
-          const title = btn.dataset.title;
-          const content = btn.dataset.content;
-          const postIdInput = safeGetElement('postId');
-          const titleInput = safeGetElement('titleInput');
-          if (postIdInput) postIdInput.value = id;
-          if (titleInput) titleInput.value = title;
-          if (window.quill) quill.root.innerHTML = content;
-          location.hash = 'publish';
-        });
-      });
     }
 
-    // ========== 保存文章（增强错误处理） ==========
-    async function savePost() {
-      const id = safeGetElement('postId')?.value;
-      const title = safeGetElement('titleInput')?.value.trim();
-      const content = window.quill ? quill.root.innerHTML : '';
-      if (!title) {
-        alert('请填写标题');
-        return;
-      }
-      const payload = { title, content, status: 'published' };
-      let url = '/api/posts';
-      let method = 'POST';
-      if (id) {
-        url = `/api/posts/${id}`;
-        method = 'PUT';
-      }
-      const result = await api(url, { method, body: JSON.stringify(payload) });
-      if (result && result.success !== false) {
-        alert(id ? '文章更新成功' : '发布成功');
-        const postIdInput = safeGetElement('postId');
-        const titleInput = safeGetElement('titleInput');
-        if (postIdInput) postIdInput.value = '';
-        if (titleInput) titleInput.value = '';
-        if (window.quill) quill.root.innerHTML = '';
-        loadPostsTable('published');
-        loadDashboard();
-        location.hash = 'post-list';
+    // 加载单个文章详情用于编辑（解决列表接口不返回正文的问题）
+    async function editPost(id) {
+      el('pageTitle').textContent = "加载中...";
+      const data = await api(`/api/post/list?id=${id}&include_drafts=1`);
+      if (data && data.post) {
+        const post = data.post;
+        el('postId').value = post.id;
+        el('titleInput').value = post.title;
+        el('hiddenContentInput').value = post.hidden_content || '';
+        if (quill) quill.root.innerHTML = post.content || '';
+        location.hash = 'publish';
       } else {
-        alert('操作失败，请检查控制台查看具体错误');
+        alert("文章详情加载失败");
       }
     }
 
-    // ========== 路由 ==========
-    async function route() {
-      const tab = location.hash.slice(1) || 'dashboard';
-      const panels = ['dashboard', 'post-list', 'drafts', 'publish', 'settings'];
+    // 删除文章功能
+    async function deletePost(id) {
+      if (!confirm('危险操作：确定要永久删除这篇文章吗？')) return;
+      // 这里的路径也必须是 /api/post/create
+      const result = await api('/api/post/create', { 
+        method: 'DELETE', 
+        body: JSON.stringify({ id }) 
+      });
+      if (result && !result.error) {
+        loadPostsTable('published');
+        loadPostsTable('drafts');
+        loadDashboard();
+      } else {
+        alert('删除失败: ' + (result?.error || '未知错误'));
+      }
+    }
+
+    // ========== 保存文章 (修复 405 核心逻辑) ==========
+    async function savePost(targetStatus) {
+      const id = el('postId').value;
+      const title = el('titleInput').value.trim();
+      const hiddenContent = el('hiddenContentInput').value.trim();
+      const content = quill ? quill.root.innerHTML : '';
+      
+      if (!title) return alert('文章标题不能为空！');
+      if (content === '<p><br></p>') return alert('文章正文不能为空！');
+
+      // 1. 构建 payload，ID 必须放在 Body 里给后端接收
+      const payload = {
+        title: title,
+        content: content,
+        hidden_content: hiddenContent || null,
+        status: targetStatus // 'published' 或 'draft'
+      };
+      
+      let method = 'POST'; // 默认为新建
+      if (id) {
+        method = 'PUT'; // 如果有 ID 则是更新
+        payload.id = Number(id); // 重点修复：将 ID 放入请求体
+      }
+
+      // 2. 统一请求后端对应创建/修改/删除的物理路径
+      const url = '/api/post/create'; 
+      
+      const btn = targetStatus === 'draft' ? el('saveDraftBtn') : el('savePublishBtn');
+      const originalText = btn.textContent;
+      btn.textContent = '保存中...';
+      btn.disabled = true;
+
+      const result = await api(url, { method, body: JSON.stringify(payload) });
+      
+      btn.textContent = originalText;
+      btn.disabled = false;
+
+      if (result && !result.error) {
+        alert(targetStatus === 'draft' ? '已成功存为草稿' : '文章发布成功！');
+        
+        // 清空表单
+        el('postId').value = '';
+        el('titleInput').value = '';
+        el('hiddenContentInput').value = '';
+        if (quill) quill.root.innerHTML = '';
+        
+        // 刷新列表并跳走
+        loadPostsTable('published');
+        loadPostsTable('drafts');
+        loadDashboard();
+        location.hash = targetStatus === 'draft' ? 'drafts' : 'post-list';
+      } else {
+        alert('操作失败: ' + (result?.error || '接口异常'));
+      }
+    }
+
+    // ========== 邀请码管理功能 ==========
+    async function loadInvites() {
+      const result = await api('/api/admin/invitation/generate', { method: 'POST' });
+      if (result && result.codes) {
+        const wrap = el('inviteCodesWrap');
+        const list = el('inviteCodesList');
+        list.innerHTML = result.codes.map(c => `<span class="bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full text-sm font-mono border border-amber-300 select-all">${c}</span>`).join('');
+        wrap.classList.remove('hidden');
+      } else {
+        alert("生成邀请码失败");
+      }
+    }
+
+    // ========== 路由控制与菜单高亮 ==========
+    function route() {
+      const hash = location.hash.slice(1) || 'dashboard';
+      const panels = ['dashboard', 'post-list', 'drafts', 'publish', 'invites'];
+      
+      // 切换视图
       panels.forEach(p => {
-        const el = safeGetElement(`panel-${p}`);
-        if (el) el.classList.toggle('hidden', p !== tab);
+        const panelEl = el(`panel-${p}`);
+        if (panelEl) panelEl.classList.toggle('hidden', p !== hash);
       });
 
-      // 高亮菜单
-      document.querySelectorAll('.admin-sidebar nav a').forEach(el => el.classList.remove('admin-menu-item-active'));
-      let activeId = '';
-      if (tab === 'dashboard') activeId = 'menu-dashboard';
-      else if (tab === 'post-list') activeId = 'menu-post-list';
-      else if (tab === 'drafts') activeId = 'menu-post-drafts';
-      else if (tab === 'publish') activeId = 'menu-post-publish';
-      else if (tab === 'settings') activeId = 'menu-settings';
-      const activeMenu = safeGetElement(activeId);
-      if (activeMenu) activeMenu.classList.add('admin-menu-item-active');
+      // 动态修改顶栏标题
+      const titles = {
+        'dashboard': '仪表盘概览',
+        'post-list': '已发布文章管理',
+        'drafts': '草稿箱管理',
+        'publish': el('postId').value ? '编辑文章' : '撰写新文章',
+        'invites': '系统邀请码生成'
+      };
+      el('pageTitle').textContent = titles[hash] || '管理面板';
 
-      if (tab === 'dashboard') await loadDashboard();
-      if (tab === 'post-list') await loadPostsTable('published');
-      if (tab === 'drafts') await loadPostsTable('drafts');
+      // 侧边栏高亮
+      document.querySelectorAll('.admin-sidebar nav a').forEach(a => {
+        a.classList.remove('bg-[#334155]', 'text-white', 'border-l-4', 'border-sky-500');
+      });
+      const activeMenu = el(`menu-${hash}`);
+      if (activeMenu) activeMenu.classList.add('bg-[#334155]', 'text-white', 'border-l-4', 'border-sky-500');
+
+      // 按需加载数据
+      if (hash === 'dashboard') loadDashboard();
+      if (hash === 'post-list') loadPostsTable('published');
+      if (hash === 'drafts') loadPostsTable('drafts');
     }
 
-    // ========== 初始化 Quill ==========
-    let quill = null;
-    function initQuill() {
-      const editorContainer = safeGetElement('contentEditor');
-      if (!editorContainer) {
-        setTimeout(initQuill, 100);
-        return;
-      }
-      try {
-        quill = new Quill('#contentEditor', {
-          theme: 'snow',
-          modules: {
-            toolbar: [
-              [{ header: [1, 2, false] }],
-              ['bold', 'italic'],
-              ['link', 'image', 'video'],
-              ['code-block']
-            ]
-          }
-        });
-        window.quill = quill;
-        console.log('Quill 初始化成功');
-      } catch(e) {
-        console.error('Quill 初始化失败', e);
-      }
-    }
-
-    // ========== 事件绑定 ==========
+    // ========== 绑定事件 ==========
     window.addEventListener('hashchange', route);
     window.addEventListener('load', () => {
       initQuill();
       route();
-      if (!location.hash) location.hash = 'dashboard';
     });
 
-    const refreshBtn = safeGetElement('refreshStatsBtn');
-    if (refreshBtn) refreshBtn.addEventListener('click', loadDashboard);
-    const logoutBtn = safeGetElement('logoutBtn');
-    if (logoutBtn) logoutBtn.addEventListener('click', () => {
+    el('refreshStatsBtn')?.addEventListener('click', loadDashboard);
+    el('logoutBtn')?.addEventListener('click', () => {
       localStorage.removeItem('hlog_auth');
       location.href = '/login.html';
     });
-    const saveBtn = safeGetElement('saveBtn');
-    if (saveBtn) saveBtn.addEventListener('click', savePost);
+    
+    // 保存按钮绑定
+    el('savePublishBtn')?.addEventListener('click', () => savePost('published'));
+    el('saveDraftBtn')?.addEventListener('click', () => savePost('draft'));
+    
+    // 生成邀请码绑定
+    el('genInviteBtn')?.addEventListener('click', loadInvites);
+
+    // 预览功能绑定
+    el('previewBtn')?.addEventListener('click', () => {
+      const title = el('titleInput').value || '无标题';
+      const content = quill ? quill.root.innerHTML : '';
+      el('previewContainer').innerHTML = `<h1 class="text-3xl font-bold mb-6">${escapeHtml(title)}</h1>${content}`;
+      el('previewModal').classList.remove('hidden');
+    });
+    el('closePreviewBtn')?.addEventListener('click', () => {
+      el('previewModal').classList.add('hidden');
+    });
+
   </script>
 </body>
 </html>
