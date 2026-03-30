@@ -297,18 +297,43 @@
     const panelDrafts = document.getElementById("panel-drafts");
 
     const initPage = () => {
-      panelDashboard.classList.toggle("hidden", tab !== "dashboard");
-      panelPostList.classList.toggle("hidden", tab !== "post-list");
-      panelDrafts.classList.toggle("hidden", tab !== "drafts");
-      panelPublish.classList.toggle("hidden", tab !== "publish");
+      // 隐藏所有面板
+      [panelDashboard, panelPostList, panelDrafts, panelPublish].forEach(p => p.classList.add("hidden"));
 
-      // 清空 active
+      // 根据 tab 显示对应面板
+      if (tab === "dashboard") {
+        panelDashboard.classList.remove("hidden");
+      } else if (tab === "post-list") {
+        panelPostList.classList.remove("hidden");
+      } else if (tab === "drafts") {
+        panelDrafts.classList.remove("hidden");
+      } else if (tab === "publish") {
+        panelPublish.classList.remove("hidden");
+      } else if (tab === "settings") {
+        // 系统设置跳转到 admin-profile.html
+        location.href = "/admin-profile.html?tab=settings";
+        return;
+      } else {
+        // 未知 tab，重定向到默认仪表盘
+        location.href = "/admin.html";
+        return;
+      }
+
+      // 清空 active 类
       document.querySelectorAll(".admin-menu-item-active").forEach((el) => el.classList.remove("admin-menu-item-active"));
-      const setActive = (id) => { const el = document.getElementById(id); if (el) el.classList.add("admin-menu-item-active"); };
-      if (tab === "dashboard") setActive("menu-dashboard");
-      if (tab === "post-list") setActive("menu-post-list");
-      if (tab === "publish") setActive("menu-post-publish");
-      if (tab === "drafts") setActive("menu-post-drafts");
+
+      // 设置 active 类
+      const activeMap = {
+        "dashboard": "menu-dashboard",
+        "post-list": "menu-post-list",
+        "publish": "menu-post-publish",
+        "drafts": "menu-post-drafts"
+      };
+      const activeId = activeMap[tab];
+      if (activeId) {
+        const el = document.getElementById(activeId);
+        if (el) el.classList.add("admin-menu-item-active");
+      }
     };
 
     // ========= Quill 初始化（强制两实例） =========
