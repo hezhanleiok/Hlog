@@ -23,13 +23,33 @@ export async function onRequestPost(context) {
     const password = String(body.password || "");
     if (!username || !password) return json({ error: "用户名或密码不能为空" }, 400);
 
+    const userCols = await context.env.DB.prepare("PRAGMA table_info(users)").all();
+    const cols = userCols.results || [];
+    const disabledCol =
+      cols.some((c) => c.name === "is_disabled") ? "is_disabled" :
+      cols.some((c) => c.name === "disabled") ? "disabled" :
+      cols.some((c) => c.name === "status") ? "status" :
+      null;
+
+    const selectParts = ["id", "username", "display_name", "password_hash", "role"];
+    if (disabledCol) selectParts.push(disabledCol);
+
     const user = await context.env.DB.prepare(
-      "SELECT id, username, display_name, password_hash, role FROM users WHERE username = ?"
+      `SELECT ${selectParts.join(", ")} FROM users WHERE username = ?`
     ).bind(username).first();
     if (!user) return json({ error: "账号不存在" }, 404);
 
     const passwordHash = await sha256(password);
     if (passwordHash !== user.password_hash) return json({ error: "密码错误" }, 401);
+
+    if (disabledCol) {
+      const v = user[disabledCol];
+      const isDisabled =
+        typeof v === "number" ? v === 1 :
+        typeof v === "string" ? ["disabled", "inactive", "banned"].includes(v.toLowerCase()) :
+        !!v;
+      if (isDisabled) return json({ error: "账号已被禁用" }, 403);
+    }
 
     const token = randomToken();
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString();

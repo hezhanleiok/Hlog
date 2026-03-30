@@ -17,11 +17,19 @@ export async function onRequestGet(context) {
     await context.env.DB.prepare("UPDATE posts SET views = views + 1 WHERE id = ?").bind(postId).run();
 
     // 站点总访问量：key=total_views
+    const todayKey = `today_views_${new Date().toISOString().slice(0, 10)}`;
     await context.env.DB.prepare(`
       INSERT INTO site_stats (key, value)
       VALUES ('total_views', 1)
       ON CONFLICT(key) DO UPDATE SET value = value + 1
     `).run();
+
+    // 今日访问量：key=today_views_YYYY-MM-DD
+    await context.env.DB.prepare(`
+      INSERT INTO site_stats (key, value)
+      VALUES (?, 1)
+      ON CONFLICT(key) DO UPDATE SET value = value + 1
+    `).bind(todayKey).run();
 
     const row = await context.env.DB.prepare("SELECT views FROM posts WHERE id = ?").bind(postId).first();
     return json({ ok: true, views: Number(row?.views ?? 0) });

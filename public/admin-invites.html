@@ -5,34 +5,100 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HLOG - 邀邀请码生成</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/admin-style.css" />
 </head>
 <body class="bg-slate-100 text-slate-800">
-  <header class="bg-white border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div>
-        <div class="text-2xl font-bold text-sky-600">邀请码生成</div>
-        <div class="text-sm text-slate-500 mt-1">Admin 工具</div>
-      </div>
-      <div class="flex items-center gap-2">
-        <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
-        <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm">退出登录</button>
-      </div>
-    </div>
-  </header>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-title">HLOG Admin</div>
 
-  <main class="max-w-6xl mx-auto px-4 py-6">
-    <div class="flex items-center justify-between gap-3 mb-4">
-      <h2 class="text-xl font-semibold">生成 10 个随机邀请码</h2>
-      <button id="genBtn" class="text-sm px-4 py-2 rounded-xl bg-sky-600 text-white hover:bg-sky-700">生成</button>
-    </div>
+      <nav class="admin-menu-group">
+        <a href="/admin.html" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 13h8V3H3v10z"></path>
+            <path d="M14 21h7V11h-7v10z"></path>
+            <path d="M14 3h7v6h-7V3z"></path>
+            <path d="M3 21h8v-6H3v6z"></path>
+          </svg>
+          仪表盘
+        </a>
 
-    <div id="result" class="bg-white border border-slate-100 rounded-2xl shadow-sm p-5">
-      <div class="text-sm text-slate-500">点击“生成”后显示邀请码。</div>
-      <div id="codesWrap" class="mt-4 hidden">
-        <div class="flex flex-wrap gap-2" id="codesList"></div>
-      </div>
+        <div class="admin-menu-item" aria-hidden="true" style="cursor:default;">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M4 4h16v16H4z"></path>
+            <path d="M8 8h8"></path>
+            <path d="M8 12h8"></path>
+          </svg>
+          文章管理
+        </div>
+        <div class="admin-submenu">
+          <a href="/admin.html?box=published">文章列表</a>
+          <a href="/admin.html?box=drafts">草稿箱</a>
+        </div>
+
+        <a href="/admin-comments.html" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+          </svg>
+          评论管理
+        </a>
+
+        <a href="/admin-users.html" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          用户管理
+        </a>
+
+        <a href="/admin-profile.html?tab=profile" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          个人中心
+        </a>
+
+        <a href="/admin-profile.html?tab=settings" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"></path>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          系统设置
+        </a>
+      </nav>
+    </aside>
+
+    <div class="admin-content">
+      <header class="bg-white border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <div class="text-2xl font-bold text-sky-600">邀请码生成</div>
+            <div class="text-sm text-slate-500 mt-1">Admin 工具</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
+            <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm">退出登录</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="max-w-6xl mx-auto px-4 py-6">
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <h2 class="text-xl font-semibold">生成 10 个随机邀请码</h2>
+          <button id="genBtn" class="admin-btn admin-btn-primary">生成</button>
+        </div>
+
+        <div id="result" class="bg-white border border-slate-100 rounded-2xl shadow-sm p-5">
+          <div class="text-sm text-slate-500">点击“生成”后显示邀请码。</div>
+          <div id="codesWrap" class="mt-4 hidden">
+            <div class="flex flex-wrap gap-2" id="codesList"></div>
+          </div>
+        </div>
+      </main>
     </div>
-  </main>
+  </div>
 
   <script>
     const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
@@ -61,9 +127,9 @@
       try {
         const data = await api("/api/admin/invitation/generate", { method: "POST" });
         const codes = data.codes || data.invitation_codes || [];
-        list.innerHTML = codes.map((c) => `
-          <span class="inline-flex items-center rounded-full bg-slate-900 text-white px-3 py-1 text-xs">${String(c)}</span>
-        `).join("");
+        list.innerHTML = codes.map((c) => \`
+          <span class="inline-flex items-center rounded-full bg-slate-900 text-white px-3 py-1 text-xs">\${String(c)}</span>
+        \`).join("");
         wrap.classList.remove("hidden");
       } catch (err) {
         alert(err.message);

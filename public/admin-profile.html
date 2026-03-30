@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HLOG - 个人中心</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/admin-style.css" />
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-title">HLOG Admin</div>
+
+      <nav class="admin-menu-group">
+        <a href="/admin.html" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 13h8V3H3v10z"></path>
+            <path d="M14 21h7V11h-7v10z"></path>
+            <path d="M14 3h7v6h-7V3z"></path>
+            <path d="M3 21h8v-6H3v6z"></path>
+          </svg>
+          仪表盘
+        </a>
+
+        <div class="admin-menu-item" aria-hidden="true" style="cursor:default;">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M4 4h16v16H4z"></path>
+            <path d="M8 8h8"></path>
+            <path d="M8 12h8"></path>
+          </svg>
+          文章管理
+        </div>
+        <div class="admin-submenu">
+          <a href="/admin.html?box=published">文章列表</a>
+          <a href="/admin.html?box=drafts">草稿箱</a>
+        </div>
+
+        <a href="/admin-comments.html" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+          </svg>
+          评论管理
+        </a>
+
+        <a href="/admin-users.html" id="menu-users" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          用户管理
+        </a>
+
+        <a href="/admin-profile.html?tab=profile" id="menu-profile" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          个人中心
+        </a>
+
+        <a href="/admin-profile.html?tab=settings" id="menu-settings" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"></path>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l-.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          系统设置
+        </a>
+      </nav>
+    </aside>
+
+    <div class="admin-content">
+      <header class="bg-white border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <div class="text-2xl font-bold text-sky-600">个人中心</div>
+            <div class="text-sm text-slate-500 mt-1">Profile & Account</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
+            <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm">退出登录</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <section id="tab-profile" class="admin-card">
+          <h2 class="text-xl font-semibold mb-4">修改个人资料</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            <div class="md:col-span-1">
+              <div class="flex flex-col items-center text-center">
+                <img id="avatarPreview" class="w-24 h-24 rounded-2xl object-cover ring-2 ring-slate-100 shadow-sm" alt="头像预览" />
+                <div class="mt-2 text-xs text-slate-500">居中圆角预览</div>
+              </div>
+            </div>
+
+            <div class="md:col-span-2 space-y-4">
+              <div>
+                <label class="text-sm text-slate-600">头像 URL</label>
+                <input id="avatarUrlInput" class="admin-input mt-1" placeholder="https://..." />
+              </div>
+
+              <div>
+                <label class="text-sm text-slate-600">显示名称</label>
+                <input id="displayNameInput" class="admin-input mt-1" />
+              </div>
+
+              <div>
+                <label class="text-sm text-slate-600">新密码（留空则不修改）</label>
+                <input id="passwordInput" type="password" class="admin-input mt-1" placeholder="至少 6 位" />
+              </div>
+
+              <div class="flex gap-3">
+                <button id="saveProfileBtn" class="admin-btn admin-btn-primary flex-1">保存</button>
+                <button id="resetProfileBtn" type="button" class="admin-btn">重置</button>
+              </div>
+              <div id="profileMsg" class="text-sm text-slate-500"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-card">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <h2 class="text-xl font-semibold">文章管理列表</h2>
+          </div>
+
+          <div id="myPostTableWrap" class="overflow-auto">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>标题</th>
+                  <th>状态</th>
+                  <th>日期</th>
+                  <th>阅读量</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="postsTbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="tab-users" class="admin-card hidden">
+          <h2 class="text-xl font-semibold mb-2">用户管理</h2>
+          <p class="text-sm text-slate-600">此处可扩展：查看用户列表、禁用/授权等。</p>
+        </section>
+
+        <section id="tab-settings" class="admin-card hidden">
+          <h2 class="text-xl font-semibold mb-2">系统设置</h2>
+          <p class="text-sm text-slate-600 mb-4">邀请码生成属于系统工具，可在下方跳转。</p>
+          <a href="/admin-invites.html" class="admin-btn admin-btn-primary">前往邀请码生成</a>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
+    if (!auth?.token) {
+      alert("请先登录");
+      location.href = "/login.html";
+    }
+
+    async function api(path, options = {}) {
+      const headers = options.headers || {};
+      headers.Authorization = \`Bearer \${auth.token}\`;
+      const res = await fetch(path, { ...options, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "请求失败");
+      return data;
+    }
+
+    const tab = new URLSearchParams(location.search).get("tab") || "profile";
+    const tabProfile = document.getElementById("tab-profile");
+    const tabUsers = document.getElementById("tab-users");
+    const tabSettings = document.getElementById("tab-settings");
+
+    function setTab() {
+      const t = tab;
+      tabProfile.classList.toggle("hidden", t !== "profile");
+      tabUsers.classList.toggle("hidden", t !== "users");
+      tabSettings.classList.toggle("hidden", t !== "settings");
+
+      const activeId = t === "users" ? "menu-users" : t === "settings" ? "menu-settings" : "menu-profile";
+      const el = document.getElementById(activeId);
+      if (el) el.classList.add("admin-menu-item-active");
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("hlog_auth");
+      location.href = "/login.html";
+    });
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function badgeHtml(status) {
+      const isDraft = status === "draft";
+      return isDraft
+        ? '<span class="admin-badge admin-badge-draft">草稿</span>'
+        : '<span class="admin-badge admin-badge-published">已发布</span>';
+    }
+
+    const avatarPreview = document.getElementById("avatarPreview");
+    const avatarUrlInput = document.getElementById("avatarUrlInput");
+    const displayNameInput = document.getElementById("displayNameInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const profileMsg = document.getElementById("profileMsg");
+
+    let initialProfile = null;
+
+    avatarUrlInput.addEventListener("input", () => {
+      if (avatarUrlInput.value.trim()) avatarPreview.src = avatarUrlInput.value.trim();
+    });
+
+    document.getElementById("resetProfileBtn").addEventListener("click", () => {
+      if (!initialProfile) return;
+      avatarPreview.src = initialProfile.avatar_url || "https://picsum.photos/200/200?random=7";
+      avatarUrlInput.value = initialProfile.avatar_url || "";
+      displayNameInput.value = initialProfile.display_name || "";
+      passwordInput.value = "";
+      profileMsg.textContent = "";
+    });
+
+    document.getElementById("saveProfileBtn").addEventListener("click", async () => {
+      try {
+        profileMsg.textContent = "保存中…";
+        const payload = {
+          avatar_url: avatarUrlInput.value.trim() || null,
+          display_name: displayNameInput.value.trim(),
+          password: passwordInput.value.trim()
+        };
+        if (!payload.display_name) return alert("显示名称不能为空");
+        await api("/api/user/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        profileMsg.textContent = "已保存";
+        passwordInput.value = "";
+        const me = await api("/api/user/me");
+        initialProfile = me.user || me;
+        avatarPreview.src = initialProfile.avatar_url || "https://picsum.photos/200/200?random=7";
+        avatarUrlInput.value = initialProfile.avatar_url || "";
+        displayNameInput.value = initialProfile.display_name || "";
+        profileMsg.textContent = "保存成功";
+      } catch (err) {
+        profileMsg.textContent = "";
+        alert(err.message);
+      }
+    });
+
+    async function loadProfile() {
+      const me = await api("/api/user/me");
+      initialProfile = me.user || me;
+      avatarPreview.src = initialProfile.avatar_url || "https://picsum.photos/200/200?random=7";
+      avatarUrlInput.value = initialProfile.avatar_url || "";
+      displayNameInput.value = initialProfile.display_name || "";
+    }
+
+    async function loadMyPosts() {
+      const data = await api("/api/user/posts");
+      const posts = data.posts || [];
+      const tbody = document.getElementById("postsTbody");
+      if (!posts.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-sm text-slate-500 py-6">暂无文章</td></tr>';
+        return;
+      }
+
+      const isAdmin = auth.role === "admin";
+      tbody.innerHTML = posts.map((p) => {
+        const actions = isAdmin
+          ? `
+              <a href="/admin.html?edit=${p.id}&box=${p.status === "draft" ? "drafts" : "published"}" class="admin-btn">编辑</a>
+              <button type="button" data-del="${p.id}" class="admin-btn admin-btn-danger">删除</button>
+            `
+          : '<span class="text-sm text-slate-500">仅查看</span>';
+
+        return `
+          <tr>
+            <td class="max-w-[260px]">
+              <div class="font-semibold text-slate-900 truncate">${escapeHtml(p.title)}</div>
+            </td>
+            <td>${badgeHtml(p.status)}</td>
+            <td class="text-slate-600 whitespace-nowrap">${p.created_at ? new Date(p.created_at).toLocaleDateString() : ""}</td>
+            <td class="text-slate-700 whitespace-nowrap">${Number(p.views ?? 0)}</td>
+            <td>${actions}</td>
+          </tr>
+        `;
+      }).join("");
+
+      tbody.querySelectorAll("[data-del]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const id = Number(btn.dataset.del);
+          if (!confirm("确认删除该文章吗？")) return;
+          await api("/api/post/create", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id })
+          });
+          await loadMyPosts();
+        });
+      });
+    }
+
+    setTab();
+    loadProfile()
+      .then(loadMyPosts)
+      .catch((err) => {
+        alert(err.message);
+      });
+  </script>
+</body>
+</html>
+

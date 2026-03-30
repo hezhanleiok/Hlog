@@ -14,12 +14,15 @@ const requiredFiles = [
   "public/admin.html",
   "public/admin-comments.html",
   "public/admin-invites.html",
+  "public/admin-profile.html",
+  "public/admin-users.html",
   "functions/api/register.js",
   "functions/api/login.js",
   "functions/api/post/create.js",
   "functions/api/post/list.js",
   "functions/api/post/view.js",
   "functions/api/site/stats.js",
+  "functions/api/stats.js",
   "functions/api/tag/list.js",
   "functions/api/comment/add.js",
   "functions/api/comment/list.js",
@@ -27,7 +30,14 @@ const requiredFiles = [
   "functions/api/admin/comment/pending.js",
   "functions/api/admin/comment/approve.js",
   "functions/api/admin/comment/delete.js",
+  "functions/api/admin/comment/reply.js",
   "functions/api/admin/invitation/generate.js",
+  "functions/api/admin/users/list.js",
+  "functions/api/admin/users/toggle.js",
+  "functions/api/user/me.js",
+  "functions/api/user/update.js",
+  "functions/api/user/posts.js",
+  "functions/api/auth/send-code.js",
   "wrangler.toml",
   "README.md",
   "check-code.js"
@@ -40,6 +50,7 @@ const apiContracts = [
   { file: "functions/api/post/list.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/post/view.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/site/stats.js", mustContain: ["onRequestGet"] },
+  { file: "functions/api/stats.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/tag/list.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/comment/add.js", mustContain: ["onRequestPost"] },
   { file: "functions/api/comment/list.js", mustContain: ["onRequestGet"] },
@@ -47,7 +58,14 @@ const apiContracts = [
   { file: "functions/api/admin/comment/pending.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/admin/comment/approve.js", mustContain: ["onRequestPost"] },
   { file: "functions/api/admin/comment/delete.js", mustContain: ["onRequestPost"] },
-  { file: "functions/api/admin/invitation/generate.js", mustContain: ["onRequestPost"] }
+  { file: "functions/api/admin/comment/reply.js", mustContain: ["onRequestPost"] },
+  { file: "functions/api/admin/invitation/generate.js", mustContain: ["onRequestPost"] },
+  { file: "functions/api/admin/users/list.js", mustContain: ["onRequestGet"] },
+  { file: "functions/api/admin/users/toggle.js", mustContain: ["onRequestPost"] },
+  { file: "functions/api/user/me.js", mustContain: ["onRequestGet"] },
+  { file: "functions/api/user/update.js", mustContain: ["onRequestPost"] },
+  { file: "functions/api/user/posts.js", mustContain: ["onRequestGet"] },
+  { file: "functions/api/auth/send-code.js", mustContain: ["onRequestPost"] }
 ];
 
 const htmlApiReferences = [
@@ -60,11 +78,19 @@ const htmlApiReferences = [
   "/api/comment/latest",
   "/api/comment/add",
   "/api/comment/list",
-  "/api/site/stats",
+  "/api/stats",
   "/api/admin/comment/pending",
   "/api/admin/comment/approve",
   "/api/admin/comment/delete",
-  "/api/admin/invitation/generate"
+  "/api/admin/comment/reply",
+  "/api/admin/invitation/generate",
+  "/api/admin/users/list",
+  "/api/admin/users/toggle",
+  "/api/user/me",
+  "/api/user/update",
+  "/api/user/posts"
+  ,
+  "/api/auth/send-code"
 ];
 
 let errorCount = 0;
@@ -123,7 +149,9 @@ async function checkHtmlReferences() {
     "public/register.html",
     "public/admin.html",
     "public/admin-comments.html",
-    "public/admin-invites.html"
+    "public/admin-invites.html",
+    "public/admin-profile.html"
+    ,"public/admin-users.html"
   ];
   const allContent = [];
   for (const hf of htmlFiles) {
@@ -145,14 +173,22 @@ async function checkJsSyntax() {
     "functions/api/post/list.js",
     "functions/api/post/view.js",
     "functions/api/site/stats.js",
+    "functions/api/stats.js",
     "functions/api/tag/list.js",
     "functions/api/comment/add.js",
     "functions/api/comment/list.js",
     "functions/api/comment/latest.js",
+    "functions/api/user/me.js",
+    "functions/api/user/update.js",
+    "functions/api/user/posts.js",
+    "functions/api/auth/send-code.js",
     "functions/api/admin/comment/pending.js",
     "functions/api/admin/comment/approve.js",
     "functions/api/admin/comment/delete.js",
+    "functions/api/admin/comment/reply.js",
     "functions/api/admin/invitation/generate.js",
+    "functions/api/admin/users/list.js",
+    "functions/api/admin/users/toggle.js",
     "check-code.js"
   ];
   for (const f of jsFiles) {

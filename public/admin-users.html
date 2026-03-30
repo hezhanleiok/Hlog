@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HLOG - 评论审核</title>
+  <title>HLOG - 用户管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/admin-style.css" />
 </head>
@@ -11,8 +11,9 @@
   <div class="admin-layout">
     <aside class="admin-sidebar">
       <div class="admin-sidebar-title">HLOG Admin</div>
+
       <nav class="admin-menu-group">
-        <a href="/admin.html" id="menu-dashboard" class="admin-menu-item">
+        <a href="/admin.html" class="admin-menu-item">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 13h8V3H3v10z"></path>
             <path d="M14 21h7V11h-7v10z"></path>
@@ -36,14 +37,14 @@
           <a href="/admin.html?box=drafts">草稿箱</a>
         </div>
 
-        <a href="/admin-comments.html" id="menu-comments" class="admin-menu-item">
+        <a href="/admin-comments.html" class="admin-menu-item">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
           </svg>
           评论管理
         </a>
 
-        <a href="/admin-users.html" class="admin-menu-item">
+        <a href="/admin-users.html" id="menu-users" class="admin-menu-item admin-menu-item-active">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
@@ -73,8 +74,8 @@
       <header class="bg-white border-b border-slate-200">
         <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <div class="text-2xl font-bold text-sky-600">评论审核</div>
-            <div class="text-sm text-slate-500 mt-1">Pending 评论管理</div>
+            <div class="text-2xl font-bold text-sky-600">用户管理</div>
+            <div class="text-sm text-slate-500 mt-1">Users & Enable/Disable</div>
           </div>
           <div class="flex items-center gap-2">
             <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
@@ -84,12 +85,26 @@
       </header>
 
       <main class="max-w-6xl mx-auto px-4 py-6">
-        <div class="flex items-center justify-between gap-3 mb-4">
-          <h2 class="text-xl font-semibold">待审核评论</h2>
-          <button id="refreshBtn" class="admin-btn">刷新</button>
+        <div class="admin-card">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <h2 class="text-xl font-semibold">用户列表</h2>
+          </div>
+          <div class="overflow-auto">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>头像</th>
+                  <th>邮箱</th>
+                  <th>昵称</th>
+                  <th>注册时间</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="usersTbody"></tbody>
+            </table>
+          </div>
         </div>
-
-        <div id="list" class="space-y-4"></div>
       </main>
     </div>
   </div>
@@ -100,12 +115,6 @@
       alert("仅管理员可访问");
       location.href = "/login.html";
     }
-
-    // Sidebar active
-    (function () {
-      const el = document.getElementById("menu-comments");
-      if (el) el.classList.add("admin-menu-item-active");
-    })();
 
     async function api(path, options = {}) {
       const headers = options.headers || {};
@@ -120,7 +129,6 @@
       localStorage.removeItem("hlog_auth");
       location.href = "/login.html";
     });
-    document.getElementById("refreshBtn").addEventListener("click", () => loadPending().catch((err) => alert(err.message)));
 
     function escapeHtml(s) {
       return String(s ?? "")
@@ -131,91 +139,52 @@
         .replace(/'/g, "&#39;");
     }
 
-    function renderItem(c) {
-      return `
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <div class="text-sm text-slate-500">
-                <span class="font-semibold text-slate-900">${escapeHtml(c.author_name || "游客")}</span>
-                <span class="mx-2">·</span>
-                <span>${escapeHtml(c.author_email || "")}</span>
-              </div>
-              <div class="text-xs text-slate-400 mt-1">${c.created_at ? new Date(c.created_at).toLocaleString() : ""}</div>
-              <div class="mt-3 text-sm text-slate-800 whitespace-pre-wrap">${escapeHtml(c.content || "")}</div>
-              <div class="text-xs text-slate-400 mt-3">文章：<span class="text-slate-700 font-medium">${escapeHtml(c.post_title || "")}</span></div>
-            </div>
-            <div class="flex flex-col gap-2 shrink-0">
-              <button type="button" data-approve="${c.id}" class="admin-btn admin-btn-primary">批准</button>
-              <button type="button" data-delete="${c.id}" class="admin-btn admin-btn-danger">删除</button>
-
-              <div class="mt-2">
-                <input
-                  type="text"
-                  data-reply-input="${c.id}"
-                  class="admin-input"
-                  placeholder="快捷回复内容"
-                />
-                <button type="button" data-reply="${c.id}" class="admin-btn admin-btn-primary mt-2 w-full">快捷回复</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+    function badge(status) {
+      if (status) return '<span class="admin-badge admin-badge-draft">已禁用</span>';
+      return '<span class="admin-badge admin-badge-published">正常</span>';
     }
 
-    async function loadPending() {
-      const data = await api("/api/admin/comment/pending");
-      const list = document.getElementById("list");
-      const items = data.comments || [];
-      list.innerHTML = items.length
-        ? items.map(renderItem).join("")
-        : '<div class="text-sm text-slate-500 bg-white border border-slate-100 rounded-2xl p-5">暂无待审核评论。</div>';
+    async function loadUsers() {
+      const { users } = await api("/api/admin/users/list?limit=200");
+      const tbody = document.getElementById("usersTbody");
+      tbody.innerHTML = users && users.length
+        ? users.map((u) => {
+            const avatar = u.avatar_url || "https://picsum.photos/48/48?random=8";
+            const isDisabled = !!u.disabled;
+            return `
+              <tr>
+                <td>
+                  <img src="${avatar}" alt="avatar" class="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200" />
+                </td>
+                <td class="text-slate-700 whitespace-nowrap">${escapeHtml(u.email)}</td>
+                <td class="text-slate-900">${escapeHtml(u.display_name)}</td>
+                <td class="text-slate-600 whitespace-nowrap">${u.created_at ? new Date(u.created_at).toLocaleDateString() : ""}</td>
+                <td>${badge(isDisabled)}</td>
+                <td>
+                  <button type="button" data-toggle="${u.id}" class="admin-btn ${isDisabled ? "admin-btn-primary" : "admin-btn-danger"}">
+                    ${isDisabled ? "启用" : "禁用"}
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join("")
+        : '<tr><td colspan="6" class="text-sm text-slate-500 py-6">暂无用户</td></tr>';
 
-      list.querySelectorAll("[data-approve]").forEach((btn) => {
+      tbody.querySelectorAll("[data-toggle]").forEach((btn) => {
         btn.addEventListener("click", async () => {
-          const id = Number(btn.dataset.approve);
-          await api("/api/admin/comment/approve", {
+          const userId = Number(btn.dataset.toggle);
+          if (!confirm("确认切换该用户状态？")) return;
+          await api("/api/admin/users/toggle", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id })
+            body: JSON.stringify({ user_id: userId })
           });
-          await loadPending();
-        });
-      });
-
-      list.querySelectorAll("[data-delete]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const id = Number(btn.dataset.delete);
-          if (!confirm("确认删除该评论吗？")) return;
-          await api("/api/admin/comment/delete", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id })
-          });
-          await loadPending();
-        });
-      });
-
-      list.querySelectorAll("[data-reply]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const id = Number(btn.dataset.reply);
-          const input = list.querySelector(`[data-reply-input="${id}"]`);
-          const reply = (input?.value || "").trim();
-          if (!reply) return alert("请输入回复内容");
-
-          await api("/api/admin/comment/reply", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, reply })
-          });
-          if (input) input.value = "";
-          await loadPending();
+          await loadUsers();
         });
       });
     }
 
-    loadPending().catch((err) => alert(err.message));
+    loadUsers().catch((err) => alert(err.message));
   </script>
 </body>
 </html>

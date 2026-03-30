@@ -6,6 +6,7 @@
   <title>HLOG - 管理后台</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" />
+  <link rel="stylesheet" href="/admin-style.css" />
   <style>
     .ql-editor { min-height: 220px; }
     .hlog-quill .ql-toolbar { border-top-left-radius: 14px; border-top-right-radius: 14px; }
@@ -14,149 +15,215 @@
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
-  <header class="bg-white border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-sky-600">HLOG Admin</h1>
-      <div class="flex items-center gap-2">
-        <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
-        <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm">退出登录</button>
-      </div>
-    </div>
-  </header>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-title">HLOG Admin</div>
 
-  <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <section class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-        <h2 class="text-xl font-semibold mb-4">文章编辑</h2>
+      <nav class="admin-menu-group">
+        <a href="/admin.html" id="menu-dashboard" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 13h8V3H3v10z"></path>
+            <path d="M14 21h7V11h-7v10z"></path>
+            <path d="M14 3h7v6h-7V3z"></path>
+            <path d="M3 21h8v-6H3v6z"></path>
+          </svg>
+          仪表盘
+        </a>
 
-        <input id="postId" type="hidden" />
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="text-sm text-slate-600">标题</label>
-            <input id="titleInput" required class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
-          </div>
-          <div>
-            <label class="text-sm text-slate-600">封面图 URL</label>
-            <input id="coverUrlInput" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="https://..." />
-          </div>
-          <div class="md:col-span-2">
-            <label class="text-sm text-slate-600">摘要</label>
-            <textarea id="summaryInput" rows="2" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"></textarea>
-          </div>
+        <div class="admin-menu-item" aria-hidden="true" style="cursor:default;">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M4 4h16v16H4z"></path>
+            <path d="M8 8h8"></path>
+            <path d="M8 12h8"></path>
+          </svg>
+          文章管理
+        </div>
+        <div class="admin-submenu">
+          <a href="/admin.html?box=published" id="menu-posts-published">文章列表</a>
+          <a href="/admin.html?box=mine" id="menu-posts-mine">我的文章</a>
+          <a href="/admin.html?box=drafts" id="menu-posts-drafts">草稿箱</a>
         </div>
 
-        <div class="mt-5 space-y-5">
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-sm font-semibold">正文内容</h3>
-            </div>
+        <a href="/admin-comments.html" id="menu-comments" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
+          </svg>
+          评论管理
+        </a>
 
-            <div id="toolbarContent" class="hlog-quill">
-              <div class="ql-toolbar ql-snow">
-                <span class="ql-formats">
-                  <select class="ql-header">
-                    <option selected></option>
-                    <option value="1"></option>
-                    <option value="2"></option>
-                    <option value="3"></option>
-                  </select>
-                </span>
-                <span class="ql-formats">
-                  <button class="ql-bold" aria-label="Bold"></button>
-                  <select class="ql-color" aria-label="Color"></select>
-                </span>
-                <span class="ql-formats">
-                  <button class="ql-link" aria-label="Link"></button>
-                  <button class="ql-image" aria-label="Image"></button>
-                  <button class="ql-youtube" type="button" aria-label="YouTube">YT</button>
-                </span>
-                <span class="ql-formats">
-                  <button class="ql-code-block" aria-label="Code Block"></button>
-                </span>
-                <span class="ql-formats">
-                  <button class="ql-clean" aria-label="Clear Format"></button>
-                </span>
-              </div>
-            </div>
-            <div id="contentEditor" class="hlog-quill rounded-2xl overflow-hidden"></div>
-          </div>
+        <a href="/admin-users.html" id="menu-users" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          用户管理
+        </a>
 
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-sm font-semibold">登录可见内容（hidden_content）</h3>
-            </div>
+        <a href="/admin-profile.html?tab=profile" id="menu-profile" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          个人中心
+        </a>
 
-            <div id="toolbarHidden" class="hlog-quill">
-              <div class="ql-toolbar ql-snow">
-                <span class="ql-formats">
-                  <select class="ql-header">
-                    <option selected></option>
-                    <option value="1"></option>
-                    <option value="2"></option>
-                    <option value="3"></option>
-                  </select>
-                </span>
-                <span class="ql-formats">
-                  <button class="ql-bold" aria-label="Bold"></button>
-                  <select class="ql-color" aria-label="Color"></select>
-                </span>
-                <span class="ql-formats">
-                  <button class="ql-link" aria-label="Link"></button>
-                  <button class="ql-image" aria-label="Image"></button>
-                  <button class="ql-youtube" type="button" aria-label="YouTube">YT</button>
-                </span>
-                <span class="ql-formats">
-                  <button class="ql-code-block" aria-label="Code Block"></button>
-                </span>
-                <span class="ql-formats">
-                  <button class="ql-clean" aria-label="Clear Format"></button>
-                </span>
-              </div>
-            </div>
-            <div id="hiddenEditor" class="hlog-quill rounded-2xl overflow-hidden"></div>
-          </div>
-        </div>
-      </section>
+        <a href="/admin-profile.html?tab=settings" id="menu-settings" class="admin-menu-item">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"></path>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V22a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V2a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          系统设置
+        </a>
+      </nav>
+    </aside>
 
-      <aside class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-        <h2 class="text-xl font-semibold mb-4">文章设置</h2>
-
-        <div class="space-y-4">
-          <div>
-            <label class="text-sm text-slate-600">标签（逗号分隔）</label>
-            <input id="tagsInput" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="如：技术, 生活, 开源" />
-          </div>
-
-          <div>
-            <label class="text-sm text-slate-600">状态</label>
-            <select id="statusSelect" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300">
-              <option value="published">发布</option>
-              <option value="draft">草稿</option>
-            </select>
-          </div>
-
-          <div class="flex items-center justify-between gap-3">
-            <div class="min-w-0">
-              <label class="text-sm text-slate-600">允许评论</label>
-              <div class="text-xs text-slate-500">开/关</div>
-            </div>
-            <input id="allowCommentsInput" type="checkbox" class="h-5 w-5 rounded border-slate-300 text-sky-600" checked />
-          </div>
-
+    <div class="admin-content">
+      <header class="bg-white border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 class="text-2xl font-bold text-sky-600">HLOG Admin</h1>
           <div class="flex items-center gap-2">
-            <button id="saveBtn" class="flex-1 px-4 py-2 rounded-xl bg-sky-600 text-white hover:bg-sky-700">保存</button>
-            <button id="resetBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300">清空</button>
+            <a href="/" class="px-3 py-2 rounded-lg border border-slate-300 text-sm hover:bg-slate-100">查看站点</a>
+            <button id="logoutBtn" class="px-3 py-2 rounded-lg bg-slate-800 text-white text-sm">退出登录</button>
           </div>
         </div>
+      </header>
 
-        <div class="mt-5 pt-5 border-t border-slate-100">
-          <h3 class="text-sm font-semibold mb-3">文章管理</h3>
-          <div id="postList" class="space-y-3 max-h-[52vh] overflow-auto pr-1"></div>
+      <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <section class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+            <h2 class="text-xl font-semibold mb-4">文章编辑</h2>
+
+            <input id="postId" type="hidden" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm text-slate-600">标题</label>
+                <input id="titleInput" required class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
+              </div>
+              <div>
+                <label class="text-sm text-slate-600">封面图 URL</label>
+                <input id="coverUrlInput" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="https://..." />
+              </div>
+              <div class="md:col-span-2">
+                <label class="text-sm text-slate-600">摘要</label>
+                <textarea id="summaryInput" rows="2" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"></textarea>
+              </div>
+            </div>
+
+            <div class="mt-5 space-y-5">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-sm font-semibold">正文内容</h3>
+                </div>
+
+                <div id="toolbarContent" class="hlog-quill">
+                  <div class="ql-toolbar ql-snow">
+                    <span class="ql-formats">
+                      <select class="ql-header">
+                        <option selected></option>
+                        <option value="1"></option>
+                        <option value="2"></option>
+                        <option value="3"></option>
+                      </select>
+                    </span>
+                    <span class="ql-formats">
+                      <button class="ql-bold" aria-label="Bold"></button>
+                      <select class="ql-color" aria-label="Color"></select>
+                    </span>
+                    <span class="ql-formats">
+                      <button class="ql-link" aria-label="Link"></button>
+                      <button class="ql-image" aria-label="Image"></button>
+                      <button class="ql-youtube" type="button" aria-label="YouTube">YT</button>
+                    </span>
+                    <span class="ql-formats">
+                      <button class="ql-code-block" aria-label="Code Block"></button>
+                    </span>
+                    <span class="ql-formats">
+                      <button class="ql-clean" aria-label="Clear Format"></button>
+                    </span>
+                  </div>
+                </div>
+                <div id="contentEditor" class="hlog-quill rounded-2xl overflow-hidden"></div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="text-sm font-semibold">登录可见内容（hidden_content）</h3>
+                </div>
+
+                <div id="toolbarHidden" class="hlog-quill">
+                  <div class="ql-toolbar ql-snow">
+                    <span class="ql-formats">
+                      <select class="ql-header">
+                        <option selected></option>
+                        <option value="1"></option>
+                        <option value="2"></option>
+                        <option value="3"></option>
+                      </select>
+                    </span>
+                    <span class="ql-formats">
+                      <button class="ql-bold" aria-label="Bold"></button>
+                      <select class="ql-color" aria-label="Color"></select>
+                    </span>
+                    <span class="ql-formats">
+                      <button class="ql-link" aria-label="Link"></button>
+                      <button class="ql-image" aria-label="Image"></button>
+                      <button class="ql-youtube" type="button" aria-label="YouTube">YT</button>
+                    </span>
+                    <span class="ql-formats">
+                      <button class="ql-code-block" aria-label="Code Block"></button>
+                    </span>
+                    <span class="ql-formats">
+                      <button class="ql-clean" aria-label="Clear Format"></button>
+                    </span>
+                  </div>
+                </div>
+                <div id="hiddenEditor" class="hlog-quill rounded-2xl overflow-hidden"></div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+            <h2 class="text-xl font-semibold mb-4">文章设置</h2>
+
+            <div class="space-y-4">
+              <div>
+                <label class="text-sm text-slate-600">标签（逗号分隔）</label>
+                <input id="tagsInput" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="如：技术, 生活, 开源" />
+              </div>
+
+              <div>
+                <label class="text-sm text-slate-600">状态</label>
+                <select id="statusSelect" class="mt-1 w-full border border-slate-300 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300">
+                  <option value="published">发布</option>
+                  <option value="draft">草稿</option>
+                </select>
+              </div>
+
+              <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <label class="text-sm text-slate-600">允许评论</label>
+                  <div class="text-xs text-slate-500">开/关</div>
+                </div>
+                <input id="allowCommentsInput" type="checkbox" class="h-5 w-5 rounded border-slate-300 text-sky-600" checked />
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button id="saveBtn" class="flex-1 px-4 py-2 rounded-xl bg-sky-600 text-white hover:bg-sky-700">保存</button>
+                <button id="resetBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300">清空</button>
+              </div>
+            </div>
+
+            <div class="mt-5 pt-5 border-t border-slate-100">
+              <h3 class="text-sm font-semibold mb-3">文章管理</h3>
+              <div id="postList" class="space-y-3 max-h-[52vh] overflow-auto pr-1"></div>
+            </div>
+          </aside>
         </div>
-      </aside>
+      </main>
     </div>
-  </main>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
   <script>
@@ -165,6 +232,18 @@
       alert("仅管理员可访问后台");
       location.href = "/login.html";
     }
+
+    // Sidebar active state + article box filter
+    (function () {
+      const box = new URLSearchParams(location.search).get("box") || "published";
+      const setActive = (id) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add("admin-menu-item-active");
+      };
+      setActive("menu-dashboard");
+      if (box === "drafts") setActive("menu-posts-drafts");
+      else setActive("menu-posts-published");
+    })();
 
     async function api(path, options = {}) {
       const headers = options.headers || {};
@@ -213,12 +292,10 @@
           if (v) return v;
         }
       } catch {}
-      // 兜底：直接匹配视频 ID（允许用户粘贴杂项）
-      const m = String(url).match(/(?:v=|be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{6,})/);
+      const m = String(url).match(/(?:v=|be\\/|embed\\/|shorts\\/)([a-zA-Z0-9_-]{6,})/);
       return m ? m[1] : null;
     }
 
-    // 自定义 iframe blot：用于插入 YouTube embed
     const BlockEmbed = Quill.import("blots/block/embed");
     class IframeBlot extends BlockEmbed {
       static create(src) {
@@ -269,13 +346,11 @@
       });
     }
 
-    // 初始化两个编辑器
     const contentQuill = initEditor("#contentEditor", "toolbarContent");
     const hiddenQuill = initEditor("#hiddenEditor", "toolbarHidden");
 
     function setQuillHtml(quill, html) {
       const safe = html || "";
-      // 直接 paste HTML：让 Quill 输出稳定（保存时用 root.innerHTML）
       quill.setText("");
       quill.clipboard.dangerouslyPasteHTML(0, safe, "silent");
     }
@@ -308,9 +383,23 @@
     }
 
     async function loadPostsForAdmin() {
-      const { posts } = await api("/api/post/list?sort=recent&limit=30&include_drafts=1");
+      const box = new URLSearchParams(location.search).get("box") || "published";
+      let posts = [];
+      if (box === "mine") {
+        const data = await api("/api/user/posts?limit=60");
+        posts = data.posts || [];
+      } else {
+        const { posts: listPosts } = await api("/api/post/list?sort=recent&limit=60&include_drafts=1");
+        posts = listPosts || [];
+      }
       const container = document.getElementById("postList");
-      container.innerHTML = posts.length ? posts.map(renderPostItem).join("") : '<div class="text-sm text-slate-500">暂无文章</div>';
+
+      const filtered = (posts || []).filter((p) => {
+        if (box === "drafts") return p.status === "draft";
+        if (box === "mine") return true;
+        return p.status !== "draft";
+      });
+      container.innerHTML = filtered.length ? filtered.map(renderPostItem).join("") : '<div class="text-sm text-slate-500">暂无文章</div>';
 
       container.querySelectorAll("[data-edit]").forEach((btn) => {
         btn.addEventListener("click", async () => {
@@ -378,7 +467,26 @@
       }
     });
 
-    loadPostsForAdmin().catch((err) => alert(err.message));
+    // Deep-link editing: /admin.html?edit=<id>
+    (async function () {
+      try {
+        await loadPostsForAdmin();
+        const editId = Number(new URLSearchParams(location.search).get("edit") || "");
+        if (!editId) return;
+        const { post } = await api(\`/api/post/list?id=\${editId}&include_drafts=1\`);
+        document.getElementById("postId").value = post.id;
+        document.getElementById("titleInput").value = post.title || "";
+        document.getElementById("summaryInput").value = post.summary || "";
+        document.getElementById("coverUrlInput").value = post.cover_url || "";
+        document.getElementById("statusSelect").value = post.status || "published";
+        document.getElementById("allowCommentsInput").checked = Number(post.allow_comments ?? 1) === 1;
+        document.getElementById("tagsInput").value = (post.tags || []).join(", ");
+        setQuillHtml(contentQuill, post.content || "");
+        setQuillHtml(hiddenQuill, post.hidden_content || "");
+      } catch (err) {
+        alert(err.message);
+      }
+    })();
   </script>
 </body>
 </html>

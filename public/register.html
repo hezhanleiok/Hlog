@@ -23,6 +23,22 @@
         <label class="text-sm text-slate-600">密码</label>
         <input id="password" type="password" required minlength="6" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
       </div>
+      <div>
+        <label class="text-sm text-slate-600">邮箱</label>
+        <div class="flex items-center gap-2 mt-1">
+          <input id="email" type="email" required class="flex-1 border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="you@example.com" />
+          <button id="sendCodeBtn" type="button" class="shrink-0 px-3 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-slate-800">获取验证码</button>
+        </div>
+        <div id="codeCountdown" class="text-xs text-slate-500 mt-2 hidden">60 秒后可重新发送</div>
+      </div>
+      <div>
+        <label class="text-sm text-slate-600">邮箱验证码</label>
+        <input id="emailCode" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="输入 6 位验证码" />
+      </div>
+      <div>
+        <label class="text-sm text-slate-600">邀请码（可选）</label>
+        <input id="invitationCode" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="如未启用可留空" />
+      </div>
       <button class="w-full bg-sky-600 text-white rounded-lg py-2 hover:bg-sky-700">注册</button>
     </form>
     <p class="text-sm text-slate-500 mt-4">已有账号？<a href="/login.html" class="text-sky-600">去登录</a></p>
@@ -30,12 +46,69 @@
   </div>
 
   <script>
+    const sendCodeBtn = document.getElementById("sendCodeBtn");
+    const codeCountdown = document.getElementById("codeCountdown");
+    let countdownTimer = null;
+    let countdownSeconds = 60;
+
+    function setCountdownUI() {
+      if (countdownSeconds <= 0) {
+        sendCodeBtn.disabled = false;
+        sendCodeBtn.textContent = "获取验证码";
+        codeCountdown.classList.add("hidden");
+        codeCountdown.textContent = "60 秒后可重新发送";
+        return;
+      }
+      sendCodeBtn.disabled = true;
+      sendCodeBtn.textContent = `${countdownSeconds}秒后重试`;
+      codeCountdown.classList.remove("hidden");
+      codeCountdown.textContent = `${countdownSeconds} 秒后可重新发送`;
+    }
+
+    async function startSendCode() {
+      const email = document.getElementById("email").value.trim();
+      if (!email) return alert("请先填写邮箱");
+      try {
+        sendCodeBtn.disabled = true;
+        const res = await fetch("/api/auth/send-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "发送验证码失败");
+
+        countdownSeconds = 60;
+        setCountdownUI();
+        if (countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = setInterval(() => {
+          countdownSeconds -= 1;
+          setCountdownUI();
+          if (countdownSeconds <= 0 && countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+          }
+        }, 1000);
+      } catch (err) {
+        alert(err.message);
+        sendCodeBtn.disabled = false;
+        sendCodeBtn.textContent = "获取验证码";
+        codeCountdown.classList.add("hidden");
+        countdownSeconds = 60;
+      }
+    }
+
+    sendCodeBtn.addEventListener("click", startSendCode);
+
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const payload = {
         username: document.getElementById("username").value.trim(),
         display_name: document.getElementById("displayName").value.trim(),
-        password: document.getElementById("password").value
+        password: document.getElementById("password").value,
+        email: document.getElementById("email").value.trim(),
+        email_code: document.getElementById("emailCode").value.trim(),
+        invitation_code: document.getElementById("invitationCode").value.trim() || null
       };
       try {
         const res = await fetch("/api/register", {

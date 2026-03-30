@@ -53,8 +53,11 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT NOT NULL UNIQUE,
+  email TEXT UNIQUE NOT NULL,
   display_name TEXT NOT NULL,
   password_hash TEXT NOT NULL,
+  avatar_url TEXT,
+  is_disabled INTEGER DEFAULT 0,
   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -120,6 +123,18 @@ CREATE TABLE IF NOT EXISTS invitation_codes (
   is_used INTEGER DEFAULT 0,
   used_by TEXT
 );
+
+-- 邮箱验证码（用于注册/找回等场景）
+CREATE TABLE IF NOT EXISTS email_codes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL,
+  code TEXT NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (email) REFERENCES users(email) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_codes_email ON email_codes(email, expires_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_posts_status_created_at ON posts(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_posts_views ON posts(views DESC);
