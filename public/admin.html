@@ -142,6 +142,7 @@
     
     // 🌟 R2 图床 API 配置
     const R2_API_ENDPOINT = "https://pig.xiaohe.gv.uy"; 
+    const QUICK_DISPLAY_DOMAIN = "https://tu.xiaohelei.us.ci"; // 修正：高速显示域名
 
     async function api(path, options = {}) {
       const headers = options.headers || {};
@@ -154,7 +155,7 @@
       return data;
     }
 
-    // 🌟 图片上传到 R2 的核心函数
+    // 🌟 修改：核心上传函数，确保返回高速显示域名链接
     async function uploadToR2(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -164,7 +165,11 @@
       });
       if (!res.ok) throw new Error("上传到 R2 失败");
       const data = await res.json();
-      return data.url; // 对应 Workers 返回的 { url: "..." }
+      
+      // 从返回的 URL 中提取文件名 (假设 URL 格式为 https://domain/filename)
+      const fileName = data.url.split('/').pop(); 
+      // 强制返回国内访问飞快的高速域名链接
+      return `${QUICK_DISPLAY_DOMAIN}/${fileName}`;
     }
 
     let quill = null;
@@ -199,7 +204,6 @@
         }
       });
 
-      // 🌟 修改：文章正文图片自动上传 R2
       quill.getModule('toolbar').addHandler('image', function() {
         const choice = confirm("【图片插入】\n点击 [确定]：选择本地图片自动上传到 R2\n点击 [取消]：手动输入图片链接");
         if (choice) {
@@ -246,7 +250,6 @@
       });
     }
 
-    // 🌟 封面图一键上传逻辑
     document.getElementById('uploadCoverBtn').onclick = () => {
       const input = document.createElement('input');
       input.type = 'file';
