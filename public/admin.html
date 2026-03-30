@@ -75,20 +75,35 @@
 
         <section id="panel-publish" class="hidden max-w-5xl mx-auto space-y-4">
           <input id="postId" type="hidden" />
-          <div class="bg-white rounded-xl border border-slate-200 p-4"><input id="titleInput" type="text" placeholder="文章标题..." class="w-full text-2xl font-bold outline-none" /></div>
           
+          <div class="bg-white rounded-xl border border-slate-200 p-4">
+            <input id="titleInput" type="text" placeholder="文章标题..." class="w-full text-2xl font-bold outline-none" />
+          </div>
+          
+          <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex-1 w-full">
+              <input id="tagsInput" type="text" placeholder="添加标签 (多个标签请用英文逗号 , 分隔)" class="w-full text-sm border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-sky-500" />
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <label class="flex items-center gap-2 text-sm font-bold text-slate-600 cursor-pointer select-none">
+                <input id="allowCommentsCheck" type="checkbox" checked class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500" />
+                开启文章评论
+              </label>
+            </div>
+          </div>
+
           <div class="bg-white rounded-xl border border-slate-200 flex flex-col">
             <div id="editorToolbar" class="bg-slate-50 border-b p-2"></div>
             <div id="contentEditor" class="min-h-[400px]"></div>
           </div>
 
           <div class="bg-white rounded-xl border border-slate-200 p-6">
-            <h3 class="font-bold text-amber-600 mb-2">隐藏内容 (仅登录可见，如网盘地址)</h3>
+            <h3 class="font-bold text-amber-600 mb-2">隐藏内容 (仅登录可见，如网盘地址、解压密码等)</h3>
             <textarea id="hiddenContentInput" rows="3" class="w-full border border-slate-300 rounded-lg p-3 outline-none focus:border-sky-500"></textarea>
           </div>
 
-          <div class="bg-white rounded-xl border border-slate-200 p-4 flex justify-between sticky bottom-4">
-            <span class="text-sm font-bold text-slate-500">状态管理：</span>
+          <div class="bg-white rounded-xl border border-slate-200 p-4 flex justify-between sticky bottom-4 z-50 shadow-sm">
+            <span class="text-sm font-bold text-slate-500">文章状态管理：</span>
             <div class="flex gap-3">
               <button id="saveDraftBtn" class="wp-btn">存为草稿</button>
               <button id="savePublishBtn" class="wp-btn wp-btn-primary px-8">发布文章</button>
@@ -103,114 +118,206 @@
   <script>
     const auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
     if (!auth?.token || auth.role !== 'admin') { location.href = '/login.html'; }
+    
+    // API 请求封装，带详细报错提醒
     async function api(path, options = {}) {
       const headers = options.headers || {};
       headers.Authorization = 'Bearer ' + auth.token;
       headers['Content-Type'] = 'application/json';
       const res = await fetch(path, { ...options, headers });
       if (res.status === 401) { localStorage.removeItem('hlog_auth'); location.href = '/login.html'; }
-      return await res.json().catch(()=>({}));
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok) throw new Error(data.detail || data.error || `请求异常 (状态码: ${res.status})`);
+      return data;
     }
 
     let quill = null;
     function initQuill() {
       quill = new Quill('#contentEditor', {
         theme: 'snow',
+        placeholder: '在此开始撰写你的文章...',
         modules: {
           toolbar: [
-            [{ 'size': ['small', false, 'large', 'huge'] }], ['bold', 'italic', 'underline'],
+            [{ 'size': ['small', false, 'large', 'huge'] }], ['bold', 'italic', 'underline', 'strike'],
             [{ 'color': [] }, { 'background': [] }], [{ 'align': [] }],
             [{ 'header': 1 }, { 'header': 2 }, 'blockquote', 'code-block'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image', 'video']
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['link', 'image', 'video'],
+            ['clean']
           ]
         }
       });
-      quill.getModule('toolbar').addHandler('image', function() {
-        const input = document.createElement('input'); input.setAttribute('type', 'file'); input.click();
-        input.onchange = () => {
-          const file = input.files[0];
-          const reader = new FileReader();
-          reader.onload = e => { const range = quill.getSelection(true); quill.insertEmbed(range.index, 'image', e.target.result); quill.setSelection(range.index + 1); };
-          reader.readAsDataURL(file);
-        };
+
+      // 自定义超链接功能
+      quill.getModule('toolbar').addHandler('link', function() {
+        const range = quill.getSelection();
+        if (range && range.length > 0) {
+          const href = prompt('请输入选中文本要跳转的网址链接:');
+          if (href) quill.format('link', href);
+        } else {
+          const text = prompt('请输入超链接显示的文字:');
+          const href = prompt('请输入该超链接的网址地址:');
+          if (text && href) {
+            const index = range ? range.index : 0;
+            quill.insertText(index, text, 'link', href);
+            quill.setSelection(index + text.length);
+          }
+        }
       });
+
+      // 自定义插入图片（支持本地和网址双模式）
+      quill.getModule('toolbar').addHandler('image', function() {
+        const choice = confirm("【选择图片插入方式】\n\n点击 [确定]：选择本地图片上传\n点击 [取消]：输入网络图片链接");
+        if (choice) {
+          const input = document.createElement('input'); 
+          input.setAttribute('type', 'file'); 
+          input.setAttribute('accept', 'image/*');
+          input.click();
+          input.onchange = () => {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => { 
+              const range = quill.getSelection(true); 
+              quill.insertEmbed(range.index, 'image', e.target.result); 
+              quill.setSelection(range.index + 1); 
+            };
+            reader.readAsDataURL(file);
+          };
+        } else {
+          const url = prompt("请输入网络图片地址 (例如 https://... .jpg):");
+          if (url) {
+            const range = quill.getSelection(true); 
+            quill.insertEmbed(range.index, 'image', url); 
+            quill.setSelection(range.index + 1); 
+          }
+        }
+      });
+
+      // 自定义插入视频 (B站/YouTube解析)
       quill.getModule('toolbar').addHandler('video', function() {
-        let url = prompt('输入视频链接 (支持 Bilibili/YouTube):');
+        let url = prompt('请输入视频网页链接 (支持 Bilibili / YouTube):');
         if (!url) return;
-        let bvid = url.match(/(BV[a-zA-Z0-9]+)/); if(bvid) url = `//player.bilibili.com/player.html?bvid=${bvid[1]}&page=1&high_quality=1`;
-        let yt = url.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([^"&?\/\s]{11})/); if(yt) url = `//www.youtube.com/embed/${yt[1]}`;
-        const range = quill.getSelection(true); quill.insertEmbed(range.index, 'video', url); quill.setSelection(range.index + 1);
+        let bvid = url.match(/(BV[a-zA-Z0-9]+)/); 
+        if(bvid) url = `//player.bilibili.com/player.html?bvid=${bvid[1]}&page=1&high_quality=1`;
+        let yt = url.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([^"&?\/\s]{11})/); 
+        if(yt) url = `//www.youtube.com/embed/${yt[1]}`;
+        
+        const range = quill.getSelection(true); 
+        quill.insertEmbed(range.index, 'video', url); 
+        quill.setSelection(range.index + 1);
       });
     }
 
     async function loadDashboard() {
-      const stats = await api('/api/stats');
-      if (stats) {
-        document.getElementById('statTodayViews').textContent = stats.today_views || 0;
-        document.getElementById('statTotalPosts').textContent = stats.total_posts || 0;
-        document.getElementById('statTotalUsers').textContent = stats.total_users || 0;
-      }
+      try {
+        const stats = await api('/api/stats');
+        if (stats) {
+          document.getElementById('statTodayViews').textContent = stats.today_views || 0;
+          document.getElementById('statTotalPosts').textContent = stats.total_posts || 0;
+          document.getElementById('statTotalUsers').textContent = stats.total_users || 0;
+        }
+      } catch (e) { console.error("概览加载失败:", e.message); }
     }
 
     async function loadPostsTable(status) {
       const tbody = document.getElementById(status === 'published' ? 'postsTbodyPublished' : 'postsTbodyDrafts');
       if (!tbody) return;
-      const data = await api(`/api/posts?status=${status}`);
-      tbody.innerHTML = (data?.posts || []).map(p => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-6 py-4 font-bold">${p.title}</td>
-          <td class="px-6 py-4">
-            <button class="text-sky-600 font-bold mr-3" onclick="editPost(${p.id})">编辑</button>
-            <button class="text-red-500 font-bold" onclick="deletePost(${p.id})">删除</button>
-          </td>
-        </tr>
-      `).join('');
+      try {
+        const data = await api(`/api/posts?status=${status}`);
+        tbody.innerHTML = (data?.posts || []).map(p => `
+          <tr class="hover:bg-slate-50 border-b border-slate-100">
+            <td class="px-6 py-4 font-bold text-slate-700">${p.title}</td>
+            <td class="px-6 py-4">
+              <button class="text-sky-600 font-bold mr-3" onclick="editPost(${p.id})">编辑</button>
+              <button class="text-red-500 font-bold" onclick="deletePost(${p.id})">删除</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch(e) { console.error(e); }
     }
 
+    // 编辑文章（带入标签和评论开关）
     async function editPost(id) {
-      const data = await api(`/api/post/list?id=${id}&include_drafts=1`);
-      if (data?.post) {
-        document.getElementById('postId').value = data.post.id;
-        document.getElementById('titleInput').value = data.post.title;
-        document.getElementById('hiddenContentInput').value = data.post.hidden_content || '';
-        if (quill) quill.root.innerHTML = data.post.content || '';
-        location.hash = 'publish';
-      }
+      try {
+        const data = await api(`/api/post/list?id=${id}&include_drafts=1`);
+        if (data?.post) {
+          document.getElementById('postId').value = data.post.id;
+          document.getElementById('titleInput').value = data.post.title;
+          document.getElementById('hiddenContentInput').value = data.post.hidden_content || '';
+          
+          document.getElementById('tagsInput').value = (data.post.tags || []).join(', ');
+          document.getElementById('allowCommentsCheck').checked = Number(data.post.allow_comments ?? 1) === 1;
+
+          if (quill) quill.root.innerHTML = data.post.content || '';
+          location.hash = 'publish';
+        }
+      } catch (e) { alert("加载文章失败: " + e.message); }
     }
 
     async function deletePost(id) {
       if (!confirm('确定删除吗？')) return;
-      await api('/api/post/create', { method: 'DELETE', body: JSON.stringify({ id }) });
-      loadPostsTable('published'); loadPostsTable('drafts');
+      try {
+        await api('/api/post/create', { method: 'DELETE', body: JSON.stringify({ id }) });
+        loadPostsTable('published'); loadPostsTable('drafts');
+      } catch (e) { alert("删除失败: " + e.message); }
     }
 
-    // 修复 405 报错核心
+    // 保存文章（打包发送标签和评论状态）
     async function savePost(targetStatus) {
       const id = document.getElementById('postId').value;
       const title = document.getElementById('titleInput').value.trim();
       const hiddenContent = document.getElementById('hiddenContentInput').value.trim();
       const content = quill ? quill.root.innerHTML : '';
-      if (!title || content === '<p><br></p>') return alert('标题和正文不能为空');
+      
+      const tagsStr = document.getElementById('tagsInput').value;
+      const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const allowComments = document.getElementById('allowCommentsCheck').checked ? 1 : 0;
+      
+      if (!title || content === '<p><br></p>') return alert('标题和正文不能为空哦！');
 
-      const payload = { title, content, hidden_content: hiddenContent || null, status: targetStatus };
+      const payload = { 
+        title, 
+        content, 
+        hidden_content: hiddenContent || null, 
+        status: targetStatus,
+        tags: tags,
+        allow_comments: allowComments
+      };
+      
       let method = 'POST';
-      if (id) { method = 'PUT'; payload.id = Number(id); } // 必须放入 Body
+      if (id) { method = 'PUT'; payload.id = Number(id); }
 
-      const result = await api('/api/post/create', { method, body: JSON.stringify(payload) });
-      if (result && !result.error) {
-        alert(targetStatus === 'draft' ? '已存为草稿' : '发布成功');
-        document.getElementById('postId').value = ''; document.getElementById('titleInput').value = '';
-        document.getElementById('hiddenContentInput').value = ''; if(quill) quill.root.innerHTML = '';
+      const btn = targetStatus === 'draft' ? document.getElementById('saveDraftBtn') : document.getElementById('savePublishBtn');
+      const originText = btn.textContent;
+      btn.textContent = '正在处理...'; btn.disabled = true;
+
+      try {
+        await api('/api/post/create', { method, body: JSON.stringify(payload) });
+        alert(targetStatus === 'draft' ? '已成功存入草稿箱' : '文章发布成功！');
+        
+        document.getElementById('postId').value = ''; 
+        document.getElementById('titleInput').value = '';
+        document.getElementById('hiddenContentInput').value = ''; 
+        document.getElementById('tagsInput').value = ''; 
+        document.getElementById('allowCommentsCheck').checked = true;
+        if(quill) quill.root.innerHTML = '';
+        
         location.hash = targetStatus === 'draft' ? 'drafts' : 'post-list';
-      } else alert('操作失败');
+      } catch (e) {
+        alert(`操作失败: ${e.message}`);
+      } finally {
+        btn.textContent = originText; btn.disabled = false;
+      }
     }
 
     document.getElementById('genInviteBtn')?.addEventListener('click', async () => {
-      const res = await api('/api/admin/invitation/generate', { method: 'POST' });
-      if (res?.codes) {
-        document.getElementById('inviteCodesList').innerHTML = res.codes.map(c => `<span class="bg-amber-100 font-bold px-3 py-1 rounded-full border border-amber-300">${c}</span>`).join('');
-        document.getElementById('inviteCodesWrap').classList.remove('hidden');
-      }
+      try {
+        const res = await api('/api/admin/invitation/generate', { method: 'POST' });
+        if (res?.codes) {
+          document.getElementById('inviteCodesList').innerHTML = res.codes.map(c => `<span class="bg-amber-100 font-bold px-3 py-1 rounded-full border border-amber-300">${c}</span>`).join('');
+          document.getElementById('inviteCodesWrap').classList.remove('hidden');
+        }
+      } catch (e) { alert("生成邀请码失败: " + e.message); }
     });
 
     function route() {
