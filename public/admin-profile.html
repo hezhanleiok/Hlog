@@ -33,8 +33,9 @@
           文章管理
         </div>
         <div class="admin-submenu">
-          <a href="/admin.html?box=published">文章列表</a>
-          <a href="/admin.html?box=drafts">草稿箱</a>
+          <a href="/admin.html?tab=post-list">文章列表</a>
+          <a href="/admin.html?tab=publish">发布文章</a>
+          <a href="/admin.html?tab=drafts">草稿箱</a>
         </div>
 
         <a href="/admin-comments.html" class="admin-menu-item">
@@ -101,6 +102,12 @@
                 <label class="text-sm text-slate-600">头像 URL</label>
                 <input id="avatarUrlInput" class="admin-input mt-1" placeholder="https://..." />
               </div>
+
+                <div>
+                  <label class="text-sm text-slate-600">头像文件（可选，存 Base64）</label>
+                  <input id="avatarFile" type="file" accept="image/*" class="admin-input mt-1" />
+                  <div class="text-xs text-slate-500 mt-1">如果没有 R2，这里会把图片转换为 Base64 并写入数据库。</div>
+                </div>
 
               <div>
                 <label class="text-sm text-slate-600">显示名称</label>
@@ -211,6 +218,7 @@
 
     const avatarPreview = document.getElementById("avatarPreview");
     const avatarUrlInput = document.getElementById("avatarUrlInput");
+    const avatarFile = document.getElementById("avatarFile");
     const displayNameInput = document.getElementById("displayNameInput");
     const passwordInput = document.getElementById("passwordInput");
     const profileMsg = document.getElementById("profileMsg");
@@ -221,10 +229,27 @@
       if (avatarUrlInput.value.trim()) avatarPreview.src = avatarUrlInput.value.trim();
     });
 
+    avatarFile?.addEventListener("change", () => {
+      const file = avatarFile.files && avatarFile.files[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) return alert("请选择图片文件");
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = String(reader.result || "");
+        if (!dataUrl) return;
+        avatarPreview.src = dataUrl;
+        avatarUrlInput.value = dataUrl; // 直接把 Base64 写进 avatar_url，后端会原样存库
+      };
+      reader.onerror = () => alert("读取图片失败");
+      reader.readAsDataURL(file);
+    });
+
     document.getElementById("resetProfileBtn").addEventListener("click", () => {
       if (!initialProfile) return;
       avatarPreview.src = initialProfile.avatar_url || "https://picsum.photos/200/200?random=7";
       avatarUrlInput.value = initialProfile.avatar_url || "";
+      if (avatarFile) avatarFile.value = "";
       displayNameInput.value = initialProfile.display_name || "";
       passwordInput.value = "";
       profileMsg.textContent = "";

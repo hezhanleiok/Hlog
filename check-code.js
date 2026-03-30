@@ -34,6 +34,7 @@ const requiredFiles = [
   "functions/api/admin/invitation/generate.js",
   "functions/api/admin/users/list.js",
   "functions/api/admin/users/toggle.js",
+  "functions/api/posts.js",
   "functions/api/user/me.js",
   "functions/api/user/update.js",
   "functions/api/user/posts.js",
@@ -51,6 +52,7 @@ const apiContracts = [
   { file: "functions/api/post/view.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/site/stats.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/stats.js", mustContain: ["onRequestGet"] },
+  { file: "functions/api/posts.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/tag/list.js", mustContain: ["onRequestGet"] },
   { file: "functions/api/comment/add.js", mustContain: ["onRequestPost"] },
   { file: "functions/api/comment/list.js", mustContain: ["onRequestGet"] },
@@ -91,6 +93,8 @@ const htmlApiReferences = [
   "/api/user/posts"
   ,
   "/api/auth/send-code"
+  ,
+  "/api/posts"
 ];
 
 let errorCount = 0;
@@ -174,6 +178,7 @@ async function checkJsSyntax() {
     "functions/api/post/view.js",
     "functions/api/site/stats.js",
     "functions/api/stats.js",
+    "functions/api/posts.js",
     "functions/api/tag/list.js",
     "functions/api/comment/add.js",
     "functions/api/comment/list.js",
