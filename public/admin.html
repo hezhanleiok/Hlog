@@ -80,15 +80,18 @@
             <input id="titleInput" type="text" placeholder="文章标题..." class="w-full text-2xl font-bold outline-none" />
           </div>
           
-          <div class="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div class="flex-1 w-full">
-              <input id="tagsInput" type="text" placeholder="添加标签 (多个标签请用英文逗号 , 分隔)" class="w-full text-sm border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-sky-500" />
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <label class="flex items-center gap-2 text-sm font-bold text-slate-600 cursor-pointer select-none">
-                <input id="allowCommentsCheck" type="checkbox" checked class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500" />
-                开启文章评论
-              </label>
+          <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div class="flex-1 w-full space-y-3">
+                <input id="coverUrlInput" type="text" placeholder="自定义封面图 URL (例如: https://.../image.jpg)" class="w-full text-sm border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-sky-500" />
+                <input id="tagsInput" type="text" placeholder="添加标签 (多个标签请用英文逗号 , 分隔)" class="w-full text-sm border border-slate-300 rounded-lg px-4 py-2 outline-none focus:border-sky-500" />
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <label class="flex items-center gap-2 text-sm font-bold text-slate-600 cursor-pointer select-none">
+                  <input id="allowCommentsCheck" type="checkbox" checked class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500" />
+                  开启文章评论
+                </label>
+              </div>
             </div>
           </div>
 
@@ -119,7 +122,6 @@
     const auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
     if (!auth?.token || auth.role !== 'admin') { location.href = '/login.html'; }
     
-    // API 请求封装，带详细报错提醒
     async function api(path, options = {}) {
       const headers = options.headers || {};
       headers.Authorization = 'Bearer ' + auth.token;
@@ -147,7 +149,6 @@
         }
       });
 
-      // 自定义超链接功能
       quill.getModule('toolbar').addHandler('link', function() {
         const range = quill.getSelection();
         if (range && range.length > 0) {
@@ -164,7 +165,6 @@
         }
       });
 
-      // 自定义插入图片（支持本地和网址双模式）
       quill.getModule('toolbar').addHandler('image', function() {
         const choice = confirm("【选择图片插入方式】\n\n点击 [确定]：选择本地图片上传\n点击 [取消]：输入网络图片链接");
         if (choice) {
@@ -193,7 +193,6 @@
         }
       });
 
-      // 自定义插入视频 (B站/YouTube解析)
       quill.getModule('toolbar').addHandler('video', function() {
         let url = prompt('请输入视频网页链接 (支持 Bilibili / YouTube):');
         if (!url) return;
@@ -201,7 +200,6 @@
         if(bvid) url = `//player.bilibili.com/player.html?bvid=${bvid[1]}&page=1&high_quality=1`;
         let yt = url.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([^"&?\/\s]{11})/); 
         if(yt) url = `//www.youtube.com/embed/${yt[1]}`;
-        
         const range = quill.getSelection(true); 
         quill.insertEmbed(range.index, 'video', url); 
         quill.setSelection(range.index + 1);
@@ -236,7 +234,6 @@
       } catch(e) { console.error(e); }
     }
 
-    // 编辑文章（带入标签和评论开关）
     async function editPost(id) {
       try {
         const data = await api(`/api/post/list?id=${id}&include_drafts=1`);
@@ -245,6 +242,8 @@
           document.getElementById('titleInput').value = data.post.title;
           document.getElementById('hiddenContentInput').value = data.post.hidden_content || '';
           
+          // 🌟 修改：加载文章时，带入封面图链接
+          document.getElementById('coverUrlInput').value = data.post.cover_url || '';
           document.getElementById('tagsInput').value = (data.post.tags || []).join(', ');
           document.getElementById('allowCommentsCheck').checked = Number(data.post.allow_comments ?? 1) === 1;
 
@@ -262,7 +261,6 @@
       } catch (e) { alert("删除失败: " + e.message); }
     }
 
-    // 保存文章（打包发送标签和评论状态）
     async function savePost(targetStatus) {
       const id = document.getElementById('postId').value;
       const title = document.getElementById('titleInput').value.trim();
@@ -272,6 +270,9 @@
       const tagsStr = document.getElementById('tagsInput').value;
       const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
       const allowComments = document.getElementById('allowCommentsCheck').checked ? 1 : 0;
+
+      // 🌟 修改：获取封面图 URL
+      const coverUrl = document.getElementById('coverUrlInput').value.trim();
       
       if (!title || content === '<p><br></p>') return alert('标题和正文不能为空哦！');
 
@@ -281,7 +282,8 @@
         hidden_content: hiddenContent || null, 
         status: targetStatus,
         tags: tags,
-        allow_comments: allowComments
+        allow_comments: allowComments,
+        cover_url: coverUrl || null // 🌟 修改：加入封面图字段
       };
       
       let method = 'POST';
@@ -299,6 +301,7 @@
         document.getElementById('titleInput').value = '';
         document.getElementById('hiddenContentInput').value = ''; 
         document.getElementById('tagsInput').value = ''; 
+        document.getElementById('coverUrlInput').value = ''; // 🌟 修改：清空输入框
         document.getElementById('allowCommentsCheck').checked = true;
         if(quill) quill.root.innerHTML = '';
         
