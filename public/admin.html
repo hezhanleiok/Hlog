@@ -4,14 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HLOG - 管理面板</title>
+  <link rel="icon" href="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" />
+  <link href="https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="/admin-style.css" />
   <style>
-    .upload-loading { position: absolute; inset: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; z-index: 50; font-weight: bold; color: #0284c7; }
-    .ql-editor { min-height: 500px; font-size: 16px; }
+    .upload-loading { position: absolute; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 10000; font-weight: bold; color: #0284c7; backdrop-filter: blur(2px); }
     .menu-active { background-color: #334155; color: white; border-left: 4px solid #0ea5e9; }
-    iframe.ql-video { width: 100%; aspect-ratio: 16/9; border-radius: 8px; }
+    /* 优化编辑器的默认样式 */
+    #editor-container { font-size: 16px; line-height: 1.6; }
+    .w-e-full-screen-container { z-index: 9999; }
   </style>
 </head>
 <body class="bg-[#f0f2f5] text-slate-800 font-sans antialiased">
@@ -107,10 +109,13 @@
               <input id="tagsInput" type="text" placeholder="精品,软件" class="w-full border rounded-lg px-4 py-2 text-sm outline-none focus:border-sky-500" />
             </div>
           </div>
-          <div class="bg-white rounded-xl border flex flex-col relative overflow-hidden shadow-sm">
-            <div id="editorUploadStatus" class="upload-loading hidden">处理中...</div>
-            <div id="contentEditor"></div>
+          
+          <div class="bg-white rounded-xl border flex flex-col relative shadow-sm z-10">
+            <div id="editorUploadStatus" class="upload-loading hidden">文件上传中...</div>
+            <div id="toolbar-container" class="border-b border-slate-200 bg-slate-50 rounded-t-xl sticky top-0 z-20"></div>
+            <div id="editor-container" class="h-[650px] overflow-hidden rounded-b-xl"></div>
           </div>
+
           <div class="bg-white rounded-xl border p-6 shadow-sm border-amber-200 bg-amber-50/20">
             <label class="text-xs font-bold text-amber-600 block mb-2 uppercase tracking-widest">🔑 登录可见内容 (下载链接/提取码等)</label>
             <textarea id="hiddenContentInput" rows="3" class="w-full border border-amber-100 rounded-lg p-3 text-sm outline-none focus:border-amber-400 bg-white" placeholder="此处输入登录后可见的链接或密码..."></textarea>
@@ -159,11 +164,14 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
+  <script src="https://unpkg.com/@wangeditor/editor@latest/dist/index.min.js"></script>
+  
   <script>
     const auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
     if (!auth?.token || auth.role !== 'admin') location.href = '/login.html';
-    let quill;
+    
+    // 全局编辑器实例
+    let editor;
 
     async function api(path, options = {}) {
       const headers = { ...options.headers, 'Authorization': 'Bearer ' + auth.token, 'Content-Type': 'application/json' };
@@ -173,34 +181,73 @@
       return data;
     }
 
-    function initQuill() {
-      quill = new Quill('#contentEditor', {
-        theme: 'snow',
-        placeholder: '在此编写正文...',
-        modules: {
-          toolbar: {
-            container: [
-              [{ 'header': [1, 2, 3, false] }],
-              ['bold', 'italic', 'underline', 'strike'],
-              ['link', 'blockquote', 'code-block'],
-              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-              ['image', 'video'], 
-              ['clean']
-            ],
-            handlers: {
-              image: function() {
-                const url = prompt("请输入图片 URL:");
-                if (url) quill.insertEmbed(quill.getSelection()?.index || 0, 'image', url);
-              },
-              video: function() {
-                const url = prompt("请输入视频 URL:");
-                if (url) quill.insertEmbed(quill.getSelection()?.index || 0, 'video', url);
+    // 初始化 WangEditor
+    function initEditor() {
+      const { createEditor, createToolbar } = window.wangEditor;
+      
+      const editorConfig = {
+        placeholder: '在此编写正文 (支持 Markdown 快捷键，如输入 "# " 变成标题)...',
+        MENU_CONF: {
+          // 接管图片上传逻辑，复用你已有的 /api/upload 接口
+          uploadImage: {
+            async customUpload(file, insertFn) {
+              const status = document.getElementById('editorUploadStatus');
+              status.classList.remove('hidden');
+              try {
+                const formData = new FormData(); 
+                formData.append('file', file);
+                const res = await fetch('/api/upload', { 
+                    method: 'POST', 
+                    headers: { 'Authorization': 'Bearer ' + auth.token }, 
+                    body: formData 
+                });
+                const data = await res.json();
+                if (data.url) {
+                    // insertFn(url, alt, href)
+                    insertFn(data.url, file.name, data.url);
+                }
+              } catch (e) { 
+                  alert('图片上传失败'); 
+              } finally { 
+                  status.classList.add('hidden'); 
               }
             }
           }
         }
+      };
+
+      editor = createEditor({
+        selector: '#editor-container',
+        html: '<p><br></p>',
+        config: editorConfig,
+        mode: 'default', // default 模式拥有全部功能栏
+      });
+
+      const toolbar = createToolbar({
+        editor,
+        selector: '#toolbar-container',
+        config: {},
+        mode: 'default',
       });
     }
+
+    // 封面图上传逻辑保持不变
+    document.getElementById('uploadCoverBtn').onclick = () => {
+      const input = document.createElement('input');
+      input.setAttribute('type', 'file'); input.setAttribute('accept', 'image/*');
+      input.onchange = async () => {
+        const file = input.files[0]; if(!file) return;
+        const status = document.getElementById('editorUploadStatus');
+        status.classList.remove('hidden');
+        try {
+          const formData = new FormData(); formData.append('file', file);
+          const res = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + auth.token }, body: formData });
+          const data = await res.json();
+          if (data.url) { document.getElementById('coverInput').value = data.url; alert("上传成功！"); }
+        } catch (e) { alert('上传失败'); } finally { status.classList.add('hidden'); }
+      };
+      input.click();
+    };
 
     async function loadCategories() {
       try {
@@ -230,7 +277,6 @@
       loadCategories();
     };
 
-    // === 发布公告 ===
     document.getElementById('saveNoticeBtn').onclick = async () => {
       const val = document.getElementById('noticeInput').value.trim();
       if (!val) return alert('请输入公告内容');
@@ -244,10 +290,12 @@
       finally { btn.disabled = false; btn.textContent = '发布并更新首页公告'; }
     };
 
-    // 🌟 核心修复1：根据是否有 ID，决定是 POST (新建) 还是 PUT (更新)
     async function submitPost(status) {
       const title = document.getElementById('titleInput').value.trim();
-      const content = quill.getSemanticHTML();
+      
+      // === 核心替换：从 WangEditor 获取 HTML 内容 ===
+      const content = editor.getHtml(); 
+      
       const cover_url = document.getElementById('coverInput').value;
       const hidden_content = document.getElementById('hiddenContentInput').value;
       const category_id = document.getElementById('postCategory').value;
@@ -255,24 +303,23 @@
       const id = document.getElementById('postId').value;
       
       if (!title) return alert('标题不能为空');
+      if (editor.getText().trim() === '') return alert('正文不能为空'); // 确保正文不为空
+
       const btn = status === 'published' ? document.getElementById('savePublishBtn') : document.getElementById('saveDraftBtn');
       const originText = btn.textContent; btn.disabled = true; btn.textContent = '处理中...';
 
       try {
         await api('/api/post/create', {
-          method: id ? 'PUT' : 'POST', // 有 ID 就更新，没 ID 才新建！
+          method: id ? 'PUT' : 'POST', 
           body: JSON.stringify({ id: id ? Number(id) : null, title, content, cover_url, hidden_content, status, tags, category_id })
         });
-        alert(id ? '文章修改成功' : '文章发布成功');
+        alert(id ? '修改保存成功！' : '文章发布成功！');
         
-        // 发布成功后重置表单并跳回列表
         resetEditor();
         location.hash = status === 'published' ? 'post-list' : 'drafts';
-      } catch (e) { alert(e.message); } 
-      finally { btn.disabled = false; btn.textContent = originText; }
+      } catch (e) { alert(e.message); } finally { btn.disabled = false; btn.textContent = originText; }
     }
 
-    // 🌟 编辑文章加载数据，并修改按钮文案
     async function editPost(id) {
       try {
         const data = await api(`/api/post/view?id=${id}`);
@@ -285,27 +332,26 @@
         document.getElementById('coverInput').value = p.cover_url || '';
         document.getElementById('hiddenContentInput').value = p.hidden_content || '';
         document.getElementById('tagsInput').value = p.tags?.join(',') || '';
-        setTimeout(() => { document.getElementById('postCategory').value = p.category_id || ''; }, 300); // 确保分类数据加载完
-        quill.setContents(quill.clipboard.convert({html: p.content || ''}));
+        setTimeout(() => { document.getElementById('postCategory').value = p.category_id || ''; }, 300); 
         
-        document.getElementById('savePublishBtn').textContent = "保存修改"; // 提示文案改变
+        // === 核心替换：向 WangEditor 写入内容 ===
+        editor.setHtml(p.content || '<p><br></p>');
+        
+        document.getElementById('savePublishBtn').textContent = '保存修改';
       } catch (e) { alert('加载文章失败: ' + e.message); }
     }
 
-    // 🌟 核心修复2：彻底修复删除接口
     async function deletePost(id) {
       if(!confirm("确定彻底删除文章？操作不可逆！")) return;
       try {
-        // 请求 create.js，指定 DELETE 方式
         await api('/api/post/create', { method: 'DELETE', body: JSON.stringify({ id }) });
         alert('删除成功');
-        loadPostsTable(location.hash === '#drafts' ? 'drafts' : 'published'); // 局部刷新，不卡死
+        loadPostsTable(location.hash === '#drafts' ? 'drafts' : 'published'); 
       } catch(e) {
         alert("删除失败: " + e.message);
       }
     }
 
-    // 重置编辑器状态
     function resetEditor() {
       document.getElementById('postId').value = '';
       document.getElementById('titleInput').value = '';
@@ -313,7 +359,10 @@
       document.getElementById('hiddenContentInput').value = '';
       document.getElementById('tagsInput').value = '';
       document.getElementById('postCategory').value = '';
-      quill.setContents([]);
+      
+      // === 核心替换：清空 WangEditor ===
+      editor.setHtml('<p><br></p>');
+      
       document.getElementById('savePublishBtn').textContent = '发布文章';
     }
 
@@ -340,14 +389,17 @@
       if (hash === 'dashboard') loadDashboard();
       if (hash === 'post-list') loadPostsTable('published');
       if (hash === 'drafts') loadPostsTable('drafts');
-      if (hash === 'publish' && !document.getElementById('postId').value) resetEditor(); // 如果点菜单进来，清理旧数据
+      if (hash === 'publish' && !document.getElementById('postId').value) resetEditor(); 
       if (hash === 'categories' || hash === 'publish') loadCategories();
     }
 
     window.addEventListener('hashchange', route);
-    window.addEventListener('load', () => { initQuill(); route(); });
+    window.addEventListener('load', () => { 
+      // 页面加载完成后初始化 WangEditor
+      initEditor(); 
+      route(); 
+    });
     
-    // 监听撰写新文章菜单点击，强制清理状态
     document.getElementById('menu-publish').addEventListener('click', resetEditor);
 
     document.getElementById('savePublishBtn').onclick = () => submitPost('published');
