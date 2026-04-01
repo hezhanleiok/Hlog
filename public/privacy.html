@@ -6,72 +6,81 @@
   <title>隐私政策 - HLOG</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .nav-link { position: relative; font-size: 1.15rem; font-weight: 700; transition: color 0.3s; }
-    .nav-link:hover { color: #0ea5e9; }
+    body { background-color: #f4f7f9; color: #1e293b; }
+    .nav-link { font-size: 1.15rem; font-weight: 800; transition: color 0.3s; color: #475569; }
+    .nav-link:hover, .nav-link.active { color: #6366f1; }
+    .dropdown { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
+    .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; min-width: 180px; background: white; border-radius: 10px; border: 1px solid #e5e7eb; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 100; padding: 8px 0; }
     .dropdown:hover .dropdown-menu { display: block; }
-    .prose h2 { font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: 2.5rem; margin-bottom: 1rem; border-left: 4px solid #0ea5e9; padding-left: 1rem; }
-    .prose p { margin-bottom: 1.25rem; line-height: 1.7; color: #475569; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased">
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-10">
-        <a href="/" class="text-2xl font-black text-sky-600 tracking-tighter">HLOG</a>
-        <nav class="hidden md:flex items-center gap-10">
-          <a href="/" class="nav-link text-slate-700">首页</a>
-          <div class="relative dropdown">
-            <a href="#" class="nav-link text-slate-700 flex items-center gap-1">文章 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></a>
-            <div class="dropdown-menu hidden absolute left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl rounded-xl py-2 z-50">
-              <a href="/?tag=精品软件" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 font-bold">精品软件</a>
-              <a href="/?tag=技术教程" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 font-bold">技术教程</a>
+<body class="antialiased font-sans">
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+      <div class="flex items-center gap-10"> 
+        <a href="/" class="flex items-center gap-2 group">
+           <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg group-hover:rotate-6 transition-transform">H</div>
+           <span class="text-3xl font-black text-slate-800 tracking-tighter">HLOG</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-10"> 
+          <a href="/" class="nav-link">首页</a>
+          <div class="dropdown">
+            <a href="#" class="nav-link flex items-center gap-1">文章 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></a>
+            <div id="navCatList" class="dropdown-menu">
+               <div class="px-4 py-2 text-xs text-slate-400 italic">同步分类中...</div>
             </div>
           </div>
-          <a href="/about.html" class="nav-link text-slate-700">关于</a>
-          <a href="/privacy.html" class="nav-link text-sky-600">隐私</a>
+          <a href="/about.html" class="nav-link">关于</a>
+          <a href="/privacy.html" class="nav-link active">隐私</a>
         </nav>
       </div>
-      <nav class="flex items-center gap-3">
-        <a href="/login.html" id="loginLink" class="px-3 py-2 rounded-lg text-sm font-bold text-slate-600">登录</a>
-        <a href="/admin.html" id="adminLink" class="px-4 py-2 rounded-lg bg-sky-600 text-white hidden font-bold">后台</a>
-        <button id="logoutBtn" class="px-3 py-2 rounded-lg text-sm font-bold bg-slate-800 text-white hidden">退出</button>
-      </nav>
+
+      <div class="flex items-center gap-4">
+        <div id="authLinks" class="flex items-center gap-3"></div>
+      </div>
     </div>
   </header>
 
   <main class="max-w-4xl mx-auto px-4 py-12">
-    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 md:p-12">
-      <h1 class="text-4xl font-black text-slate-900 mb-8 text-center">隐私政策</h1>
-      
-      <div class="prose max-w-none">
-        <p class="text-sm text-slate-400 mb-8 italic">最后更新日期：2026年3月30日</p>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-10 md:p-16">
+      <h1 class="text-3xl font-black text-slate-900 mb-8 text-center border-b pb-6">隐私政策</h1>
+      <div class="space-y-6 text-sm font-medium text-slate-600 leading-relaxed">
+        <p>本隐私政策说明了 HLOG 网站如何收集、使用和保护您的个人信息。</p>
         
-        <h2>1. 信息收集</h2>
-        <p>当您在本站发表评论时，我们会收集您在评论表单中填写的昵称、电子邮箱地址以及您的 IP 地址。这些信息仅用于过滤垃圾评论和识别用户身份。</p>
-
-        <h2>2. 账号与安全</h2>
-        <p>如果您注册了本站账号，我们会存储您的用户名和加密后的密码。我们采用业界标准的加密算法（SHA-256）保护您的密码，无法反向解密获取原始密码。</p>
-
-        <h2>3. Cookie 使用</h2>
-        <p>本站使用浏览器缓存（LocalStorage）来存储您的登录凭证（Token），以便您在下次访问时无需重新登录。我们不使用 Cookie 进行任何广告追踪。</p>
-
-        <h2>4. 第三方服务</h2>
-        <p>本站部署于 <strong>Cloudflare Pages</strong>，图片存储于 <strong>Cloudflare R2</strong>。在访问过程中，Cloudflare 可能会根据其自身的隐私政策收集必要的网络访问数据以确保服务安全稳定。</p>
-
-        <h2>5. 您的权利</h2>
-        <p>您可以随时联系管理员要求修改或删除您的个人评论信息及账号资料。</p>
+        <h2 class="text-xl font-bold text-slate-800 mt-8 mb-2">1. 信息收集</h2>
+        <p>当您注册账户、发表评论或使用我们的服务时，我们可能会收集您的基本信息（如用户名、电子邮件等）。这些数据将安全地存储在 Cloudflare D1 数据库中。</p>
+        
+        <h2 class="text-xl font-bold text-slate-800 mt-8 mb-2">2. 信息使用</h2>
+        <p>我们收集的信息主要用于身份验证、防止滥用（如评论防垃圾）以及提供核心的博客功能。我们绝不会将您的个人信息出售给任何第三方。</p>
+        
+        <h2 class="text-xl font-bold text-slate-800 mt-8 mb-2">3. 数据安全</h2>
+        <p>我们将使用包括 JWT 令牌在内的标准安全措施来保护您的账户安全。密码将被加密存储，平台管理员无法获取您的明文密码。</p>
+        
+        <h2 class="text-xl font-bold text-slate-800 mt-8 mb-2">4. 联系我们</h2>
+        <p>如果您对本隐私政策有任何疑问或希望删除您的账户数据，请通过系统管理员与我们联系。</p>
       </div>
     </div>
   </main>
 
   <script>
     const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
+    const authLinks = document.getElementById("authLinks");
     if (auth?.token) {
-      document.getElementById("loginLink").classList.add("hidden");
-      if (auth.role === "admin") document.getElementById("adminLink").classList.remove("hidden");
-      document.getElementById("logoutBtn").classList.remove("hidden");
+      authLinks.innerHTML = `<a href="/admin.html" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-black shadow-lg">管理后台</a>`;
+    } else {
+      authLinks.innerHTML = `<a href="/login.html" class="text-sm font-black text-slate-600 hover:text-indigo-600">登录</a><a href="/register.html" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-sm font-black shadow-lg">注册</a>`;
     }
-    document.getElementById("logoutBtn")?.addEventListener("click", () => { localStorage.removeItem("hlog_auth"); location.reload(); });
+
+    async function loadCategories() {
+      try {
+        const res = await fetch("/api/category/list");
+        const data = await res.json();
+        const cats = data.categories || [];
+        document.getElementById("navCatList").innerHTML = cats.map(c => 
+          `<a href="/?cat=${c.id}" class="block px-5 py-2.5 hover:bg-indigo-50 font-bold text-slate-600 transition-colors">${c.name}</a>`).join("");
+      } catch(e) {}
+    }
+    loadCategories();
   </script>
 </body>
 </html>
