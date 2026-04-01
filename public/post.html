@@ -3,26 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>文章阅读 - HLOG</title>
+  <title>HLOG - XIAOHE的互联网分享</title>
+  <link rel="icon" href="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <link rel="stylesheet" href="https://lib.baomitu.com/Swiper/11.0.5/swiper-bundle.min.css" />
   <style>
     :root { --main-radius: 12px; }
     body { background-color: #f4f7f9; color: #1e293b; }
+    .card-modern { background: white; border-radius: var(--main-radius); border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
     .nav-link { font-size: 1.15rem; font-weight: 800; transition: color 0.3s; color: #475569; }
     .nav-link:hover, .nav-link.active { color: #6366f1; }
     .dropdown { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
     .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; min-width: 180px; background: white; border-radius: 10px; border: 1px solid #e5e7eb; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 100; padding: 8px 0; }
     .dropdown:hover .dropdown-menu { display: block; }
-    
-    .ql-editor { font-size: 1.05rem; line-height: 1.8; color: #334155; }
-    .ql-editor img { max-width: 100%; border-radius: 8px; margin: 1.5rem 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    .ql-editor h2 { font-size: 1.5rem; font-weight: 800; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
-    .ql-editor h3 { font-size: 1.25rem; font-weight: bold; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-    .ql-editor blockquote { border-left: 4px solid #6366f1; background-color: #f8fafc; padding: 1rem; color: #475569; font-style: italic; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
-    iframe.ql-video { width: 100%; aspect-ratio: 16/9; border-radius: 8px; margin: 1.5rem 0; }
+    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .aside-title { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 800; color: #1e293b; margin-bottom: 1.25rem; }
     .aside-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .home-hero-swiper { border-radius: 16px; overflow: hidden; height: 400px; }
   </style>
 </head>
 <body class="antialiased font-sans">
@@ -30,13 +28,13 @@
     <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
       <div class="flex items-center gap-10"> 
         <a href="/" class="flex items-center gap-2 group">
-           <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg group-hover:rotate-6 transition-transform">H</div>
+           <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg">H</div>
            <span class="text-3xl font-black text-slate-800 tracking-tighter">HLOG</span>
         </a>
         <nav class="hidden md:flex items-center gap-10"> 
-          <a href="/" class="nav-link">首页</a>
+          <a href="/" class="nav-link active">首页</a>
           <div class="dropdown">
-            <a href="#" class="nav-link active flex items-center gap-1">文章 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></a>
+            <a href="#" class="nav-link flex items-center gap-1">文章 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></a>
             <div id="navCatList" class="dropdown-menu">
                <div class="px-4 py-2 text-xs text-slate-400 italic">同步分类中...</div>
             </div>
@@ -45,75 +43,63 @@
           <a href="/privacy.html" class="nav-link">隐私</a>
         </nav>
       </div>
-
-      <div class="flex items-center gap-4">
-        <form id="searchForm" class="hidden sm:flex items-center bg-slate-100 rounded-full px-5 py-2 focus-within:bg-white border focus-within:border-indigo-300 transition-all">
-          <input id="searchInput" type="text" placeholder="搜索站内..." class="bg-transparent text-sm outline-none w-32 focus:w-48 transition-all" />
-          <button type="submit" class="text-slate-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
-        </form>
-        <div id="authLinks" class="flex items-center gap-3"></div>
-      </div>
+      <div id="authLinks" class="flex items-center gap-3"></div>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex flex-col lg:flex-row gap-8">
-      <div class="flex-1 min-w-0">
-        <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <div class="p-8 md:p-12">
-            <h1 id="postTitle" class="text-3xl md:text-4xl font-black text-slate-900 leading-tight mb-6">加载中...</h1>
-            <div id="postMeta" class="flex flex-wrap items-center gap-6 text-sm font-bold text-slate-400 mb-8 pb-8 border-b border-slate-100 uppercase tracking-widest">
-            </div>
-            
-            <div id="postCover" class="w-full aspect-video rounded-xl overflow-hidden mb-10 hidden bg-slate-50">
-              <img src="" class="w-full h-full object-cover" />
-            </div>
-
-            <div id="postContent" class="ql-editor p-0">
-               <div class="flex justify-center items-center py-20 text-indigo-500 font-bold">
-                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                 正在获取文章内容...
-               </div>
-            </div>
-            
-            <div id="postTags" class="mt-10 flex flex-wrap gap-2 font-bold"></div>
+    <div class="flex flex-col md:flex-row gap-8">
+      <div class="flex-1 min-w-0 space-y-8">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+          <div class="xl:col-span-2 relative rounded-2xl shadow-sm bg-slate-200 overflow-hidden">
+            <div class="swiper home-hero-swiper"><div class="swiper-wrapper" id="swiperWrapper"></div><div class="swiper-pagination"></div></div>
           </div>
-        </article>
-
-        <div id="hiddenContentWrapper" class="mt-8 bg-amber-50 border border-amber-200 rounded-2xl p-6 hidden shadow-sm">
-          <h3 class="text-sm font-black text-amber-600 mb-2 flex items-center gap-2"><span>🔑</span> 专属登录内容</h3>
-          <div id="hiddenContent" class="text-slate-700 text-sm break-all font-medium"></div>
+          <div class="flex flex-col gap-4 self-stretch">
+            <div class="card-modern p-6 flex-1">
+              <h3 class="text-base font-black text-slate-800 mb-4 pl-3 border-l-4 border-indigo-600 tracking-wider">最新公告</h3>
+              <div id="siteNoticeDisplay" class="text-sm text-slate-500 leading-relaxed">加载中...</div>
+            </div>
+            <div class="relative rounded-2xl overflow-hidden shadow-xl h-[220px] bg-indigo-100 group">
+              <img id="posterImg" src="" onerror="this.src='https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png'" class="absolute inset-0 w-full h-full object-cover object-center transition duration-700 group-hover:scale-110" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+              <div class="absolute bottom-6 left-6 right-6 text-white">
+                <div class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Featured Post</div>
+                <h4 id="posterTitle" class="text-xl font-bold mb-3 line-clamp-2 leading-tight">加载中...</h4>
+                <a id="posterLink" href="#" class="inline-block bg-white text-indigo-600 px-5 py-2 rounded-xl text-xs font-black">立即阅读</a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="mt-12 bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
-          <h3 class="text-xl font-black text-slate-800 mb-8 flex items-center gap-2">
-            <span class="w-1.5 h-6 bg-indigo-600 rounded-full"></span> 参与互动探讨
-          </h3>
-          <div id="commentForm" class="mb-10">
-            <div class="flex flex-col md:flex-row gap-4 mb-4">
-              <input type="text" id="commentName" placeholder="您的昵称 (必填)" class="flex-1 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-indigo-500 transition" required />
-              <input type="email" id="commentEmail" placeholder="您的邮箱 (必填，不会被公开)" class="flex-1 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:border-indigo-500 transition" required />
-            </div>
-            <textarea id="commentContent" rows="3" placeholder="写下你的想法..." class="w-full border border-slate-200 rounded-xl p-4 mb-4 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"></textarea>
-            <button id="submitCommentBtn" class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition">发表评论</button>
+        <div class="card-modern overflow-hidden">
+          <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h2 class="text-xl font-black text-slate-800 flex items-center gap-2"><span class="w-1.5 h-6 bg-indigo-600 rounded-full"></span> 最新发布</h2>
           </div>
-          <div id="commentsList" class="space-y-6"></div>
+          <div id="postGrid" class="divide-y divide-slate-100">加载中...</div>
         </div>
       </div>
 
-      <aside class="w-full lg:w-80 shrink-0 space-y-8">
-        <div class="bg-white rounded-2xl p-8 text-center border border-slate-200 shadow-sm relative overflow-hidden">
+      <aside class="w-full md:w-80 shrink-0 space-y-8">
+        <div class="card-modern p-8 text-center relative overflow-hidden">
           <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-10"></div>
-          <img src="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 border-4 border-white shadow-md relative z-10" />
-          <h3 class="text-lg font-black text-slate-900">XIAOHE</h3>
+          <img src="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" class="w-24 h-24 rounded-2xl object-cover mx-auto mb-4 border-4 border-white shadow-md relative z-10" />
+          <h2 class="text-xl font-black text-slate-900">XIAOHE</h2>
           <p class="text-xs text-slate-400 mt-2 font-bold">一个互联网爱好分享者！</p>
+          
+          <div class="flex justify-center gap-4 mt-6">
+            <a href="https://x.com/xiaoheyiyi" target="_blank" class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="https://youtube.com/@xiaohe" target="_blank" class="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+            <a href="https://github.com/hezhanleiok/Hlog" target="_blank" class="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg></a>
+            <a href="https://t.me/xiaoheok" target="_blank" class="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+          </div>
+
           <div class="grid grid-cols-2 border-t border-slate-50 mt-8 pt-6">
             <div><div id="stat_posts" class="text-base font-black text-slate-800">0</div><div class="text-[10px] text-slate-400 uppercase font-bold">文章</div></div>
             <div><div id="stat_tags" class="text-base font-black text-slate-800">0</div><div class="text-[10px] text-slate-400 uppercase font-bold">标签</div></div>
           </div>
         </div>
-        
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+
+        <div class="card-modern p-6">
           <h3 class="aside-title"><div class="aside-icon bg-blue-100 text-blue-600">📊</div> 运行统计</h3>
           <div class="space-y-4 pt-2">
             <div class="flex justify-between items-center text-sm">
@@ -127,32 +113,59 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <div class="card-modern p-6">
+          <h3 class="aside-title"><div class="aside-icon bg-purple-100 text-purple-600">🏷️</div> 热门标签</h3>
+          <div id="sidebarTags" class="flex flex-wrap gap-2 pt-2">加载中...</div>
+        </div>
+
+        <div class="card-modern p-6">
           <h3 class="aside-title"><div class="aside-icon bg-orange-100 text-orange-600">🔥</div> 热门推荐</h3>
           <div id="hotList" class="space-y-4"></div>
+        </div>
+
+        <div class="card-modern p-6">
+          <h3 class="aside-title"><div class="aside-icon bg-amber-100 text-amber-600">📅</div> 文章归档</h3>
+          <div id="archiveList" class="space-y-1"></div>
+        </div>
+
+        <div class="card-modern p-6">
+          <h3 class="aside-title"><div class="aside-icon bg-emerald-100 text-emerald-600">💬</div> 最新互动</h3>
+          <div id="latestComments" class="space-y-4"></div>
         </div>
       </aside>
     </div>
   </main>
 
   <footer class="bg-white border-t border-slate-200 mt-12 py-8 text-center">
-    <p class="text-sm text-slate-400 font-bold">© 2026 HLOG · 极致分享 · Cloudflare 驱动</p>
+    <p class="text-sm text-slate-400 font-bold">© 2026 HLOG · Cloudflare 驱动</p>
   </footer>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://lib.baomitu.com/Swiper/11.0.5/swiper-bundle.min.js"></script>
   <script>
     const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
     const authLinks = document.getElementById("authLinks");
+    
     if (auth?.token) {
       authLinks.innerHTML = `<a href="/admin.html" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-black shadow-lg">管理后台</a>`;
     } else {
-      authLinks.innerHTML = `<a href="/login.html" class="text-sm font-black text-slate-600 hover:text-indigo-600">登录</a><a href="/register.html" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-sm font-black shadow-lg">注册</a>`;
+      authLinks.innerHTML = `
+        <a href="/login.html" class="text-sm font-black text-slate-600 hover:text-indigo-600">登录</a>
+        <a href="/register.html" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-sm font-black shadow-lg hover:bg-slate-700 transition">注册</a>
+      `;
     }
 
-    async function api(path, options = {}) {
-      const headers = options.headers || {};
-      if (auth?.token) headers.Authorization = `Bearer ${auth.token}`;
-      return (await fetch(path, { ...options, headers })).json().catch(() => ({}));
+    async function api(path) {
+      return (await fetch(path)).json().catch(() => ({}));
+    }
+
+    // ⭐ 新增：优先请求静态 JSON 文件，如果失败（如本地开发时）则自动回退调用动态 API
+    async function fetchStaticOrApi(staticPath, apiPath) {
+      try {
+        const res = await fetch(staticPath);
+        if (res.ok) return await res.json();
+      } catch (e) {}
+      // 静态获取失败，走原始 API
+      return api(apiPath);
     }
 
     function getCover(p) {
@@ -163,119 +176,118 @@
 
     function escapeHtml(s) { return String(s || "").replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m])); }
 
+    function toggleArchive(id) {
+        const el = document.getElementById(id);
+        if(el) el.classList.toggle('hidden');
+    }
+
     async function load() {
-      // 一次性获取所有需要的数据以提高速度
-      const [catData, stats, siteStats, tagsData, hotData] = await Promise.all([
-        api("/api/category/list"),
-        api("/api/stats"),
-        api("/api/site/stats"),
-        api("/api/tag/list"),
-        api("/api/post/list?sort=views&limit=5")
+      // ⭐ 修改点：使用 fetchStaticOrApi 替换原有的 api() 调用
+      const [catData, stats, siteStats, annRes, postsRes, hotData, commentsData, tagsData] = await Promise.all([
+        fetchStaticOrApi("/static/category-list.json", "/api/category/list"),
+        fetchStaticOrApi("/static/stats.json", "/api/stats"),
+        fetchStaticOrApi("/static/site-stats.json", "/api/site/stats"),
+        fetchStaticOrApi("/static/announcement-latest.json", "/api/admin/announcement/latest"),
+        fetchStaticOrApi("/static/post-list-recent.json", "/api/post/list?limit=15&sort=recent"),
+        fetchStaticOrApi("/static/post-list-views.json", "/api/post/list?sort=views&limit=5"),
+        fetchStaticOrApi("/static/comment-latest.json", "/api/comment/latest?limit=4"),
+        fetchStaticOrApi("/static/tag-list.json", "/api/tag/list")
       ]);
 
-      // 菜单
       const cats = catData.categories || [];
       document.getElementById("navCatList").innerHTML = cats.map(c => 
         `<a href="/?cat=${c.id}" class="block px-5 py-2.5 hover:bg-indigo-50 font-bold text-slate-600 transition-colors">${c.name}</a>`).join("");
 
-      // 侧边栏统计
       document.getElementById("stat_posts").textContent = siteStats.post_count || 0;
       document.getElementById("stat_tags").textContent = (tagsData.tags || []).length;
       document.getElementById("statTodayViews").textContent = stats.today_views || 0;
       document.getElementById("statTotalViews").textContent = siteStats.total_views || 0;
 
-      const urlParams = new URLSearchParams(window.location.search);
-      const postId = urlParams.get("post");
-      if (!postId) { document.getElementById("postContent").innerHTML = "<div class='text-center py-10 font-bold'>缺少文章参数</div>"; return; }
+      // 渲染标签云
+      const tagsList = tagsData.tags || [];
+      document.getElementById("sidebarTags").innerHTML = tagsList.map(t => 
+        `<a href="/?tag=${encodeURIComponent(t.name)}" class="bg-slate-100 text-slate-600 hover:bg-indigo-600 hover:text-white transition px-3 py-1 rounded-lg text-[11px] font-bold">${escapeHtml(t.name)}</a>`
+      ).join("") || '<div class="text-xs text-slate-400">暂无标签</div>';
 
-      const data = await api(`/api/post/view?id=${postId}`);
-      if (!data || !data.post) {
-         document.title = "文章加载失败 - HLOG";
-         document.getElementById("postTitle").textContent = "文章加载失败";
-         document.getElementById("postContent").innerHTML = `<div class='text-center text-red-500 py-10 font-bold'>无法获取文章数据：${data?.error || '数据库字段不匹配或文章已被删除'}</div>`;
-         return;
-      }
-      
-      const post = data.post;
-      document.title = `${post.title} - HLOG`;
-      document.getElementById("postTitle").textContent = post.title;
-      document.getElementById("postMeta").innerHTML = `
-        <span>时间: ${new Date(post.created_at).toLocaleString()}</span>
-        <span>分类: ${post.category_name || '未分类'}</span>
-        <span>阅读: ${post.views}</span>
-      `;
-      
-      if (post.cover_url) {
-        document.getElementById("postCover").classList.remove("hidden");
-        document.querySelector("#postCover img").src = post.cover_url;
-      }
-      
-      document.getElementById("postContent").innerHTML = post.content || "<p>暂无内容</p>";
-      document.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
-      document.getElementById("postTags").innerHTML = (post.tags||[]).map(t=>`<span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[10px] uppercase">${escapeHtml(t)}</span>`).join("");
-
-      if (post.hidden_content) {
-        document.getElementById("hiddenContentWrapper").classList.remove("hidden");
-        document.getElementById("hiddenContent").innerHTML = escapeHtml(post.hidden_content).replace(/\n/g, '<br>');
-      } else if (post.has_hidden_content) {
-        document.getElementById("hiddenContentWrapper").classList.remove("hidden");
-        document.getElementById("hiddenContent").innerHTML = `<a href="/login.html" class="text-indigo-600 underline font-bold">登录后查看专属内容</a>`;
+      const announcements = annRes.data || [];
+      const noticeContainer = document.getElementById("siteNoticeDisplay");
+      if (announcements.length > 0) {
+        noticeContainer.innerHTML = '<ul class="space-y-3 m-0 p-0">' + announcements.map(a => `<li class="relative pl-4 text-sm text-slate-600 before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-1.5 before:h-1.5 before:bg-indigo-600 before:rounded-sm leading-relaxed">${escapeHtml(a.content)}</li>`).join("") + '</ul>';
       }
 
-      // 侧边栏热门
+      const posts = postsRes.posts || [];
+      if(posts.length > 0) {
+        document.getElementById("posterImg").src = getCover(posts[0]);
+        document.getElementById("posterTitle").textContent = posts[0].title;
+        document.getElementById("posterLink").href = `/post.html?post=${posts[0].id}`;
+      }
+      
+      document.getElementById("postGrid").innerHTML = posts.map(p => `
+        <div class="post-item p-6 group hover:bg-slate-50 transition-colors">
+          <a href="/post.html?post=${p.id}" class="flex flex-col md:flex-row gap-6">
+            <div class="w-full md:w-64 h-40 overflow-hidden rounded-xl bg-slate-50 shrink-0">
+              <img src="${getCover(p)}" onerror="this.src='https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" />
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xl font-black text-slate-800 mb-2 group-hover:text-indigo-600 line-clamp-1">${escapeHtml(p.title)}</h3>
+                <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed">${escapeHtml(p.summary || '阅读更多内容...')}</p>
+              </div>
+              <div class="flex gap-4 text-[10px] font-black text-slate-400 mt-4 uppercase">
+                <span>${new Date(p.created_at).toLocaleDateString()}</span>
+                <span>${p.views} 阅读</span>
+              </div>
+            </div>
+          </a>
+        </div>`).join("") || '<div class="p-6 text-center text-slate-400">暂无文章</div>';
+
+      if (posts.length > 0) {
+        document.getElementById("swiperWrapper").innerHTML = posts.slice(0, 5).map(p => `
+          <div class="swiper-slide relative">
+            <a href="/post.html?post=${p.id}" class="block h-full">
+              <img src="${getCover(p)}" onerror="this.src='https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png'" class="w-full h-full object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+              <div class="absolute bottom-12 left-10 text-white font-black text-3xl">${escapeHtml(p.title)}</div>
+            </a>
+          </div>`).join("");
+        new Swiper(".home-hero-swiper", { pagination: { el: ".swiper-pagination", clickable: true }, autoplay: { delay: 5000 }, loop: true, effect: 'fade' });
+      }
+
       document.getElementById("hotList").innerHTML = (hotData.posts || []).map(p => `
         <a href="/post.html?post=${p.id}" class="flex gap-3 group bg-slate-50 p-2 rounded-xl hover:bg-indigo-50 transition-colors border border-slate-100">
-          <img src="${getCover(p)}" class="w-16 h-12 rounded-lg object-cover shrink-0" />
+          <img src="${getCover(p)}" onerror="this.src='https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png'" class="w-16 h-14 rounded-lg object-cover shrink-0" />
           <div class="min-w-0 flex flex-col justify-center">
             <h4 class="text-xs font-black text-slate-700 line-clamp-2 group-hover:text-indigo-600 transition leading-snug">${escapeHtml(p.title)}</h4>
           </div>
         </a>`).join("");
 
-      loadComments(postId);
-    }
+      document.getElementById("latestComments").innerHTML = (commentsData.comments || []).map(c => `
+        <div class="flex gap-3 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+           <img src="${c.avatar || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.name)+'&background=random&color=fff'}" class="w-8 h-8 rounded-full shadow-sm shrink-0">
+           <div class="min-w-0">
+             <div class="text-xs font-black text-indigo-600 mb-1">${escapeHtml(c.name)}</div>
+             <div class="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">${escapeHtml(c.content)}</div>
+           </div>
+        </div>`).join("");
 
-    async function loadComments(postId) {
-      const data = await api(`/api/comment/list?post_id=${postId}`);
-      document.getElementById("commentsList").innerHTML = (data.comments || []).map(c => `
-        <div class="border-b border-slate-100 pb-4">
-          <div class="flex items-center gap-3 mb-2">
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=random&color=fff" class="w-8 h-8 rounded-full shadow-sm shrink-0">
-            <div>
-                <span class="font-bold text-sm text-indigo-600">${escapeHtml(c.name)}</span>
-                <span class="text-[10px] text-slate-400 font-bold ml-2">${new Date(c.created_at).toLocaleString()}</span>
-            </div>
+      const archive = {};
+      posts.forEach(p => {
+        const d = new Date(p.created_at);
+        const key = `${d.getFullYear()}年${d.getMonth() + 1}月`;
+        if(!archive[key]) archive[key] = [];
+        archive[key].push(p);
+      });
+      document.getElementById("archiveList").innerHTML = Object.entries(archive).map(([key, list], i) => `
+        <div class="mb-2">
+          <div onclick="toggleArchive('archive-${i}')" class="flex justify-between items-center py-2 px-3 rounded-xl hover:bg-indigo-50 cursor-pointer transition-all group">
+            <span class="text-sm font-bold text-slate-600 group-hover:text-indigo-600">${key}</span>
+            <span class="bg-slate-100 px-2 py-0.5 rounded-full text-[10px] font-black text-slate-400">${list.length} 篇</span>
           </div>
-          <div class="text-sm text-slate-600 pl-11 font-medium">${escapeHtml(c.content)}</div>
-          ${c.reply ? `<div class="mt-3 ml-11 bg-slate-50 p-3 rounded-lg border border-slate-100"><div class="text-xs font-black text-indigo-600 mb-1">作者回复:</div><div class="text-xs text-slate-600 font-medium">${escapeHtml(c.reply)}</div></div>` : ''}
-        </div>`).join("") || '<div class="text-sm text-slate-400 italic">暂无评论，快来抢沙发！</div>';
+          <ul id="archive-${i}" class="hidden pl-4 pr-2 py-2 space-y-2 border-l-2 border-indigo-100 ml-3 mt-1">
+            ${list.map(p => `<li><a href="/post.html?post=${p.id}" class="text-xs text-slate-500 hover:text-indigo-600 line-clamp-1 block py-1">${escapeHtml(p.title)}</a></li>`).join("")}
+          </ul>
+        </div>`).join("");
     }
-
-    // 游客直接评论逻辑
-    document.getElementById("submitCommentBtn").onclick = async () => {
-      const name = document.getElementById("commentName").value.trim();
-      const email = document.getElementById("commentEmail").value.trim();
-      const content = document.getElementById("commentContent").value.trim();
-      
-      if (!name || !email || !content) return alert("请填写完整您的昵称、邮箱和评论内容");
-      
-      const btn = document.getElementById("submitCommentBtn"); btn.disabled = true; btn.textContent = "提交中...";
-      const postId = new URLSearchParams(window.location.search).get("post");
-      try {
-        await api("/api/comment/add", { 
-          method: "POST", 
-          body: JSON.stringify({ post_id: Number(postId), name, email, content }) 
-        });
-        alert("评论提交成功！");
-        document.getElementById("commentContent").value = "";
-        loadComments(postId);
-      } catch(e) { alert("评论失败"); } finally { btn.disabled = false; btn.textContent = "发表评论"; }
-    };
-
-    document.getElementById("searchForm").addEventListener("submit", (e) => {
-      e.preventDefault(); const q = document.getElementById("searchInput").value.trim();
-      if(q) location.href = `/?q=${encodeURIComponent(q)}`;
-    });
-
     load();
   </script>
 </body>
