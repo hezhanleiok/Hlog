@@ -7,152 +7,116 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://lib.baomitu.com/Swiper/11.0.5/swiper-bundle.min.css" />
   <style>
-    :root { --main-radius: 14px; }
-    body { background-color: #f4f7f9; color: #1e293b; }
-    .card-flat { background: white; border-radius: var(--main-radius); border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    :root { --accent-color: #6366f1; }
+    body { background-color: #f3f4f6; color: #1f2937; }
+    .card-modern { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f3f4f6; }
     
-    /* 下拉菜单修复 */
-    .dropdown { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
+    /* 导航栏下拉修复 */
+    .dropdown { position: relative; padding-bottom: 15px; margin-bottom: -15px; }
     .dropdown-menu { 
-      display: none; position: absolute; top: 100%; left: 0; margin-top: 5px; z-index: 100;
-      animation: fadeIn 0.2s ease-out;
+      display: none; position: absolute; top: 100%; left: 0; min-width: 160px;
+      background: white; border-radius: 8px; border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 50; padding: 8px 0;
     }
     .dropdown:hover .dropdown-menu { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-    .nav-link { font-size: 1.1rem; font-weight: 700; transition: color 0.3s; color: #475569; }
-    .nav-link:hover, .nav-link.active { color: #0ea5e9; }
-
+    
     .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    
-    .post-card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .post-card-hover:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
   </style>
 </head>
-<body class="antialiased">
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-12"> 
-        <a href="/" class="flex items-center gap-2 group">
-           <div class="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg group-hover:rotate-12 transition-transform">H</div>
-           <span class="text-2xl font-black text-slate-800 tracking-tighter">HLOG</span>
+<body class="antialiased font-sans">
+  <header class="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-10">
+        <a href="/" class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">H</div>
+          <span class="text-xl font-bold tracking-tight text-gray-900">HLOG</span>
         </a>
-        <nav class="hidden md:flex items-center gap-8"> 
-          <a href="/" class="nav-link active">首页</a>
+        <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-600">
+          <a href="/" class="text-indigo-600">首页</a>
           <div class="dropdown">
-            <a href="#" class="nav-link flex items-center gap-1">分类文章 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></a>
-            <div class="dropdown-menu w-48 bg-white border border-slate-100 shadow-2xl rounded-2xl py-2">
-              <div id="navCatList">
-                <a href="/?tag=精品软件" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 font-bold transition-colors">💎 精品软件</a>
-                <a href="/?tag=技术教程" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 font-bold transition-colors">🚀 技术教程</a>
-              </div>
+            <a href="#" class="flex items-center gap-1 hover:text-indigo-600">文章 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></a>
+            <div id="navCatList" class="dropdown-menu">
+              <div class="px-4 py-2 text-xs text-gray-400">正在同步分类...</div>
             </div>
           </div>
-          <a href="/about.html" class="nav-link">关于</a>
+          <a href="/about.html" class="hover:text-indigo-600">关于</a>
+          <a href="/privacy.html" class="hover:text-indigo-600">隐私</a>
         </nav>
       </div>
-
-      <div class="flex items-center gap-4">
-        <form id="searchForm" class="hidden sm:flex items-center bg-slate-100 rounded-full px-4 py-2 border border-transparent focus-within:border-sky-300 focus-within:bg-white transition-all">
-          <input id="searchInput" type="text" placeholder="搜索站内文章..." class="bg-transparent border-none text-sm outline-none w-32 focus:w-48 transition-all" />
-          <button type="submit" class="text-slate-400 hover:text-sky-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
-        </form>
-        <div id="authLinks" class="flex items-center gap-2">
-          <a href="/login.html" id="loginLink" class="px-4 py-2 text-sm font-bold text-slate-600 hover:text-sky-600 transition">登录</a>
+      <div id="authLinks" class="flex items-center gap-4">
         </div>
-      </div>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-8">
     <div class="flex flex-col lg:flex-row gap-8">
-      
-      <div class="flex-1 min-w-0">
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-10">
-          <div class="xl:col-span-2 relative rounded-[2rem] overflow-hidden shadow-xl bg-slate-200 isolate aspect-[16/9] xl:aspect-auto xl:h-[400px]">
+      <div class="flex-1 min-w-0 space-y-8">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div class="xl:col-span-2 rounded-2xl overflow-hidden shadow-lg aspect-[16/9] xl:h-[400px]">
             <div class="swiper home-hero-swiper h-full">
               <div class="swiper-wrapper" id="swiperWrapper"></div>
               <div class="swiper-pagination"></div>
             </div>
           </div>
-
           <div class="flex flex-col gap-4">
-            <div class="bg-white rounded-[1.5rem] p-6 card-flat flex-1">
-              <h3 class="text-sm font-black text-red-600 flex items-center gap-2 mb-4">
-                <span>📢</span> 站点公告
-              </h3>
-              <div id="siteNoticeDisplay" class="text-xs text-slate-500 leading-relaxed font-medium">
-                HLOG V2.0 布局视觉升级已上线！欢迎交流技术心得。
+            <div id="posterRecommend" class="relative rounded-2xl overflow-hidden shadow-lg h-full group">
+              <img id="posterImg" src="" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+              <div class="absolute bottom-6 left-6 right-6 text-white">
+                <span class="bg-indigo-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2 inline-block">特别推荐</span>
+                <h3 id="posterTitle" class="text-xl font-bold line-clamp-2 leading-tight mb-4">...</h3>
+                <a id="posterLink" href="#" class="inline-block bg-white text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold">立即阅读</a>
               </div>
             </div>
-            <div class="bg-gradient-to-br from-sky-700 to-indigo-900 rounded-[1.5rem] p-6 shadow-lg text-white relative overflow-hidden group flex-1 flex flex-col justify-between">
-              <div class="relative z-10">
-                <div class="text-[10px] font-bold opacity-80 uppercase tracking-widest mb-1">🔥 特别推荐</div>
-                <h4 class="text-lg font-bold mb-3 leading-tight" id="topRecommendTitle">正在加载...</h4>
-              </div>
-              <a href="#" id="topRecommendBtn" class="relative z-10 inline-block text-center text-xs font-bold bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-lg transition">立即阅读</a>
-              <svg class="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            </div>
           </div>
-        </div>
-
-        <div class="flex items-center justify-between mb-8">
-          <div class="flex items-baseline gap-3">
-            <h2 class="text-2xl font-black text-slate-800 tracking-tight">最新发布</h2>
-          </div>
-          <button id="reloadPostsBtn" class="text-sm font-bold text-sky-600 hover:underline">刷新列表</button>
         </div>
 
         <div id="postGrid" class="flex flex-col gap-6"></div>
       </div>
 
-      <aside class="w-full lg:w-80 shrink-0 space-y-8">
-        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 text-center sticky top-24">
-          <img id="profileAvatar" src="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" class="w-24 h-24 rounded-[1.5rem] object-cover mx-auto ring-8 ring-slate-50" />
-          <h2 class="mt-5 text-xl font-black text-slate-900">XIAOHE</h2>
-          <p class="mt-2 text-sm text-slate-500 font-medium px-4 line-clamp-2">一个互联网爱好分享者！</p>
-          
-          <div class="flex justify-center gap-4 mt-6">
-            <a href="https://x.com/xiaoheyiyi" target="_blank" class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-            <a href="https://youtube.com/@xiaohe" target="_blank" class="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-            <a href="https://github.com/hezhanleiok/Hlog" target="_blank" class="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg></a>
-            <a href="https://t.me/xiaoheok" target="_blank" class="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+      <aside class="w-full lg:w-80 space-y-6">
+        <div class="card-modern p-6 text-center">
+          <img src="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" class="w-20 h-20 rounded-full mx-auto mb-4 ring-4 ring-gray-50 shadow-sm" />
+          <h2 class="text-lg font-bold">XIAOHE</h2>
+          <p class="text-xs text-gray-400 mt-1">一个互联网爱好分享者！</p>
+          <div class="flex justify-center gap-4 mt-6 border-t pt-6">
+            <div class="text-center flex-1">
+              <div id="stat_posts" class="text-lg font-bold">0</div>
+              <div class="text-[10px] text-gray-400">文章</div>
+            </div>
+            <div class="text-center flex-1 border-x border-gray-100">
+              <div id="stat_tags" class="text-lg font-bold">0</div>
+              <div class="text-[10px] text-gray-400">标签</div>
+            </div>
+            <div class="text-center flex-1">
+              <div id="stat_cats" class="text-lg font-bold">0</div>
+              <div class="text-[10px] text-gray-400">分类</div>
+            </div>
           </div>
-
-          <div class="grid grid-cols-3 gap-2 mt-8 pt-8 border-t border-slate-50">
-            <div><div id="stat_posts" class="text-xl font-black text-slate-800">0</div><div class="text-[10px] font-bold text-slate-400">文章</div></div>
-            <div><div id="stat_tags" class="text-xl font-black text-slate-800">0</div><div class="text-[10px] font-bold text-slate-400">标签</div></div>
-            <div><div id="stat_cats" class="text-xl font-black text-slate-800">0</div><div class="text-[10px] font-bold text-slate-400">分类</div></div>
-          </div>
+          <button class="w-full mt-6 bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-bold shadow-indigo-100 shadow-lg">关注我</button>
         </div>
 
-        <div class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 p-6">
-          <h3 class="text-sm font-black border-l-4 border-rose-500 pl-3 mb-4">访问统计</h3>
-          <div class="space-y-4">
-            <div class="flex justify-between items-center"><span class="text-xs text-slate-500">今日访问</span><span id="statTodayViews" class="font-bold">0</span></div>
-            <div class="flex justify-between items-center"><span class="text-xs text-slate-500">累计访问</span><span id="statTotalViews" class="font-bold">0</span></div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-[1.5rem] p-6 card-flat">
-          <h3 class="text-sm font-black border-l-4 border-amber-500 pl-3 mb-6">热门推荐</h3>
-          <div id="hotList" class="space-y-5"></div>
-        </div>
-
-        <div class="bg-white rounded-[1.5rem] p-6 card-flat">
-          <h3 class="text-sm font-black border-l-4 border-indigo-500 pl-3 mb-6">标签云</h3>
+        <div class="card-modern p-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">热门标签</h3>
           <div id="tagCloud" class="flex flex-wrap gap-2"></div>
         </div>
 
-        <div class="bg-white rounded-[1.5rem] p-6 card-flat">
-          <h3 class="text-sm font-black border-l-4 border-rose-500 pl-3 mb-6">最新评论</h3>
-          <div id="latestComments" class="space-y-4"></div>
+        <div class="card-modern p-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">访问统计</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between text-xs font-medium">
+              <span class="text-gray-400">今日访问</span><span id="stat_today">0</span>
+            </div>
+            <div class="flex justify-between text-xs font-medium">
+              <span class="text-gray-400">累计访问</span><span id="stat_total">0</span>
+            </div>
+          </div>
         </div>
 
-        <div class="bg-white rounded-[1.5rem] p-6 card-flat">
-          <h3 class="text-sm font-black border-l-4 border-emerald-500 pl-3 mb-6">文章归档</h3>
-          <div id="archiveList" class="space-y-1"></div>
+        <div class="card-modern p-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">最新评论</h3>
+          <div id="latestComments" class="space-y-4"></div>
         </div>
       </aside>
     </div>
@@ -161,113 +125,90 @@
   <script src="https://lib.baomitu.com/Swiper/11.0.5/swiper-bundle.min.js"></script>
   <script>
     const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
+    const container = document.getElementById("authLinks");
     if (auth?.token) {
-      document.getElementById("authLinks").innerHTML = `
-        <a href="/admin.html" class="px-5 py-2 rounded-xl bg-sky-600 text-white font-bold shadow-lg shadow-sky-100 hover:bg-sky-700 transition">管理后台</a>
-        <button id="logoutBtn" class="px-4 py-2 rounded-xl bg-slate-800 text-white font-bold text-sm hover:bg-slate-700">退出</button>
-      `;
-      document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("hlog_auth"); location.reload(); };
+      container.innerHTML = `<a href="/admin.html" class="bg-gray-100 px-4 py-2 rounded-lg text-sm font-bold">后台管理</a>`;
+    } else {
+      container.innerHTML = `<a href="/login.html" class="text-sm font-bold text-gray-600">登录</a>`;
     }
 
     async function api(path) {
       const h = auth?.token ? { Authorization: `Bearer ${auth.token}` } : {};
-      return (await fetch(path, { headers: h })).json().catch(() => ({}));
+      return (await fetch(path, { headers: h })).json();
     }
 
-    function getPostCover(post) {
-      if (post.cover_url) return post.cover_url;
-      const match = (post.content || "").match(/<img[^>]+src="([^">]+)"/);
-      return match ? match[1] : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Crect fill='%23f1f5f9' width='800' height='450'/%3E%3C/svg%3E";
+    function getCover(p) {
+      if(p.cover_url) return p.cover_url;
+      const m = (p.content||"").match(/<img[^>]+src="([^">]+)"/);
+      return m ? m[1] : "https://via.placeholder.com/800x450?text=HLOG";
     }
-
-    function escapeHtml(s) { return String(s || "").replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m])); }
 
     async function load() {
+      // 1. 获取分类并同步导航
+      const catData = await api("/api/category/list");
+      const cats = catData.categories || [];
+      document.getElementById("navCatList").innerHTML = cats.map(c => 
+        `<a href="/?cat=${c.id}" class="block px-4 py-2 hover:bg-gray-50 text-sm font-medium text-gray-700 transition">${c.name}</a>`
+      ).join("") || `<div class="px-4 py-2 text-xs text-gray-400">暂无分类</div>`;
+
+      // 2. 加载文章并设置海报
       const urlParams = new URLSearchParams(window.location.search);
-      const catId = urlParams.get("cat");
-      const tagId = urlParams.get("tag");
-
-      // 1. 基础数据
-      const stats = await api("/api/stats");
-      const siteStats = await api("/api/site/stats");
-      document.getElementById("siteNoticeDisplay").textContent = stats.site_notice || "欢迎访问 HLOG！";
-      document.getElementById("statTodayViews").textContent = stats.today_views || 0;
-      document.getElementById("statTotalViews").textContent = siteStats.total_views || 0;
-      document.getElementById("stat_posts").textContent = siteStats.post_count || 0;
-
-      // 2. 加载文章
-      let postPath = `/api/post/list?limit=15&sort=recent`;
-      if(catId) postPath += `&cat_id=${catId}`;
-      if(tagId) postPath += `&tag_id=${tagId}`;
-      const { posts = [] } = await api(postPath);
+      let postPath = `/api/post/list?limit=12`;
+      if(urlParams.get("cat")) postPath += `&cat_id=${urlParams.get("cat")}`;
       
+      const { posts = [] } = await api(postPath);
       if(posts.length > 0) {
-        document.getElementById("topRecommendTitle").textContent = posts[0].title;
-        document.getElementById("topRecommendBtn").href = `/post.html?post=${posts[0].id}`;
+        document.getElementById("posterImg").src = getCover(posts[0]);
+        document.getElementById("posterTitle").textContent = posts[0].title;
+        document.getElementById("posterLink").href = `/post.html?post=${posts[0].id}`;
       }
 
-      // 渲染主列表
+      // 渲染文章列表
       document.getElementById("postGrid").innerHTML = posts.map(p => `
-        <article class="bg-white rounded-[1.5rem] shadow-sm border border-slate-100 overflow-hidden post-card-hover group">
+        <article class="card-modern overflow-hidden group">
           <a href="/post.html?post=${p.id}" class="flex flex-col md:flex-row">
-            <div class="w-full md:w-72 h-48 overflow-hidden bg-slate-50 shrink-0">
-              <img src="${getPostCover(p)}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+            <div class="w-full md:w-72 h-48 shrink-0 overflow-hidden">
+              <img src="${getCover(p)}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
             </div>
             <div class="p-6 flex flex-col justify-between flex-1 min-w-0">
               <div>
-                <h3 class="text-xl font-bold text-slate-800 line-clamp-1 mb-3 group-hover:text-sky-600">${escapeHtml(p.title)}</h3>
-                <p class="text-slate-500 text-sm line-clamp-2">${escapeHtml(p.summary || '阅读全文内容...')}</p>
+                <h3 class="text-xl font-bold mb-2 group-hover:text-indigo-600 transition line-clamp-1">${p.title}</h3>
+                <p class="text-sm text-gray-500 line-clamp-2 leading-relaxed">${p.summary || '阅读全文内容...'}</p>
               </div>
-              <div class="flex items-center gap-4 text-[11px] font-bold text-slate-400 mt-4 uppercase">
-                <span class="bg-sky-50 text-sky-600 px-2 py-0.5 rounded">${p.category_name || '文章'}</span>
+              <div class="flex items-center gap-4 text-[11px] font-bold text-gray-400 uppercase mt-4">
+                <span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">${p.category_name || '默认'}</span>
                 <span>${new Date(p.created_at).toLocaleDateString()}</span>
-                <span>${p.views} 阅读</span>
+                <span>${p.views} 次阅读</span>
               </div>
             </div>
           </a>
         </article>`).join("");
 
-      // 3. 轮播图
-      const swiperWrapper = document.getElementById("swiperWrapper");
-      swiperWrapper.innerHTML = posts.slice(0, 5).map(p => `
-        <div class="swiper-slide relative">
-          <a href="/post.html?post=${p.id}" class="block h-full group">
-            <img src="${getPostCover(p)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[10s]" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-            <div class="absolute bottom-10 left-10 text-white font-bold text-2xl">${escapeHtml(p.title)}</div>
-          </a>
-        </div>`).join("");
-      new Swiper(".home-hero-swiper", { pagination: { el: ".swiper-pagination", clickable: true }, autoplay: true });
+      // 3. 更新统计
+      const stats = await api("/api/stats");
+      const site = await api("/api/site/stats");
+      document.getElementById("stat_today").textContent = stats.today_views || 0;
+      document.getElementById("stat_total").textContent = site.total_views || 0;
+      document.getElementById("stat_posts").textContent = site.post_count || 0;
+      document.getElementById("stat_cats").textContent = cats.length;
 
-      // 4. 侧边栏内容
+      // 4. 加载标签
       const tagData = await api("/api/tag/list");
-      const catData = await api("/api/category/list");
-      
-      document.getElementById("navCatList").innerHTML = (catData.categories || []).map(c => 
-        `<a href="/?cat=${c.id}" class="block px-4 py-2 hover:bg-sky-50 text-slate-600 font-bold transition-colors">${c.name}</a>`).join("");
-      
       document.getElementById("stat_tags").textContent = (tagData.tags || []).length;
-      document.getElementById("stat_cats").textContent = (catData.categories || []).length;
-
       document.getElementById("tagCloud").innerHTML = (tagData.tags || []).map(t => 
-        `<a href="/?tag=${t.id}" class="text-[11px] px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100 font-bold hover:text-sky-600 transition">${escapeHtml(t.name)}</a>`).join("");
+        `<a href="/?tag=${t.id}" class="px-3 py-1.5 bg-gray-50 hover:bg-indigo-50 hover:text-indigo-600 text-[11px] font-bold rounded-lg transition">${t.name}</a>`
+      ).join("");
 
-      const hotData = await api("/api/post/list?sort=views&limit=5");
-      document.getElementById("hotList").innerHTML = (hotData.posts || []).map(p => `
-        <a href="/post.html?post=${p.id}" class="flex items-center gap-4 group">
-          <img src="${getPostCover(p)}" class="w-16 h-12 rounded-xl object-cover shrink-0" />
-          <h4 class="text-xs font-bold line-clamp-1 group-hover:text-amber-600">${escapeHtml(p.title)}</h4>
-        </a>`).join("");
-
-      const commentData = await api("/api/comment/latest?limit=3");
-      document.getElementById("latestComments").innerHTML = (commentData.comments || []).map(c => `
-        <div class="bg-slate-50/50 p-4 rounded-xl border border-slate-100 text-[11px]">
-          <span class="font-bold text-sky-600">${escapeHtml(c.name)}:</span> "${escapeHtml(c.content)}"
-        </div>`).join("");
+      // 5. 最新评论
+      const { comments = [] } = await api("/api/comment/latest?limit=4");
+      document.getElementById("latestComments").innerHTML = comments.map(c => `
+        <div class="text-[11px] leading-relaxed">
+          <span class="font-bold text-indigo-600">${c.name}:</span>
+          <span class="text-gray-600">"${c.content}"</span>
+        </div>`).join("") || '<div class="text-xs text-gray-400 italic">暂无新评论</div>';
     }
 
     load();
-    document.getElementById("reloadPostsBtn").onclick = load;
   </script>
 </body>
 </html>
