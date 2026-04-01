@@ -10,42 +10,46 @@
     :root { --main-radius: 12px; }
     body { background-color: #f4f7f9; color: #1e293b; }
     
-    /* 基础卡片样式 - 参考图2去过度圆润 */
     .card-modern { background: white; border-radius: var(--main-radius); border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
     
-    /* 导航菜单修复 */
-    .nav-link { font-size: 1.1rem; font-weight: 700; transition: color 0.3s; color: #475569; }
+    /* 🌟 导航菜单文字加大加粗 */
+    .nav-link { font-size: 1.15rem; font-weight: 800; transition: color 0.3s; color: #475569; }
     .nav-link:hover, .nav-link.active { color: #6366f1; }
+    
     .dropdown { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
     .dropdown-menu { 
-      display: none; position: absolute; top: 100%; left: 0; min-width: 160px;
+      display: none; position: absolute; top: 100%; left: 0; min-width: 180px;
       background: white; border-radius: 10px; border: 1px solid #e5e7eb;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 50; padding: 8px 0;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 100; padding: 8px 0;
     }
     .dropdown:hover .dropdown-menu { display: block; }
 
-    /* 文字截断 */
     .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     
-    /* 侧边栏标题图标装饰 */
-    .aside-title { display: flex; items-center: center; gap: 8px; font-size: 0.875rem; font-weight: 800; color: #1e293b; margin-bottom: 1.25rem; }
+    /* 🌟 侧边栏标题图标装饰 - 对齐图2 */
+    .aside-title { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 800; color: #1e293b; margin-bottom: 1.25rem; }
+    .aside-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    
+    /* 🌟 修复幻灯片比例，防止遮挡 */
+    .home-hero-swiper { border-radius: 16px; overflow: hidden; height: 100%; min-height: 300px; max-height: 450px; }
+    .swiper-slide img { width: 100%; height: 100%; object-cover: cover; }
   </style>
 </head>
 <body class="antialiased font-sans">
   <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
       <div class="flex items-center gap-10"> 
-        <a href="/" class="flex items-center gap-2">
-           <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg">H</div>
-           <span class="text-2xl font-black text-slate-800 tracking-tighter">HLOG</span>
+        <a href="/" class="flex items-center gap-2 group">
+           <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg group-hover:rotate-6 transition-transform">H</div>
+           <span class="text-3xl font-black text-slate-800 tracking-tighter">HLOG</span>
         </a>
-        <nav class="hidden md:flex items-center gap-8"> 
+        <nav class="hidden md:flex items-center gap-10"> 
           <a href="/" class="nav-link active">首页</a>
           <div class="dropdown">
             <a href="#" class="nav-link flex items-center gap-1">文章 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></a>
             <div id="navCatList" class="dropdown-menu">
-              </div>
+                </div>
           </div>
           <a href="/about.html" class="nav-link">关于</a>
           <a href="/privacy.html" class="nav-link">隐私</a>
@@ -53,11 +57,11 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <form id="searchForm" class="hidden sm:flex items-center bg-slate-100 rounded-full px-4 py-1.5 focus-within:bg-white border focus-within:border-indigo-300 transition-all">
-          <input id="searchInput" type="text" placeholder="搜索站内..." class="bg-transparent text-sm outline-none w-32 focus:w-48 transition-all" />
-          <button type="submit" class="text-slate-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+        <form id="searchForm" class="hidden sm:flex items-center bg-slate-100 rounded-full px-5 py-2 focus-within:bg-white border focus-within:border-indigo-300 transition-all">
+          <input id="searchInput" type="text" placeholder="探索新鲜事..." class="bg-transparent text-sm outline-none w-32 focus:w-48 transition-all" />
+          <button type="submit" class="text-slate-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
         </form>
-        <div id="authLinks" class="flex items-center gap-2"></div>
+        <div id="authLinks" class="flex items-center gap-3"></div>
       </div>
     </div>
   </header>
@@ -66,28 +70,28 @@
     <div class="flex flex-col lg:flex-row gap-8">
       
       <div class="flex-1 min-w-0 space-y-8">
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div class="xl:col-span-2 relative rounded-2xl overflow-hidden shadow-sm bg-slate-200 aspect-[16/9] xl:h-[400px]">
-            <div class="swiper home-hero-swiper h-full">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
+          <div class="xl:col-span-2 relative rounded-2xl shadow-sm bg-slate-200 overflow-hidden aspect-video">
+            <div class="swiper home-hero-swiper">
               <div class="swiper-wrapper" id="swiperWrapper"></div>
               <div class="swiper-pagination"></div>
             </div>
           </div>
 
           <div class="flex flex-col gap-4">
-            <div class="card-modern p-6 flex-1 border-l-4 border-l-red-500">
-              <h3 class="text-sm font-black text-red-600 flex items-center gap-2 mb-4">
+            <div class="card-modern p-6 flex-1 border-t-4 border-t-red-500">
+              <h3 class="text-sm font-black text-red-600 flex items-center gap-2 mb-4 uppercase tracking-wider">
                 <span>📢</span> 站点公告
               </h3>
-              <div id="siteNoticeDisplay" class="text-xs text-slate-500 leading-relaxed font-medium">加载中...</div>
+              <div id="siteNoticeDisplay" class="text-sm text-slate-500 leading-relaxed font-bold">正在获取最新消息...</div>
             </div>
-            <div class="relative rounded-2xl overflow-hidden shadow-lg group h-full min-h-[180px]">
-              <img id="posterImg" src="" class="absolute inset-0 w-full h-full object-cover transition duration-500 group-hover:scale-110" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+            <div class="relative rounded-2xl overflow-hidden shadow-xl group h-[220px]">
+              <img id="posterImg" src="" class="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
               <div class="absolute bottom-6 left-6 right-6 text-white">
-                <div class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-1">🔥 重点推荐</div>
-                <h4 id="posterTitle" class="text-lg font-bold mb-3 line-clamp-2">...</h4>
-                <a id="posterLink" href="#" class="inline-block bg-white text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold transition-transform hover:scale-105">立即阅读</a>
+                <div class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Featured Post</div>
+                <h4 id="posterTitle" class="text-xl font-bold mb-3 line-clamp-2 leading-tight">加载中...</h4>
+                <a id="posterLink" href="#" class="inline-block bg-white text-indigo-600 px-5 py-2 rounded-xl text-xs font-black transition-all hover:bg-indigo-600 hover:text-white">立即阅读</a>
               </div>
             </div>
           </div>
@@ -96,57 +100,58 @@
         <div id="postGrid" class="flex flex-col gap-6"></div>
       </div>
 
-      <aside class="w-full lg:w-80 shrink-0 space-y-6">
-        <div class="card-modern p-8 text-center">
-          <img src="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" class="w-24 h-24 rounded-2xl object-cover mx-auto mb-4 border-4 border-slate-50 shadow-sm" />
+      <aside class="w-full lg:w-80 shrink-0 space-y-8">
+        <div class="card-modern p-8 text-center relative overflow-hidden">
+          <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-10"></div>
+          <img src="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" class="w-24 h-24 rounded-2xl object-cover mx-auto mb-4 border-4 border-white shadow-md relative z-10" />
           <h2 class="text-xl font-black text-slate-900">XIAOHE</h2>
-          <p class="text-xs text-slate-400 mt-2">一个互联网爱好分享者！</p>
+          <p class="text-xs text-slate-400 mt-2 font-bold">一个互联网爱好分享者！</p>
           
           <div class="flex justify-center gap-4 mt-6">
             <a href="https://x.com/xiaoheyiyi" target="_blank" class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-            <a href="https://youtube.com/@xiaohe" target="_blank" class="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-            <a href="https://github.com/hezhanleiok/Hlog" target="_blank" class="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg></a>
+            <a href="https://youtube.com/@xiaohe" target="_blank" class="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+            <a href="https://github.com/hezhanleiok/Hlog" target="_blank" class="w-9 h-9 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg></a>
             <a href="https://t.me/xiaoheok" target="_blank" class="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center hover:scale-110 transition"><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
           </div>
 
           <div class="grid grid-cols-3 border-t border-slate-50 mt-8 pt-6">
-            <div><div id="stat_posts" class="text-base font-bold text-slate-800">0</div><div class="text-[10px] text-slate-400">文章</div></div>
-            <div><div id="stat_tags" class="text-base font-bold text-slate-800">0</div><div class="text-[10px] text-slate-400">标签</div></div>
-            <div><div id="stat_cats" class="text-base font-bold text-slate-800">0</div><div class="text-[10px] text-slate-400">分类</div></div>
+            <div><div id="stat_posts" class="text-base font-black text-slate-800">0</div><div class="text-[10px] text-slate-400 uppercase font-bold">文章</div></div>
+            <div><div id="stat_tags" class="text-base font-black text-slate-800">0</div><div class="text-[10px] text-slate-400 uppercase font-bold">标签</div></div>
+            <div><div id="stat_cats" class="text-base font-black text-slate-800">0</div><div class="text-[10px] text-slate-400 uppercase font-bold">分类</div></div>
           </div>
         </div>
 
         <div class="card-modern p-6">
-          <h3 class="aside-title"><span class="text-orange-500 text-lg">🔥</span> 热门内容</h3>
+          <h3 class="aside-title"><div class="aside-icon bg-orange-100 text-orange-600">🔥</div> 热门推荐</h3>
           <div id="hotList" class="space-y-4"></div>
         </div>
 
         <div class="card-modern p-6">
-          <h3 class="aside-title"><span class="text-indigo-500 text-lg">🏷️</span> 话题标签</h3>
+          <h3 class="aside-title"><div class="aside-icon bg-indigo-100 text-indigo-600">🏷️</div> 热门话题</h3>
           <div id="tagCloud" class="flex flex-wrap gap-2"></div>
         </div>
 
         <div class="card-modern p-6">
-          <h3 class="aside-title"><span class="text-blue-500 text-lg">📊</span> 访问统计</h3>
-          <div class="space-y-3">
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-slate-500 font-medium">今日浏览</span>
-              <span id="statTodayViews" class="font-bold text-slate-800">0</span>
+          <h3 class="aside-title"><div class="aside-icon bg-blue-100 text-blue-600">📊</div> 运行统计</h3>
+          <div class="space-y-4 pt-2">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-400 font-bold">今日访客</span>
+              <span id="statTodayViews" class="font-black text-slate-700">0</span>
             </div>
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-slate-500 font-medium">累计访问量</span>
-              <span id="statTotalViews" class="font-bold text-slate-800">0</span>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-400 font-bold">累计访问</span>
+              <span id="statTotalViews" class="font-black text-slate-700">0</span>
             </div>
           </div>
         </div>
 
         <div class="card-modern p-6">
-          <h3 class="aside-title"><span class="text-emerald-500 text-lg">💬</span> 互动社区</h3>
+          <h3 class="aside-title"><div class="aside-icon bg-emerald-100 text-emerald-600">💬</div> 最新互动</h3>
           <div id="latestComments" class="space-y-4"></div>
         </div>
 
         <div class="card-modern p-6">
-          <h3 class="aside-title"><span class="text-amber-500 text-lg">📅</span> 文章归档</h3>
+          <h3 class="aside-title"><div class="aside-icon bg-amber-100 text-amber-600">📅</div> 时间轴</h3>
           <div id="archiveList" class="space-y-1"></div>
         </div>
       </aside>
@@ -154,17 +159,22 @@
   </main>
 
   <footer class="bg-white border-t border-slate-200 mt-12 py-8 text-center">
-    <p class="text-xs text-slate-400 font-medium">© 2026 HLOG · Cloudflare 驱动 · 互联网爱好分享</p>
+    <p class="text-sm text-slate-400 font-bold">© 2026 HLOG · 极致分享 · Cloudflare 驱动</p>
   </footer>
 
   <script src="https://lib.baomitu.com/Swiper/11.0.5/swiper-bundle.min.js"></script>
   <script>
     const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
     const authLinks = document.getElementById("authLinks");
+    
+    // 🌟 找回注册按钮并加固登录状态显示
     if (auth?.token) {
-      authLinks.innerHTML = `<a href="/admin.html" class="px-5 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-md">管理后台</a>`;
+      authLinks.innerHTML = `<a href="/admin.html" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-black shadow-lg">管理后台</a>`;
     } else {
-      authLinks.innerHTML = `<a href="/login.html" class="text-sm font-bold text-slate-600 hover:text-indigo-600">登录</a>`;
+      authLinks.innerHTML = `
+        <a href="/login.html" class="text-sm font-black text-slate-600 hover:text-indigo-600">登录</a>
+        <a href="/register.html" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-sm font-black shadow-lg hover:bg-slate-700 transition">注册</a>
+      `;
     }
 
     async function api(path) {
@@ -175,7 +185,7 @@
     function getCover(p) {
       if(p.cover_url) return p.cover_url;
       const m = (p.content||"").match(/<img[^>]+src="([^">]+)"/);
-      return m ? m[1] : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Crect fill='%23eff6ff' width='800' height='450'/%3E%3C/svg%3E";
+      return m ? m[1] : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Crect fill='%23eff6ff' width='800' height='450'/%3E%3Ctext fill='%236366f1' font-family='sans-serif' font-size='30' font-weight='black' x='50%25' y='50%25' text-anchor='middle'%3EHLOG%3C/text%3E%3C/svg%3E";
     }
 
     function escapeHtml(s) { return String(s || "").replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m])); }
@@ -185,87 +195,89 @@
       const catId = urlParams.get("cat");
       const tagId = urlParams.get("tag");
 
-      // 1. 获取站点统计与公告
+      // 1. 同步分类菜单
+      const catData = await api("/api/category/list");
+      const cats = catData.categories || [];
+      document.getElementById("navCatList").innerHTML = cats.map(c => 
+        `<a href="/?cat=${c.id}" class="block px-5 py-2.5 hover:bg-indigo-50 font-bold text-slate-600 transition-colors">${c.name}</a>`).join("");
+      document.getElementById("stat_cats").textContent = cats.length;
+
+      // 2. 加载统计
       const stats = await api("/api/stats");
       const siteStats = await api("/api/site/stats");
-      document.getElementById("siteNoticeDisplay").textContent = stats.site_notice || "欢迎访问 HLOG！";
+      document.getElementById("siteNoticeDisplay").textContent = stats.site_notice || "欢迎来到 XIAOHE 的分享空间！";
       document.getElementById("statTodayViews").textContent = stats.today_views || 0;
       document.getElementById("statTotalViews").textContent = siteStats.total_views || 0;
       document.getElementById("stat_posts").textContent = siteStats.post_count || 0;
 
-      // 2. 文章列表加载
+      // 3. 文章逻辑
       let postPath = `/api/post/list?limit=15&sort=recent`;
       if(catId) postPath += `&cat_id=${catId}`;
       if(tagId) postPath += `&tag_id=${tagId}`;
       const { posts = [] } = await api(postPath);
       
-      // 设置海报推荐位
+      // 设置海报
       if(posts.length > 0) {
         document.getElementById("posterImg").src = getCover(posts[0]);
         document.getElementById("posterTitle").textContent = posts[0].title;
         document.getElementById("posterLink").href = `/post.html?post=${posts[0].id}`;
       }
 
-      // 渲染文章列表
       document.getElementById("postGrid").innerHTML = posts.map(p => `
-        <article class="card-modern overflow-hidden group hover:border-indigo-200 transition-colors">
+        <article class="card-modern overflow-hidden group hover:border-indigo-300 transition-all">
           <a href="/post.html?post=${p.id}" class="flex flex-col md:flex-row">
-            <div class="w-full md:w-72 h-48 overflow-hidden bg-slate-50 shrink-0">
-              <img src="${getCover(p)}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+            <div class="w-full md:w-80 h-52 overflow-hidden bg-slate-50 shrink-0">
+              <img src="${getCover(p)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             </div>
-            <div class="p-6 flex flex-col justify-between flex-1 min-w-0">
+            <div class="p-8 flex flex-col justify-between flex-1 min-w-0">
               <div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 line-clamp-1 transition-colors">${escapeHtml(p.title)}</h3>
-                <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed">${escapeHtml(p.summary || '点击阅读全文...')}</p>
+                <h3 class="text-2xl font-black text-slate-800 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-1">${escapeHtml(p.title)}</h3>
+                <p class="text-sm text-slate-500 line-clamp-2 leading-relaxed font-medium">${escapeHtml(p.summary || '点击阅读全文，发现更多精彩内容...')}</p>
               </div>
-              <div class="flex items-center gap-6 text-[10px] font-bold text-slate-400 mt-4 uppercase">
-                <span class="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded">${p.category_name || '默认'}</span>
+              <div class="flex items-center gap-6 text-[11px] font-black text-slate-400 mt-6 uppercase tracking-widest">
+                <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full">${p.category_name || '未分类'}</span>
                 <span>${new Date(p.created_at).toLocaleDateString()}</span>
-                <span>${p.views} 次阅读</span>
+                <span>${p.views} 阅读</span>
               </div>
             </div>
           </a>
         </article>`).join("");
 
-      // 3. 轮播渲染
+      // 4. 轮播
       document.getElementById("swiperWrapper").innerHTML = posts.slice(0, 3).map(p => `
         <div class="swiper-slide relative">
-          <a href="/post.html?post=${p.id}" class="block h-full group">
+          <a href="/post.html?post=${p.id}" class="block h-full">
             <img src="${getCover(p)}" class="w-full h-full object-cover" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-            <div class="absolute bottom-10 left-10 text-white font-bold text-2xl drop-shadow-md">${escapeHtml(p.title)}</div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+            <div class="absolute bottom-12 left-10 text-white font-black text-3xl drop-shadow-xl">${escapeHtml(p.title)}</div>
           </a>
         </div>`).join("");
-      new Swiper(".home-hero-swiper", { pagination: { el: ".swiper-pagination", clickable: true }, autoplay: { delay: 5000 } });
+      new Swiper(".home-hero-swiper", { 
+        pagination: { el: ".swiper-pagination", clickable: true }, 
+        autoplay: { delay: 6000 },
+        loop: true,
+        effect: 'fade'
+      });
 
-      // 4. 同步分类菜单与侧边栏
-      const catData = await api("/api/category/list");
-      const cats = catData.categories || [];
-      document.getElementById("navCatList").innerHTML = cats.map(c => 
-        `<a href="/?cat=${c.id}" class="block px-4 py-2 hover:bg-indigo-50 font-bold text-slate-600 transition-colors">${c.name}</a>`).join("");
-      document.getElementById("stat_cats").textContent = cats.length;
-
-      // 标签
+      // 5. 侧边栏
       const tagData = await api("/api/tag/list");
       document.getElementById("tagCloud").innerHTML = (tagData.tags || []).map(t => 
-        `<a href="/?tag=${t.id}" class="text-[10px] px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100 font-bold hover:bg-indigo-50 hover:text-indigo-600 transition">${escapeHtml(t.name)}</a>`).join("");
+        `<a href="/?tag=${t.id}" class="text-[11px] px-3 py-1.5 bg-slate-50 rounded-lg font-black hover:bg-indigo-600 hover:text-white transition-all">${escapeHtml(t.name)}</a>`).join("");
       document.getElementById("stat_tags").textContent = (tagData.tags || []).length;
 
-      // 热门文章
       const hotData = await api("/api/post/list?sort=views&limit=5");
       document.getElementById("hotList").innerHTML = (hotData.posts || []).map(p => `
         <a href="/post.html?post=${p.id}" class="flex items-center gap-3 group">
-          <img src="${getCover(p)}" class="w-12 h-10 rounded object-cover shrink-0" />
-          <div class="min-w-0"><h4 class="text-[11px] font-bold text-slate-700 line-clamp-1 group-hover:text-orange-600 transition">${escapeHtml(p.title)}</h4></div>
+          <img src="${getCover(p)}" class="w-16 h-12 rounded-lg object-cover shrink-0" />
+          <div class="min-w-0"><h4 class="text-xs font-black text-slate-700 line-clamp-1 group-hover:text-indigo-600 transition">${escapeHtml(p.title)}</h4></div>
         </a>`).join("");
 
-      // 评论
       const { comments = [] } = await api("/api/comment/latest?limit=4");
       document.getElementById("latestComments").innerHTML = comments.map(c => `
-        <div class="bg-slate-50/50 p-3 rounded-lg text-[11px] leading-relaxed border border-slate-50">
-           <span class="font-bold text-indigo-600">${escapeHtml(c.name)}:</span> 
-           <span class="text-slate-600 italic">"${escapeHtml(c.content)}"</span>
-        </div>`).join("") || '<div class="text-[10px] text-slate-300 italic text-center">期待你的交流</div>';
+        <div class="bg-slate-50/50 p-4 rounded-xl text-[11px] leading-relaxed border border-slate-100">
+           <span class="font-black text-indigo-600">${escapeHtml(c.name)}:</span> 
+           <span class="text-slate-600 italic font-medium">"${escapeHtml(c.content)}"</span>
+        </div>`).join("") || '<div class="text-[10px] text-slate-300 italic text-center font-bold">暂无新动态</div>';
 
       renderArchive(posts);
     }
@@ -277,9 +289,9 @@
         archive[key] = (archive[key] || 0) + 1;
       });
       document.getElementById("archiveList").innerHTML = Object.entries(archive).map(([key, count]) => `
-        <a href="/?date=${key}" class="flex justify-between items-center py-2 px-2 rounded-lg hover:bg-amber-50 transition-colors group">
-          <span class="text-sm font-bold text-slate-600 group-hover:text-amber-600">${key}</span>
-          <span class="bg-slate-100 px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-400">${count} 篇</span>
+        <a href="/?date=${key}" class="flex justify-between items-center py-2.5 px-3 rounded-xl hover:bg-indigo-50 transition-all group">
+          <span class="text-sm font-bold text-slate-600 group-hover:text-indigo-600">${key}</span>
+          <span class="bg-slate-100 px-2 py-0.5 rounded-full text-[10px] font-black text-slate-400">${count} 篇</span>
         </a>`).join("");
     }
 
