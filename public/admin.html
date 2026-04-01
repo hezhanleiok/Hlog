@@ -6,7 +6,7 @@
   <title>HLOG - 管理面板</title>
   <link rel="icon" href="https://tu.xiaohelei.us.ci/1774821377748_qosfsk_ScreenShot_2026-03-30_055545_501.png" type="image/png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
   <link rel="stylesheet" href="/admin-style.css" />
   <style>
     .upload-loading { position: absolute; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 10000; font-weight: bold; color: #0284c7; backdrop-filter: blur(2px); }
@@ -163,13 +163,12 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/@wangeditor/editor@latest/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@wangeditor/editor@latest/dist/index.min.js"></script>
   
   <script>
     const auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
     if (!auth?.token || auth.role !== 'admin') location.href = '/login.html';
     
-    // 全局编辑器实例
     let editor = null;
 
     async function api(path, options = {}) {
@@ -180,9 +179,16 @@
       return data;
     }
 
-    // 初始化 WangEditor (必须在容器可见的情况下执行)
+    // 初始化 WangEditor
     function initEditor() {
-      if (editor) return; // 如果已经初始化，就不重复执行
+      if (editor) return; // 避免重复初始化
+      
+      // 🌟 修复点3：添加容错拦截，防止网络导致的未加载直接搞崩溃页面
+      if (!window.wangEditor) {
+          console.error("编辑器核心库加载失败！");
+          alert("编辑器加载失败，请刷新页面重试。");
+          return;
+      }
       
       const { createEditor, createToolbar } = window.wangEditor;
       
@@ -205,7 +211,7 @@
                 if (data.url) {
                     insertFn(data.url, file.name, data.url);
                 } else {
-                    alert('图片上传失败, 请检查后端接口');
+                    alert('图片上传失败, 请检查接口');
                 }
               } catch (e) { 
                   alert('图片上传失败'); 
@@ -217,19 +223,23 @@
         }
       };
 
-      editor = createEditor({
-        selector: '#editor-container',
-        html: '<p><br></p>',
-        config: editorConfig,
-        mode: 'default', 
-      });
+      try {
+        editor = createEditor({
+          selector: '#editor-container',
+          html: '<p><br></p>',
+          config: editorConfig,
+          mode: 'default', 
+        });
 
-      const toolbar = createToolbar({
-        editor,
-        selector: '#toolbar-container',
-        config: {},
-        mode: 'default',
-      });
+        createToolbar({
+          editor,
+          selector: '#toolbar-container',
+          config: {},
+          mode: 'default',
+        });
+      } catch (err) {
+        console.error("编辑器渲染时出现错误：", err);
+      }
     }
 
     document.getElementById('uploadCoverBtn').onclick = () => {
@@ -256,7 +266,9 @@
         const tbody = document.getElementById('catTbody');
         select.innerHTML = '<option value="">-- 未分类 --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         if(tbody) tbody.innerHTML = categories.map(c => `<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-bold text-slate-700">${c.name}</td><td class="px-6 py-4 text-right"><button class="text-red-500 font-bold" onclick="deleteCategory(${c.id})">删除</button></td></tr>`).join('');
-      } catch (e) {}
+      } catch (e) {
+          console.error("加载分类失败: ", e);
+      }
     }
 
     document.getElementById('addCatBtn').onclick = async () => {
@@ -292,7 +304,7 @@
 
     async function submitPost(status) {
       const title = document.getElementById('titleInput').value.trim();
-      if (!editor) return alert('编辑器尚未加载完成');
+      if (!editor) return alert('编辑器尚未完全加载');
       const content = editor.getHtml(); 
       const cover_url = document.getElementById('coverInput').value;
       const hidden_content = document.getElementById('hiddenContentInput').value;
@@ -324,7 +336,6 @@
         if (!data || !data.post) throw new Error(data?.error || "无法获取文章数据");
         const p = data.post;
         
-        // 🌟 修复关键点：先用代码强制让页面切换到发布面板，使其对浏览器可见
         location.hash = 'publish';
         const panels = ['dashboard', 'post-list', 'drafts', 'publish', 'invites', 'notice', 'categories'];
         panels.forEach(panel => { 
@@ -332,18 +343,22 @@
             if (el) el.classList.toggle('hidden', panel !== 'publish'); 
         });
         
-        // 面板已经显示出来了，现在初始化就不会崩溃了
-        initEditor(); 
+        // 延迟一下再插入内容，避免页面闪烁
+        setTimeout(() => {
+            initEditor(); 
+            document.getElementById('postId').value = p.id;
+            document.getElementById('titleInput').value = p.title;
+            document.getElementById('coverInput').value = p.cover_url || '';
+            document.getElementById('hiddenContentInput').value = p.hidden_content || '';
+            document.getElementById('tagsInput').value = p.tags?.join(',') || '';
+            
+            // 确保分类加载完成后再选中
+            setTimeout(() => { document.getElementById('postCategory').value = p.category_id || ''; }, 300); 
+            
+            if(editor) editor.setHtml(p.content || '<p><br></p>');
+            document.getElementById('savePublishBtn').textContent = '保存修改';
+        }, 50);
         
-        document.getElementById('postId').value = p.id;
-        document.getElementById('titleInput').value = p.title;
-        document.getElementById('coverInput').value = p.cover_url || '';
-        document.getElementById('hiddenContentInput').value = p.hidden_content || '';
-        document.getElementById('tagsInput').value = p.tags?.join(',') || '';
-        setTimeout(() => { document.getElementById('postCategory').value = p.category_id || ''; }, 300); 
-        
-        editor.setHtml(p.content || '<p><br></p>');
-        document.getElementById('savePublishBtn').textContent = '保存修改';
       } catch (e) { alert('加载文章失败: ' + e.message); }
     }
 
@@ -389,31 +404,44 @@
     function route() {
       const hash = location.hash.slice(1) || 'dashboard';
       const panels = ['dashboard', 'post-list', 'drafts', 'publish', 'invites', 'notice', 'categories'];
-      panels.forEach(p => { const el = document.getElementById(`panel-${p}`); if (el) el.classList.toggle('hidden', p !== hash); });
+      
+      // 切换显示面板
+      panels.forEach(p => { 
+          const el = document.getElementById(`panel-${p}`); 
+          if (el) el.classList.toggle('hidden', p !== hash); 
+      });
+      
+      // 切换左侧高亮
       document.querySelectorAll('aside nav a').forEach(a => a.classList.remove('menu-active'));
-      const activeMenu = document.getElementById(`menu-${hash}`); if (activeMenu) activeMenu.classList.add('menu-active');
+      const activeMenu = document.getElementById(`menu-${hash}`); 
+      if (activeMenu) activeMenu.classList.add('menu-active');
+
+      // 无论切换到哪个页面，分类一定要无条件加载出来
+      if (hash === 'categories' || hash === 'publish') {
+          loadCategories(); 
+      }
 
       if (hash === 'dashboard') loadDashboard();
       if (hash === 'post-list') loadPostsTable('published');
       if (hash === 'drafts') loadPostsTable('drafts');
       
-      // 🌟 修复关键点：只要进入发布页面，立刻初始化编辑器（因为此时它已经处于显示状态了）
+      // 🌟 修复点4：必须给面板留出渲染展示时间 (setTimeout)，然后再去渲染工具栏，彻底解决工具栏变白消失！
       if (hash === 'publish') {
-        initEditor();
-        if (!document.getElementById('postId').value) resetEditor(); 
+        setTimeout(() => {
+            initEditor();
+            if (!document.getElementById('postId').value) resetEditor(); 
+        }, 100); 
       }
-      
-      if (hash === 'categories' || hash === 'publish') loadCategories();
     }
 
     window.addEventListener('hashchange', route);
     
-    // 页面初次加载时执行路由分配
+    // 页面初次加载
     window.addEventListener('load', () => { 
       route(); 
     });
     
-    // 无论目前在不在发布页，只要点击侧边栏的“撰写新文章”，都清空并进入发文状态
+    // 强制清理
     document.getElementById('menu-publish').addEventListener('click', (e) => {
       resetEditor(); 
     });
