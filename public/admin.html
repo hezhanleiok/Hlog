@@ -13,6 +13,9 @@
     .menu-active { background-color: #334155; color: white; border-left: 4px solid #0ea5e9; }
     #editor-container { font-size: 16px; line-height: 1.6; }
     .w-e-full-screen-container { z-index: 9999; }
+    /* ================= 新增：修复 WangEditor 模态框网络图片预览及编辑器图片显示坍塌的问题 ================= */
+    .w-e-text-container img { max-width: 100%; display: inline-block; }
+    .w-e-modal img { max-width: 100%; max-height: 200px !important; display: block; margin: 10px auto; object-fit: contain; }
   </style>
 </head>
 <body class="bg-[#f0f2f5] text-slate-800 font-sans antialiased">
@@ -169,6 +172,21 @@
     const auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
     if (!auth?.token || auth.role !== 'admin') location.href = '/login.html';
     
+    // ================= 新增：提取并配置你原有的个人 R2 图床 =================
+    const R2_API_ENDPOINT = "https://pig.xiaohe.gv.uy"; 
+    const QUICK_DISPLAY_DOMAIN = "https://tu.xiaohelei.us.ci";
+
+    async function uploadToR2(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(R2_API_ENDPOINT, { method: "POST", body: formData });
+      if (!res.ok) throw new Error("上传到图床失败");
+      const data = await res.json();
+      const fileName = data.url.split('/').pop(); 
+      return `${QUICK_DISPLAY_DOMAIN}/${fileName}`;
+    }
+    // ========================================================================
+
     let editor = null;
 
     async function api(path, options = {}) {
@@ -183,7 +201,6 @@
     function initEditor() {
       if (editor) return; // 避免重复初始化
       
-      // 🌟 修复点3：添加容错拦截，防止网络导致的未加载直接搞崩溃页面
       if (!window.wangEditor) {
           console.error("编辑器核心库加载失败！");
           alert("编辑器加载失败，请刷新页面重试。");
@@ -200,21 +217,12 @@
               const status = document.getElementById('editorUploadStatus');
               status.classList.remove('hidden');
               try {
-                const formData = new FormData(); 
-                formData.append('file', file);
-                const res = await fetch('/api/upload', { 
-                    method: 'POST', 
-                    headers: { 'Authorization': 'Bearer ' + auth.token }, 
-                    body: formData 
-                });
-                const data = await res.json();
-                if (data.url) {
-                    insertFn(data.url, file.name, data.url);
-                } else {
-                    alert('图片上传失败, 请检查接口');
-                }
+                // ================= 修改：调用你个人的直传函数 =================
+                const url = await uploadToR2(file);
+                insertFn(url, file.name, url);
+                // ============================================================
               } catch (e) { 
-                  alert('图片上传失败'); 
+                  alert('图片上传失败: ' + e.message); 
               } finally { 
                   status.classList.add('hidden'); 
               }
@@ -250,11 +258,12 @@
         const status = document.getElementById('editorUploadStatus');
         status.classList.remove('hidden');
         try {
-          const formData = new FormData(); formData.append('file', file);
-          const res = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + auth.token }, body: formData });
-          const data = await res.json();
-          if (data.url) { document.getElementById('coverInput').value = data.url; alert("上传成功！"); }
-        } catch (e) { alert('上传失败'); } finally { status.classList.add('hidden'); }
+          // ================= 修改：调用你个人的直传函数 =================
+          const url = await uploadToR2(file);
+          document.getElementById('coverInput').value = url; 
+          alert("上传成功！");
+          // ============================================================
+        } catch (e) { alert('上传失败: ' + e.message); } finally { status.classList.add('hidden'); }
       };
       input.click();
     };
@@ -302,7 +311,7 @@
       finally { btn.disabled = false; btn.textContent = '发布并更新首页公告'; }
     };
 
-    // ================== 新增：邀请码获取及生成功能 ==================
+    // ================== 原有：邀请码获取及生成功能 ==================
     async function loadInvites() {
       try {
         const res = await api('/api/admin/invitation/list');
