@@ -6,31 +6,79 @@
   <title>注册 - HLOG</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#f0f2f5] flex items-center justify-center min-h-screen">
+<body class="bg-[#f0f2f5] flex items-center justify-center min-h-screen py-10">
   <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
     <h2 class="text-2xl font-black text-center text-slate-800 mb-8">加入 HLOG</h2>
     <form id="regForm" class="space-y-4">
-      <input type="text" id="username" placeholder="用户名" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500" />
-      <input type="password" id="password" placeholder="密码" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500" />
-      <input type="text" id="inviteCode" placeholder="邀请码 (必填)" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500" />
-      <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">注册</button>
+      <input type="text" id="username" placeholder="用户名" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 transition" />
+      <input type="email" id="email" placeholder="邮箱" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 transition" />
+      <input type="password" id="password" placeholder="密码" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 transition" />
+      
+      <div class="flex gap-2">
+        <input type="text" id="verifyCode" placeholder="验证码" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 transition" />
+        <button type="button" id="sendCodeBtn" class="whitespace-nowrap px-6 py-3 bg-slate-50 text-indigo-600 font-bold rounded-xl border border-slate-200 hover:bg-slate-100 transition">发送验证码</button>
+      </div>
+
+      <input type="text" id="inviteCode" placeholder="邀请码" class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500 transition" />
+      
+      <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition mt-4">注册</button>
     </form>
     <div class="mt-6 text-center text-sm text-slate-500">
       已有账号？ <a href="/login.html" class="text-indigo-600 font-bold">去登录</a>
     </div>
   </div>
   <script>
+    // 恢复发送验证码逻辑
+    document.getElementById('sendCodeBtn').onclick = async () => {
+      const email = document.getElementById('email').value.trim();
+      if (!email) return alert('请先输入邮箱');
+      const btn = document.getElementById('sendCodeBtn');
+      btn.disabled = true; btn.textContent = '发送中...';
+      try {
+        const res = await fetch('/api/auth/send-code', { method: 'POST', body: JSON.stringify({ email }) });
+        const data = await res.json();
+        if (res.ok) {
+            alert('验证码已发送到邮箱！');
+        } else {
+            alert('发送失败: ' + (data.error || '未知错误'));
+        }
+      } catch (err) { 
+          alert('网络错误'); 
+      }
+      btn.textContent = '发送验证码'; 
+      btn.disabled = false;
+    };
+
+    // 提交注册逻辑
     document.getElementById('regForm').onsubmit = async (e) => {
       e.preventDefault();
       const u = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
       const p = document.getElementById('password').value;
+      const code = document.getElementById('verifyCode').value;
       const c = document.getElementById('inviteCode').value;
+      
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true; btn.textContent = '注册中...';
+
       try {
-        const res = await fetch('/api/register', { method: 'POST', body: JSON.stringify({ username: u, password: p, inviteCode: c }) });
+        // 请求带有 email 和 code 字段
+        const res = await fetch('/api/register', { 
+            method: 'POST', 
+            body: JSON.stringify({ username: u, email, password: p, code, inviteCode: c }) 
+        });
         const data = await res.json();
-        if(res.ok) { alert('注册成功！'); location.href = '/login.html'; }
-        else alert('注册失败: ' + data.error);
-      } catch (err) { alert('网络错误'); }
+        if(res.ok) { 
+            alert('注册成功！'); 
+            location.href = '/login.html'; 
+        } else {
+            alert('注册失败: ' + data.error);
+        }
+      } catch (err) { 
+          alert('网络错误'); 
+      }
+      
+      btn.disabled = false; btn.textContent = '注册';
     };
   </script>
 </body>

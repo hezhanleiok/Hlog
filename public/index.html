@@ -13,6 +13,11 @@
     .card-modern { background: white; border-radius: var(--main-radius); border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
     .nav-link { font-size: 1.15rem; font-weight: 800; transition: color 0.3s; color: #475569; }
     .nav-link:hover, .nav-link.active { color: #6366f1; }
+    /* 下拉菜单样式补回 */
+    .dropdown { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
+    .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; min-width: 180px; background: white; border-radius: 10px; border: 1px solid #e5e7eb; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 100; padding: 8px 0; }
+    .dropdown:hover .dropdown-menu { display: block; }
+    
     .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .aside-title { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 800; color: #1e293b; margin-bottom: 1.25rem; }
@@ -30,7 +35,14 @@
         </a>
         <nav class="hidden md:flex items-center gap-10"> 
           <a href="/" class="nav-link active">首页</a>
+          <div class="dropdown">
+            <a href="#" class="nav-link flex items-center gap-1">文章 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg></a>
+            <div id="navCatList" class="dropdown-menu">
+               <div class="px-4 py-2 text-xs text-slate-400 italic">同步分类中...</div>
+            </div>
+          </div>
           <a href="/about.html" class="nav-link">关于</a>
+          <a href="/privacy.html" class="nav-link">隐私</a>
         </nav>
       </div>
       <div id="authLinks" class="flex items-center gap-3"></div>
@@ -50,7 +62,7 @@
               <div id="siteNoticeDisplay" class="text-sm text-slate-500 leading-relaxed">加载中...</div>
             </div>
             <div class="relative rounded-2xl overflow-hidden shadow-xl h-[220px] bg-indigo-100 group">
-              <img id="posterImg" src="" class="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110" />
+              <img id="posterImg" src="" class="absolute inset-0 w-full h-full object-cover object-center transition duration-700 group-hover:scale-110" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
               <div class="absolute bottom-6 left-6 right-6 text-white">
                 <div class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Featured Post</div>
@@ -85,7 +97,21 @@
 
           <div class="grid grid-cols-2 border-t border-slate-50 mt-8 pt-6">
             <div><div id="stat_posts" class="text-base font-black text-slate-800">0</div><div class="text-[10px] text-slate-400 uppercase font-bold">文章</div></div>
-            <div><div id="statTodayViews" class="text-base font-black text-slate-800">0</div><div class="text-[10px] text-slate-400 uppercase font-bold">今日访问</div></div>
+            <div><div id="stat_tags" class="text-base font-black text-slate-800">0</div><div class="text-[10px] text-slate-400 uppercase font-bold">标签</div></div>
+          </div>
+        </div>
+
+        <div class="card-modern p-6">
+          <h3 class="aside-title"><div class="aside-icon bg-blue-100 text-blue-600">📊</div> 运行统计</h3>
+          <div class="space-y-4 pt-2">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-400 font-bold">今日访客</span>
+              <span id="statTodayViews" class="font-black text-slate-700">0</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-400 font-bold">累计访问</span>
+              <span id="statTotalViews" class="font-black text-slate-700">0</span>
+            </div>
           </div>
         </div>
 
@@ -143,13 +169,22 @@
     }
 
     async function load() {
-      const [stats, siteStats, annRes, postsRes, hotData, commentsData] = await Promise.all([
-        api("/api/stats"), api("/api/site/stats"), api("/api/admin/announcement/latest"),
-        api("/api/post/list?limit=15&sort=recent"), api("/api/post/list?sort=views&limit=5"), api("/api/comment/latest?limit=4")
+      // 增加抓取标签 API
+      const [catData, stats, siteStats, annRes, postsRes, hotData, commentsData, tagsData] = await Promise.all([
+        api("/api/category/list"), api("/api/stats"), api("/api/site/stats"), api("/api/admin/announcement/latest"),
+        api("/api/post/list?limit=15&sort=recent"), api("/api/post/list?sort=views&limit=5"), api("/api/comment/latest?limit=4"), api("/api/tag/list")
       ]);
 
-      document.getElementById("statTodayViews").textContent = stats.today_views || 0;
+      // 渲染分类下拉菜单
+      const cats = catData.categories || [];
+      document.getElementById("navCatList").innerHTML = cats.map(c => 
+        `<a href="/?cat=${c.id}" class="block px-5 py-2.5 hover:bg-indigo-50 font-bold text-slate-600 transition-colors">${c.name}</a>`).join("");
+
+      // 渲染侧边栏各项统计 (包含标签统计修复)
       document.getElementById("stat_posts").textContent = siteStats.post_count || 0;
+      document.getElementById("stat_tags").textContent = (tagsData.tags || []).length;
+      document.getElementById("statTodayViews").textContent = stats.today_views || 0;
+      document.getElementById("statTotalViews").textContent = siteStats.total_views || 0;
 
       const announcements = annRes.data || [];
       const noticeContainer = document.getElementById("siteNoticeDisplay");
@@ -195,7 +230,6 @@
         new Swiper(".home-hero-swiper", { pagination: { el: ".swiper-pagination", clickable: true }, autoplay: { delay: 5000 }, loop: true, effect: 'fade' });
       }
 
-      // 热门推荐（卡片+封面图）
       document.getElementById("hotList").innerHTML = (hotData.posts || []).map(p => `
         <a href="/post.html?post=${p.id}" class="flex gap-3 group bg-slate-50 p-2 rounded-xl hover:bg-indigo-50 transition-colors border border-slate-100">
           <img src="${getCover(p)}" class="w-16 h-14 rounded-lg object-cover shrink-0" />
@@ -204,17 +238,15 @@
           </div>
         </a>`).join("");
 
-      // 最新互动
       document.getElementById("latestComments").innerHTML = (commentsData.comments || []).map(c => `
         <div class="flex gap-3 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-           <img src="${c.avatar || 'https://ui-avatars.com/api/?name='+escapeHtml(c.name)+'&background=random'}" class="w-8 h-8 rounded-full shadow-sm shrink-0">
+           <img src="${c.avatar || 'https://ui-avatars.com/api/?name='+escapeHtml(c.name)+'&background=random&color=fff'}" class="w-8 h-8 rounded-full shadow-sm shrink-0">
            <div class="min-w-0">
              <div class="text-xs font-black text-indigo-600 mb-1">${escapeHtml(c.name)}</div>
              <div class="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">${escapeHtml(c.content)}</div>
            </div>
         </div>`).join("");
 
-      // 归档渲染（按月折叠）
       const archive = {};
       posts.forEach(p => {
         const d = new Date(p.created_at);
