@@ -101,6 +101,14 @@
             <input id="titleInput" type="text" placeholder="文章标题..." class="w-full text-2xl font-bold outline-none" />
           </div>
 
+          <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-4">
+            <label class="text-xs font-bold text-slate-400 block uppercase tracking-widest">文章封面图</label>
+            <div class="flex flex-col md:flex-row gap-4">
+              <input id="coverInput" type="text" placeholder="粘贴图片 URL..." class="flex-1 border border-slate-300 rounded-lg px-4 py-2 text-sm outline-none focus:border-sky-500" />
+              <button id="uploadCoverBtn" class="bg-slate-100 px-6 py-2 rounded-lg text-sm font-bold border border-slate-200 hover:bg-slate-200 transition">本地上传</button>
+            </div>
+          </div>
+
           <div class="bg-white rounded-xl border border-slate-200 p-4">
             <label class="text-xs font-bold text-slate-400 block mb-2 uppercase tracking-widest">选择分类</label>
             <select id="postCategory" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm outline-none focus:border-sky-500">
@@ -168,7 +176,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
   <script>
-    /* --- 完全保留你的原有核心变量 --- */
     const auth = JSON.parse(localStorage.getItem('hlog_auth') || 'null');
     if (!auth?.token || auth.role !== 'admin') location.href = '/login.html';
     let quill;
@@ -181,13 +188,13 @@
       return data;
     }
 
-    /* --- 🌟 新增：公告管理逻辑 --- */
     async function loadNotice() {
       try {
         const stats = await api('/api/stats');
         if (stats.site_notice) document.getElementById('noticeInput').value = stats.site_notice;
       } catch (e) {}
     }
+
     document.getElementById('saveNoticeBtn').onclick = async () => {
       const val = document.getElementById('noticeInput').value;
       try {
@@ -196,18 +203,15 @@
       } catch (e) { alert(e.message); }
     };
 
-    /* --- 🌟 新增：分类管理逻辑 --- */
     async function loadCategories() {
       try {
         const { categories = [] } = await api('/api/category/list');
         const select = document.getElementById('postCategory');
         const tbody = document.getElementById('catTbody');
         
-        // 同步到发布页下拉框
         select.innerHTML = '<option value="">-- 请选择文章分类 --</option>' + 
           categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         
-        // 同步到分类管理表格
         tbody.innerHTML = categories.map(c => `
           <tr class="hover:bg-slate-50">
             <td class="px-6 py-4 font-bold text-slate-700">${c.name}</td>
@@ -217,20 +221,28 @@
           </tr>`).join('');
       } catch (e) {}
     }
+
+    // 🌟 修复：新建分类点击事件绑定
     document.getElementById('addCatBtn').onclick = async () => {
-      const name = document.getElementById('newCatName').value.trim();
-      if(!name) return;
-      await api('/api/category/add', { method: 'POST', body: JSON.stringify({ name }) });
-      document.getElementById('newCatName').value = '';
-      loadCategories();
-    };
-    window.deleteCategory = async (id) => {
-      if(!confirm("确定彻底删除此分类吗？")) return;
-      await api('/api/category/delete', { method: 'DELETE', body: JSON.stringify({ id }) });
-      loadCategories();
+      const nameInput = document.getElementById('newCatName');
+      const name = nameInput.value.trim();
+      if(!name) return alert("请输入分类名称");
+      try {
+        await api('/api/category/add', { method: 'POST', body: JSON.stringify({ name }) });
+        nameInput.value = '';
+        alert("分类创建成功");
+        loadCategories();
+      } catch (e) { alert(e.message); }
     };
 
-    /* --- 核心逻辑：完全保留原有编辑器和上传逻辑 --- */
+    window.deleteCategory = async (id) => {
+      if(!confirm("确定彻底删除此分类吗？")) return;
+      try {
+        await api('/api/category/delete', { method: 'DELETE', body: JSON.stringify({ id }) });
+        loadCategories();
+      } catch (e) { alert(e.message); }
+    };
+
     function initQuill() {
       quill = new Quill('#contentEditor', { 
         theme: 'snow', 
@@ -238,7 +250,6 @@
           [{'header': [1,2,3,false]}], ['bold','italic','underline','strike'], ['link','image','video','blockquote','code-block'], [{'list':'ordered'},{'list':'bullet'}], ['clean']
         ]}
       });
-      // 保留原有图片上传处理器
       quill.getModule('toolbar').addHandler('image', () => {
         const input = document.createElement('input'); input.setAttribute('type', 'file'); input.setAttribute('accept', 'image/*');
         input.onchange = async () => {
@@ -255,12 +266,32 @@
       });
     }
 
+    // 🌟 封面图上传逻辑
+    document.getElementById('uploadCoverBtn').onclick = () => {
+      const input = document.createElement('input'); input.setAttribute('type', 'file'); input.setAttribute('accept', 'image/*');
+      input.onchange = async () => {
+        const file = input.files[0]; if(!file) return;
+        const status = document.getElementById('editorUploadStatus'); status.classList.remove('hidden');
+        try {
+          const formData = new FormData(); formData.append('file', file);
+          const res = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + auth.token }, body: formData });
+          const data = await res.json();
+          if (data.url) {
+            document.getElementById('coverInput').value = data.url;
+            alert("封面上传成功");
+          }
+        } catch (e) { alert('上传失败'); } finally { status.classList.add('hidden'); }
+      };
+      input.click();
+    };
+
     async function submitPost(status) {
       const title = document.getElementById('titleInput').value.trim();
       const content = quill.getSemanticHTML();
-      const category_id = document.getElementById('postCategory').value; // 🌟 仅增加这一行获取分类
+      const category_id = document.getElementById('postCategory').value;
       const tags = document.getElementById('tagsInput').value;
-      const hidden_content = document.getElementById('hiddenContentInput')?.value || ''; // 保留
+      const hidden_content = document.getElementById('hiddenContentInput')?.value || '';
+      const cover_url = document.getElementById('coverInput').value; // 🌟 获取封面图
       const id = document.getElementById('postId').value;
       if (!title) return alert('标题不能为空');
       
@@ -270,14 +301,13 @@
       try {
         await api('/api/post/create', {
           method: 'POST',
-          body: JSON.stringify({ id: id ? Number(id) : null, title, content, status, tags, category_id, hidden_content })
+          body: JSON.stringify({ id: id ? Number(id) : null, title, content, status, tags, category_id, hidden_content, cover_url })
         });
         alert('操作成功');
         location.hash = status === 'published' ? 'post-list' : 'drafts';
       } catch (e) { alert(e.message); } finally { btn.disabled = false; btn.textContent = originText; }
     }
 
-    /* --- 原有业务加载函数 --- */
     async function loadDashboard() {
       try {
         const stats = await api('/api/stats');
@@ -309,7 +339,8 @@
         document.getElementById('postId').value = data.post.id;
         document.getElementById('titleInput').value = data.post.title;
         document.getElementById('tagsInput').value = data.post.tags?.join(',') || '';
-        document.getElementById('postCategory').value = data.post.category_id || ''; // 🌟 增加分类回显
+        document.getElementById('postCategory').value = data.post.category_id || '';
+        document.getElementById('coverInput').value = data.post.cover_url || ''; // 🌟 封面图回显
         if(document.getElementById('hiddenContentInput')) document.getElementById('hiddenContentInput').value = data.post.hidden_content || '';
         quill.setContents(quill.clipboard.convert({html: data.post.content}));
       } catch (e) { alert('加载失败'); }
@@ -321,7 +352,6 @@
       location.reload();
     }
 
-    /* --- 原有路由系统：适配新增面板 --- */
     function route() {
       const hash = location.hash.slice(1) || 'dashboard';
       const panels = ['dashboard', 'post-list', 'drafts', 'publish', 'invites', 'notice', 'categories'];
@@ -330,7 +360,6 @@
         if (el) el.classList.toggle('hidden', p !== hash);
       });
       
-      // 更新按钮激活样式
       document.querySelectorAll('aside nav a').forEach(a => a.classList.remove('menu-active'));
       const activeMenu = document.getElementById(`menu-${hash}`);
       if (activeMenu) activeMenu.classList.add('menu-active');
