@@ -57,7 +57,6 @@
               <div id="statTotalPosts" class="text-3xl font-black text-slate-800 mt-1">0</div>
             </div>
           </div>
-          <button id="refreshStatsBtn" class="wp-btn">刷新统计数据</button>
         </section>
 
         <section id="panel-notice" class="hidden max-w-2xl mx-auto">
@@ -190,21 +189,11 @@
             ],
             handlers: {
               image: function() {
-                const url = prompt("请输入图片 URL (或取消后选择文件上传):");
-                if (url) {
-                  quill.insertEmbed(quill.getSelection()?.index || 0, 'image', url);
-                } else {
-                  const input = document.createElement('input');
-                  input.setAttribute('type', 'file'); input.setAttribute('accept', 'image/*');
-                  input.click();
-                  input.onchange = async () => {
-                    const file = input.files[0]; if(!file) return;
-                    uploadFile(file, (url) => quill.insertEmbed(quill.getSelection()?.index || 0, 'image', url));
-                  };
-                }
+                const url = prompt("请输入图片 URL:");
+                if (url) quill.insertEmbed(quill.getSelection()?.index || 0, 'image', url);
               },
               video: function() {
-                const url = prompt("请输入视频 URL (YouTube, Bilibili等):");
+                const url = prompt("请输入视频 URL:");
                 if (url) quill.insertEmbed(quill.getSelection()?.index || 0, 'video', url);
               }
             }
@@ -213,34 +202,13 @@
       });
     }
 
-    document.getElementById('uploadCoverBtn').onclick = () => {
-      const input = document.createElement('input');
-      input.setAttribute('type', 'file'); input.setAttribute('accept', 'image/*');
-      input.onchange = async () => {
-        const file = input.files[0]; if(!file) return;
-        uploadFile(file, (url) => { document.getElementById('coverInput').value = url; alert("上传成功！"); });
-      };
-      input.click();
-    };
-
-    async function uploadFile(file, callback) {
-      const status = document.getElementById('editorUploadStatus');
-      status.classList.remove('hidden');
-      try {
-        const formData = new FormData(); formData.append('file', file);
-        const res = await fetch('/api/upload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + auth.token }, body: formData });
-        const data = await res.json();
-        if (data.url) callback(data.url);
-      } catch (e) { alert('上传失败'); } finally { status.classList.add('hidden'); }
-    }
-
     async function loadCategories() {
       try {
         const { categories = [] } = await api('/api/category/list');
         const select = document.getElementById('postCategory');
         const tbody = document.getElementById('catTbody');
         select.innerHTML = '<option value="">-- 未分类 --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        tbody.innerHTML = categories.map(c => `<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-bold text-slate-700">${c.name}</td><td class="px-6 py-4 text-right"><button class="text-red-500 font-bold" onclick="deleteCategory(${c.id})">删除</button></td></tr>`).join('');
+        if(tbody) tbody.innerHTML = categories.map(c => `<tr class="hover:bg-slate-50"><td class="px-6 py-4 font-bold text-slate-700">${c.name}</td><td class="px-6 py-4 text-right"><button class="text-red-500 font-bold" onclick="deleteCategory(${c.id})">删除</button></td></tr>`).join('');
       } catch (e) {}
     }
 
@@ -262,38 +230,21 @@
       loadCategories();
     };
 
-    async function loadNotice() {
-      // 公告页面打开时，不填充任何内容
-      document.getElementById('noticeInput').value = '';
-    }
-    
-    // === 绑定我们新写的发布公告接口 ===
+    // === 发布公告 ===
     document.getElementById('saveNoticeBtn').onclick = async () => {
       const val = document.getElementById('noticeInput').value.trim();
-      if (!val) {
-        alert('请输入公告内容');
-        return;
-      }
-      
+      if (!val) return alert('请输入公告内容');
       const btn = document.getElementById('saveNoticeBtn');
-      btn.disabled = true;
-      btn.textContent = '发布中...';
-      
+      btn.disabled = true; btn.textContent = '发布中...';
       try {
-        await api('/api/admin/announcement/add', { 
-          method: 'POST', 
-          body: JSON.stringify({ content: val }) 
-        });
+        await api('/api/admin/announcement/add', { method: 'POST', body: JSON.stringify({ content: val }) });
         alert('公告发布成功！将会在首页展示。');
         document.getElementById('noticeInput').value = ''; 
-      } catch (e) {
-        alert('发布失败: ' + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '发布并更新首页公告';
-      }
+      } catch (e) { alert('发布失败: ' + e.message); } 
+      finally { btn.disabled = false; btn.textContent = '发布并更新首页公告'; }
     };
 
+    // 🌟 核心修复1：根据是否有 ID，决定是 POST (新建) 还是 PUT (更新)
     async function submitPost(status) {
       const title = document.getElementById('titleInput').value.trim();
       const content = quill.getSemanticHTML();
@@ -309,28 +260,61 @@
 
       try {
         await api('/api/post/create', {
-          method: 'POST',
+          method: id ? 'PUT' : 'POST', // 有 ID 就更新，没 ID 才新建！
           body: JSON.stringify({ id: id ? Number(id) : null, title, content, cover_url, hidden_content, status, tags, category_id })
         });
-        alert('操作成功');
+        alert(id ? '文章修改成功' : '文章发布成功');
+        
+        // 发布成功后重置表单并跳回列表
+        resetEditor();
         location.hash = status === 'published' ? 'post-list' : 'drafts';
-      } catch (e) { alert(e.message); } finally { btn.disabled = false; btn.textContent = originText; }
+      } catch (e) { alert(e.message); } 
+      finally { btn.disabled = false; btn.textContent = originText; }
     }
 
+    // 🌟 编辑文章加载数据，并修改按钮文案
     async function editPost(id) {
       try {
         const data = await api(`/api/post/view?id=${id}`);
-        if (!data || !data.post) throw new Error(data?.error || "无法获取文章数据，请检查接口或数据库字段");
+        if (!data || !data.post) throw new Error(data?.error || "无法获取文章数据");
         const p = data.post;
         location.hash = 'publish';
+        
         document.getElementById('postId').value = p.id;
         document.getElementById('titleInput').value = p.title;
         document.getElementById('coverInput').value = p.cover_url || '';
         document.getElementById('hiddenContentInput').value = p.hidden_content || '';
         document.getElementById('tagsInput').value = p.tags?.join(',') || '';
-        setTimeout(() => { document.getElementById('postCategory').value = p.category_id || ''; }, 200);
+        setTimeout(() => { document.getElementById('postCategory').value = p.category_id || ''; }, 300); // 确保分类数据加载完
         quill.setContents(quill.clipboard.convert({html: p.content || ''}));
+        
+        document.getElementById('savePublishBtn').textContent = "保存修改"; // 提示文案改变
       } catch (e) { alert('加载文章失败: ' + e.message); }
+    }
+
+    // 🌟 核心修复2：彻底修复删除接口
+    async function deletePost(id) {
+      if(!confirm("确定彻底删除文章？操作不可逆！")) return;
+      try {
+        // 请求 create.js，指定 DELETE 方式
+        await api('/api/post/create', { method: 'DELETE', body: JSON.stringify({ id }) });
+        alert('删除成功');
+        loadPostsTable(location.hash === '#drafts' ? 'drafts' : 'published'); // 局部刷新，不卡死
+      } catch(e) {
+        alert("删除失败: " + e.message);
+      }
+    }
+
+    // 重置编辑器状态
+    function resetEditor() {
+      document.getElementById('postId').value = '';
+      document.getElementById('titleInput').value = '';
+      document.getElementById('coverInput').value = '';
+      document.getElementById('hiddenContentInput').value = '';
+      document.getElementById('tagsInput').value = '';
+      document.getElementById('postCategory').value = '';
+      quill.setContents([]);
+      document.getElementById('savePublishBtn').textContent = '发布文章';
     }
 
     async function loadDashboard() {
@@ -346,12 +330,6 @@
       tbody.innerHTML = (data.posts || []).map(p => `<tr><td class="px-6 py-4 font-bold text-slate-700">${p.title}</td><td class="px-6 py-4 flex gap-4 text-sm font-bold"><button onclick="editPost(${p.id})" class="text-sky-600">编辑</button><button onclick="deletePost(${p.id})" class="text-red-500">删除</button></td></tr>`).join('');
     }
 
-    async function deletePost(id) {
-      if(!confirm("确定彻底删除文章？")) return;
-      await api('/api/admin/post/delete', { method: 'POST', body: JSON.stringify({ id }) });
-      location.reload();
-    }
-
     function route() {
       const hash = location.hash.slice(1) || 'dashboard';
       const panels = ['dashboard', 'post-list', 'drafts', 'publish', 'invites', 'notice', 'categories'];
@@ -362,12 +340,16 @@
       if (hash === 'dashboard') loadDashboard();
       if (hash === 'post-list') loadPostsTable('published');
       if (hash === 'drafts') loadPostsTable('drafts');
-      if (hash === 'notice') loadNotice();
+      if (hash === 'publish' && !document.getElementById('postId').value) resetEditor(); // 如果点菜单进来，清理旧数据
       if (hash === 'categories' || hash === 'publish') loadCategories();
     }
 
     window.addEventListener('hashchange', route);
     window.addEventListener('load', () => { initQuill(); route(); });
+    
+    // 监听撰写新文章菜单点击，强制清理状态
+    document.getElementById('menu-publish').addEventListener('click', resetEditor);
+
     document.getElementById('savePublishBtn').onclick = () => submitPost('published');
     document.getElementById('saveDraftBtn').onclick = () => submitPost('drafts');
     document.getElementById('logoutBtn').onclick = () => { localStorage.removeItem('hlog_auth'); location.href = '/login.html'; };

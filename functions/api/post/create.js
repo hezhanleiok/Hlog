@@ -34,7 +34,6 @@ async function upsertTagIds(context, tagNames) {
     const row = await context.env.DB.prepare("SELECT id FROM tags WHERE name = ?").bind(name).first();
     if (row?.id) ids.push(row.id);
   }
-  // 去重
   return [...new Set(ids)];
 }
 
@@ -46,21 +45,25 @@ export async function onRequest(context) {
     const method = context.request.method.toUpperCase();
     const body = await context.request.json().catch(() => ({}));
 
-    if (method === "POST") {
-      const title = String(body.title || "").trim();
-      const summary = body.summary == null ? null : String(body.summary).trim();
-      const content = String(body.content || "").trim();
-      const hidden_content = body.hidden_content == null ? null : String(body.hidden_content).trim();
-      const cover_url = body.cover_url == null ? null : String(body.cover_url).trim() || null;
-      const status = body.status === "draft" ? "draft" : "published";
-      const allow_comments = Number(body.allow_comments ?? 1) === 1 ? 1 : 0;
+    // 提取公共字段
+    const title = String(body.title || "").trim();
+    const summary = body.summary == null ? null : String(body.summary).trim();
+    const content = String(body.content || "").trim();
+    const hidden_content = body.hidden_content == null ? null : String(body.hidden_content).trim();
+    const cover_url = body.cover_url == null ? null : String(body.cover_url).trim() || null;
+    const status = body.status === "draft" ? "draft" : "published";
+    const allow_comments = Number(body.allow_comments ?? 1) === 1 ? 1 : 0;
+    // 🌟 核心修复：接收 category_id
+    const category_id = body.category_id ? Number(body.category_id) : null; 
 
+    if (method === "POST") {
       if (!title || !content) return json({ error: "标题和正文不能为空" }, 400);
 
+      // 🌟 核心修复：插入语句增加 category_id
       const result = await context.env.DB.prepare(
-        `INSERT INTO posts (title, summary, content, hidden_content, cover_url, status, views, allow_comments)
-         VALUES (?, ?, ?, ?, ?, ?, 0, ?)`
-      ).bind(title, summary, content, hidden_content, cover_url, status, allow_comments).run();
+        `INSERT INTO posts (title, summary, content, hidden_content, cover_url, status, views, allow_comments, category_id)
+         VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)`
+      ).bind(title, summary, content, hidden_content, cover_url, status, allow_comments, category_id).run();
 
       const postId = result.meta.last_row_id;
 
@@ -72,29 +75,20 @@ export async function onRequest(context) {
           await context.env.DB.prepare("INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)").bind(postId, tagId).run();
         }
       }
-
       return json({ ok: true, id: postId }, 201);
     }
 
     if (method === "PUT") {
       const id = Number(body.id);
       if (!id) return json({ error: "缺少文章 ID" }, 400);
-
-      const title = String(body.title || "").trim();
-      const summary = body.summary == null ? null : String(body.summary).trim();
-      const content = String(body.content || "").trim();
-      const hidden_content = body.hidden_content == null ? null : String(body.hidden_content).trim();
-      const cover_url = body.cover_url == null ? null : String(body.cover_url).trim() || null;
-      const status = body.status === "draft" ? "draft" : "published";
-      const allow_comments = Number(body.allow_comments ?? 1) === 1 ? 1 : 0;
-
       if (!title || !content) return json({ error: "标题和正文不能为空" }, 400);
 
+      // 🌟 核心修复：更新语句增加 category_id
       const result = await context.env.DB.prepare(
         `UPDATE posts
-         SET title = ?, summary = ?, content = ?, hidden_content = ?, cover_url = ?, status = ?, allow_comments = ?
+         SET title = ?, summary = ?, content = ?, hidden_content = ?, cover_url = ?, status = ?, allow_comments = ?, category_id = ?
          WHERE id = ?`
-      ).bind(title, summary, content, hidden_content, cover_url, status, allow_comments, id).run();
+      ).bind(title, summary, content, hidden_content, cover_url, status, allow_comments, category_id, id).run();
 
       if (!result.meta.changes) return json({ error: "文章不存在" }, 404);
 
@@ -106,7 +100,6 @@ export async function onRequest(context) {
           await context.env.DB.prepare("INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)").bind(id, tagId).run();
         }
       }
-
       return json({ ok: true });
     }
 
@@ -117,6 +110,7 @@ export async function onRequest(context) {
       await context.env.DB.prepare("DELETE FROM post_tags WHERE post_id = ?").bind(id).run();
       await context.env.DB.prepare("DELETE FROM comments WHERE post_id = ?").bind(id).run();
       const result = await context.env.DB.prepare("DELETE FROM posts WHERE id = ?").bind(id).run();
+      
       if (!result.meta.changes) return json({ error: "文章不存在" }, 404);
       return json({ ok: true });
     }
@@ -126,4 +120,3 @@ export async function onRequest(context) {
     return json({ error: "文章操作失败", detail: String(err.message || err) }, 500);
   }
 }
-
