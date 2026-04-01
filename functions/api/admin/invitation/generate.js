@@ -1,53 +1,26 @@
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json; charset=utf-8" }
-  });
-}
-
-async function requireAdmin(context) {
-  const authHeader = context.request.headers.get("Authorization") || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-  if (!token) return { error: json({ error: "未登录" }, 401) };
-
-  const row = await context.env.DB.prepare(
-    `SELECT u.id, u.role
-     FROM sessions s
-     JOIN users u ON u.id = s.user_id
-     WHERE s.token = ? AND s.expires_at > datetime('now')`
-  ).bind(token).first();
-
-  if (!row) return { error: json({ error: "登录状态已失效" }, 401) };
-  if (row.role !== "admin") return { error: json({ error: "仅管理员可操作" }, 403) };
-  return { user: row };
-}
-
-function randomCode(len = 10) {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 去掉易混淆字符 I/O/1/0
-  const arr = new Uint8Array(len);
-  crypto.getRandomValues(arr);
-  return [...arr].map((b) => chars[b % chars.length]).join("");
+// functions/api/admin/invitation/generate.js
+function generateRandomCode(length) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return Array.from({length}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
 export async function onRequestPost(context) {
-  const admin = await requireAdmin(context);
-  if (admin.error) return admin.error;
-
   try {
-    const count = 10;
-    const codes = new Set();
-    while (codes.size < count) codes.add(randomCode(10));
+    const auth = context.request.headers.get("Authorization");
+    if (!auth) return Response.json({ error: "未授权" }, { status: 401 });
 
-    const toInsert = [...codes];
-    for (const code of toInsert) {
-      await context.env.DB.prepare(
-        "INSERT OR IGNORE INTO invitation_codes (code, is_used, used_by) VALUES (?, 0, NULL)"
-      ).bind(code).run();
+    const body = await context.request.json().catch(() => ({}));
+    const count = Math.min(Math.max(Number(body.count) || 1, 1), 20); // 一次最多生成20个
+
+    const codes = [];
+    for(let i=0; i<count; i++){
+        const code = generateRandomCode(8);
+        await context.env.DB.prepare("INSERT INTO invitations (code, status) VALUES (?, 0)").bind(code).run();
+        codes.push({ code, status: 0 });
     }
 
-    return json({ ok: true, codes: toInsert });
+    return Response.json({ success: true, data: codes });
   } catch (err) {
-    return json({ error: "生成邀请码失败", detail: String(err.message || err) }, 500);
+    return Response.json({ error: "生成失败" }, { status: 500 });
   }
 }
-

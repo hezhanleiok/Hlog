@@ -302,6 +302,36 @@
       finally { btn.disabled = false; btn.textContent = '发布并更新首页公告'; }
     };
 
+    // ================== 新增：邀请码获取及生成功能 ==================
+    async function loadInvites() {
+      try {
+        const res = await api('/api/admin/invitation/list');
+        const tbody = document.getElementById('invitesTbody');
+        if(res.data) {
+          tbody.innerHTML = res.data.map(inv => `
+            <tr>
+              <td class="px-6 py-4 font-mono font-bold text-slate-700">${inv.code}</td>
+              <td class="px-6 py-4 font-bold ${inv.status === 0 ? 'text-emerald-500' : 'text-slate-400'}">
+                ${inv.status === 0 ? '未使用' : '已使用'}
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch(e) {
+          console.error("加载邀请码失败", e);
+      }
+    }
+
+    document.getElementById('genInviteBtn').onclick = async () => {
+      const count = document.getElementById('inviteCount').value;
+      try {
+        await api('/api/admin/invitation/generate', { method: 'POST', body: JSON.stringify({ count }) });
+        alert('生成成功！');
+        loadInvites(); // 生成后刷新列表
+      } catch (e) { alert(e.message); }
+    };
+    // ==============================================================
+
     async function submitPost(status) {
       const title = document.getElementById('titleInput').value.trim();
       if (!editor) return alert('编辑器尚未完全加载');
@@ -424,6 +454,7 @@
       if (hash === 'dashboard') loadDashboard();
       if (hash === 'post-list') loadPostsTable('published');
       if (hash === 'drafts') loadPostsTable('drafts');
+      if (hash === 'invites') loadInvites(); // 新增：切换到邀请码页面时执行加载
       
       // 🌟 修复点4：必须给面板留出渲染展示时间 (setTimeout)，然后再去渲染工具栏，彻底解决工具栏变白消失！
       if (hash === 'publish') {

@@ -3,127 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HLOG - 注册</title>
+  <title>注册 - HLOG</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center px-4">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-sm p-6">
-    <h1 class="text-2xl font-bold mb-1">创建 HLOG 账号</h1>
-    <p class="text-sm text-slate-500 mb-6">注册后即可发表评论，管理员可发布文章。</p>
-    <form id="registerForm" class="space-y-4">
-      <div>
-        <label class="text-sm text-slate-600">用户名</label>
-        <input id="username" required minlength="3" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
-      </div>
-      <div>
-        <label class="text-sm text-slate-600">显示昵称</label>
-        <input id="displayName" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
-      </div>
-      <div>
-        <label class="text-sm text-slate-600">密码</label>
-        <input id="password" type="password" required minlength="6" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
-      </div>
-      <div>
-        <label class="text-sm text-slate-600">邮箱</label>
-        <div class="flex items-center gap-2 mt-1">
-          <input id="email" type="email" required class="flex-1 border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="you@example.com" />
-          <button id="sendCodeBtn" type="button" class="shrink-0 px-3 py-2 rounded-lg bg-slate-900 text-white text-sm hover:bg-slate-800">获取验证码</button>
-        </div>
-        <div id="codeCountdown" class="text-xs text-slate-500 mt-2 hidden">60 秒后可重新发送</div>
-      </div>
-      <div>
-        <label class="text-sm text-slate-600">邮箱验证码</label>
-        <input id="emailCode" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="输入 6 位验证码" />
-      </div>
-      <div>
-        <label class="text-sm text-slate-600">邀请码（可选）</label>
-        <input id="invitationCode" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" placeholder="如未启用可留空" />
-      </div>
-      <button class="w-full bg-sky-600 text-white rounded-lg py-2 hover:bg-sky-700">注册</button>
+<body class="bg-[#f0f2f5] flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <h2 class="text-2xl font-black text-center text-slate-800 mb-8">加入 HLOG</h2>
+    <form id="regForm" class="space-y-4">
+      <input type="text" id="username" placeholder="用户名" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500" />
+      <input type="password" id="password" placeholder="密码" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500" />
+      <input type="text" id="inviteCode" placeholder="邀请码 (必填)" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-500" />
+      <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">注册</button>
     </form>
-    <p class="text-sm text-slate-500 mt-4">已有账号？<a href="/login.html" class="text-sky-600">去登录</a></p>
-    <a href="/" class="inline-block mt-4 text-sm text-slate-600 hover:text-slate-900">返回首页</a>
+    <div class="mt-6 text-center text-sm text-slate-500">
+      已有账号？ <a href="/login.html" class="text-indigo-600 font-bold">去登录</a>
+    </div>
   </div>
-
   <script>
-    const sendCodeBtn = document.getElementById("sendCodeBtn");
-    const codeCountdown = document.getElementById("codeCountdown");
-    let countdownTimer = null;
-    let countdownSeconds = 60;
-
-    function setCountdownUI() {
-      if (countdownSeconds <= 0) {
-        sendCodeBtn.disabled = false;
-        sendCodeBtn.textContent = "获取验证码";
-        codeCountdown.classList.add("hidden");
-        codeCountdown.textContent = "60 秒后可重新发送";
-        return;
-      }
-      sendCodeBtn.disabled = true;
-      sendCodeBtn.textContent = `${countdownSeconds}秒后重试`;
-      codeCountdown.classList.remove("hidden");
-      codeCountdown.textContent = `${countdownSeconds} 秒后可重新发送`;
-    }
-
-    async function startSendCode() {
-      const email = document.getElementById("email").value.trim();
-      if (!email) return alert("请先填写邮箱");
-      try {
-        sendCodeBtn.disabled = true;
-        const res = await fetch("/api/auth/send-code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || "发送验证码失败");
-
-        countdownSeconds = 60;
-        setCountdownUI();
-        if (countdownTimer) clearInterval(countdownTimer);
-        countdownTimer = setInterval(() => {
-          countdownSeconds -= 1;
-          setCountdownUI();
-          if (countdownSeconds <= 0 && countdownTimer) {
-            clearInterval(countdownTimer);
-            countdownTimer = null;
-          }
-        }, 1000);
-      } catch (err) {
-        alert(err.message);
-        sendCodeBtn.disabled = false;
-        sendCodeBtn.textContent = "获取验证码";
-        codeCountdown.classList.add("hidden");
-        countdownSeconds = 60;
-      }
-    }
-
-    sendCodeBtn.addEventListener("click", startSendCode);
-
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    document.getElementById('regForm').onsubmit = async (e) => {
       e.preventDefault();
-      const payload = {
-        username: document.getElementById("username").value.trim(),
-        display_name: document.getElementById("displayName").value.trim(),
-        password: document.getElementById("password").value,
-        email: document.getElementById("email").value.trim(),
-        email_code: document.getElementById("emailCode").value.trim(),
-        invitation_code: document.getElementById("invitationCode").value.trim() || null
-      };
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      const c = document.getElementById('inviteCode').value;
       try {
-        const res = await fetch("/api/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+        const res = await fetch('/api/register', { method: 'POST', body: JSON.stringify({ username: u, password: p, inviteCode: c }) });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "注册失败");
-        alert("注册成功，请登录");
-        location.href = "/login.html";
-      } catch (err) {
-        alert(err.message);
-      }
-    });
+        if(res.ok) { alert('注册成功！'); location.href = '/login.html'; }
+        else alert('注册失败: ' + data.error);
+      } catch (err) { alert('网络错误'); }
+    };
   </script>
 </body>
 </html>
