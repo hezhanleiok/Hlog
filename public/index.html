@@ -31,9 +31,10 @@
     .aside-title { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 800; color: #1e293b; margin-bottom: 1.25rem; }
     .aside-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
     
-    /* 🌟 修复幻灯片比例，防止遮挡 */
-    .home-hero-swiper { border-radius: 16px; overflow: hidden; height: 100%; min-height: 300px; max-height: 450px; }
-    .swiper-slide img { width: 100%; height: 100%; object-cover: cover; }
+    /* 🌟 修复幻灯片比例，防止遮挡。移除 aspect-video 强制比例，改为自适应高度 */
+    .home-hero-swiper { border-radius: 16px; overflow: hidden; height: 400px; }
+    @media (max-width: 768px) { .home-hero-swiper { height: 250px; } }
+    .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
   </style>
 </head>
 <body class="antialiased font-sans">
@@ -70,8 +71,8 @@
     <div class="flex flex-col lg:flex-row gap-8">
       
       <div class="flex-1 min-w-0 space-y-8">
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
-          <div class="xl:col-span-2 relative rounded-2xl shadow-sm bg-slate-200 overflow-hidden aspect-video">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+          <div class="xl:col-span-2 relative rounded-2xl shadow-sm bg-slate-200 overflow-hidden">
             <div class="swiper home-hero-swiper">
               <div class="swiper-wrapper" id="swiperWrapper"></div>
               <div class="swiper-pagination"></div>
@@ -167,7 +168,6 @@
     const auth = JSON.parse(localStorage.getItem("hlog_auth") || "null");
     const authLinks = document.getElementById("authLinks");
     
-    // 🌟 找回注册按钮并加固登录状态显示
     if (auth?.token) {
       authLinks.innerHTML = `<a href="/admin.html" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-black shadow-lg">管理后台</a>`;
     } else {
@@ -195,14 +195,12 @@
       const catId = urlParams.get("cat");
       const tagId = urlParams.get("tag");
 
-      // 1. 同步分类菜单
       const catData = await api("/api/category/list");
       const cats = catData.categories || [];
       document.getElementById("navCatList").innerHTML = cats.map(c => 
         `<a href="/?cat=${c.id}" class="block px-5 py-2.5 hover:bg-indigo-50 font-bold text-slate-600 transition-colors">${c.name}</a>`).join("");
       document.getElementById("stat_cats").textContent = cats.length;
 
-      // 2. 加载统计
       const stats = await api("/api/stats");
       const siteStats = await api("/api/site/stats");
       document.getElementById("siteNoticeDisplay").textContent = stats.site_notice || "欢迎来到 XIAOHE 的分享空间！";
@@ -210,13 +208,11 @@
       document.getElementById("statTotalViews").textContent = siteStats.total_views || 0;
       document.getElementById("stat_posts").textContent = siteStats.post_count || 0;
 
-      // 3. 文章逻辑
       let postPath = `/api/post/list?limit=15&sort=recent`;
       if(catId) postPath += `&cat_id=${catId}`;
       if(tagId) postPath += `&tag_id=${tagId}`;
       const { posts = [] } = await api(postPath);
       
-      // 设置海报
       if(posts.length > 0) {
         document.getElementById("posterImg").src = getCover(posts[0]);
         document.getElementById("posterTitle").textContent = posts[0].title;
@@ -243,7 +239,6 @@
           </a>
         </article>`).join("");
 
-      // 4. 轮播
       document.getElementById("swiperWrapper").innerHTML = posts.slice(0, 3).map(p => `
         <div class="swiper-slide relative">
           <a href="/post.html?post=${p.id}" class="block h-full">
@@ -259,7 +254,6 @@
         effect: 'fade'
       });
 
-      // 5. 侧边栏
       const tagData = await api("/api/tag/list");
       document.getElementById("tagCloud").innerHTML = (tagData.tags || []).map(t => 
         `<a href="/?tag=${t.id}" class="text-[11px] px-3 py-1.5 bg-slate-50 rounded-lg font-black hover:bg-indigo-600 hover:text-white transition-all">${escapeHtml(t.name)}</a>`).join("");
