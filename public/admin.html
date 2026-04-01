@@ -63,7 +63,7 @@
         <section id="panel-notice" class="hidden max-w-2xl mx-auto">
           <div class="bg-white p-8 rounded-2xl border shadow-sm">
             <h3 class="text-lg font-black text-red-600 mb-4 flex items-center gap-2">📢 编辑首页公告</h3>
-            <textarea id="noticeInput" rows="6" class="w-full border border-slate-200 rounded-xl p-4 outline-none focus:border-red-500 transition-all"></textarea>
+            <textarea id="noticeInput" rows="6" placeholder="输入要发布的新公告内容..." class="w-full border border-slate-200 rounded-xl p-4 outline-none focus:border-red-500 transition-all"></textarea>
             <button id="saveNoticeBtn" class="w-full mt-6 bg-red-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-red-700 transition">发布并更新首页公告</button>
           </div>
         </section>
@@ -263,13 +263,35 @@
     };
 
     async function loadNotice() {
-      const s = await api('/api/stats');
-      if(s.site_notice) document.getElementById('noticeInput').value = s.site_notice;
+      // 公告页面打开时，不填充任何内容
+      document.getElementById('noticeInput').value = '';
     }
+    
+    // === 绑定我们新写的发布公告接口 ===
     document.getElementById('saveNoticeBtn').onclick = async () => {
-      const val = document.getElementById('noticeInput').value;
-      await api('/api/admin/stats/update_notice', { method: 'POST', body: JSON.stringify({ value: val }) });
-      alert('更新成功');
+      const val = document.getElementById('noticeInput').value.trim();
+      if (!val) {
+        alert('请输入公告内容');
+        return;
+      }
+      
+      const btn = document.getElementById('saveNoticeBtn');
+      btn.disabled = true;
+      btn.textContent = '发布中...';
+      
+      try {
+        await api('/api/admin/announcement/add', { 
+          method: 'POST', 
+          body: JSON.stringify({ content: val }) 
+        });
+        alert('公告发布成功！将会在首页展示。');
+        document.getElementById('noticeInput').value = ''; 
+      } catch (e) {
+        alert('发布失败: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '发布并更新首页公告';
+      }
     };
 
     async function submitPost(status) {
@@ -295,7 +317,6 @@
       } catch (e) { alert(e.message); } finally { btn.disabled = false; btn.textContent = originText; }
     }
 
-    // 🌟 修复：加强了防崩溃容错的回显逻辑
     async function editPost(id) {
       try {
         const data = await api(`/api/post/view?id=${id}`);
