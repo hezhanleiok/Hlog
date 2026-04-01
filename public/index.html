@@ -158,6 +158,16 @@
       return (await fetch(path)).json().catch(() => ({}));
     }
 
+    // ⭐ 新增：优先请求静态 JSON 文件，如果失败（如本地开发时）则自动回退调用动态 API
+    async function fetchStaticOrApi(staticPath, apiPath) {
+      try {
+        const res = await fetch(staticPath);
+        if (res.ok) return await res.json();
+      } catch (e) {}
+      // 静态获取失败，走原始 API
+      return api(apiPath);
+    }
+
     function getCover(p) {
       if(p.cover_url) return p.cover_url;
       const m = (p.content||"").match(/<img[^>]+src="([^">]+)"/);
@@ -172,9 +182,16 @@
     }
 
     async function load() {
+      // ⭐ 修改点：使用 fetchStaticOrApi 替换原有的 api() 调用
       const [catData, stats, siteStats, annRes, postsRes, hotData, commentsData, tagsData] = await Promise.all([
-        api("/api/category/list"), api("/api/stats"), api("/api/site/stats"), api("/api/admin/announcement/latest"),
-        api("/api/post/list?limit=15&sort=recent"), api("/api/post/list?sort=views&limit=5"), api("/api/comment/latest?limit=4"), api("/api/tag/list")
+        fetchStaticOrApi("/static/category-list.json", "/api/category/list"),
+        fetchStaticOrApi("/static/stats.json", "/api/stats"),
+        fetchStaticOrApi("/static/site-stats.json", "/api/site/stats"),
+        fetchStaticOrApi("/static/announcement-latest.json", "/api/admin/announcement/latest"),
+        fetchStaticOrApi("/static/post-list-recent.json", "/api/post/list?limit=15&sort=recent"),
+        fetchStaticOrApi("/static/post-list-views.json", "/api/post/list?sort=views&limit=5"),
+        fetchStaticOrApi("/static/comment-latest.json", "/api/comment/latest?limit=4"),
+        fetchStaticOrApi("/static/tag-list.json", "/api/tag/list")
       ]);
 
       const cats = catData.categories || [];

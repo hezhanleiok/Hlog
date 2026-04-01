@@ -37,6 +37,17 @@ async function upsertTagIds(context, tagNames) {
   return [...new Set(ids)];
 }
 
+// 🌟 新增：触发 Cloudflare Pages 静态重新部署的函数
+function triggerDeploy(context) {
+  const hookUrl = "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/fdffadac-e9e6-42a7-b33e-11ded5edaeb0";
+  // 使用 context.waitUntil 可以在后台异步发送请求，不阻塞当前接口返回给前端的速度
+  context.waitUntil(
+    fetch(hookUrl, { method: "POST" })
+      .then(res => console.log("自动触发静态部署成功, 状态码:", res.status))
+      .catch(err => console.error("自动触发静态部署失败:", err))
+  );
+}
+
 export async function onRequest(context) {
   const auth = await requireAdmin(context);
   if (auth.error) return auth.error;
@@ -75,6 +86,10 @@ export async function onRequest(context) {
           await context.env.DB.prepare("INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)").bind(postId, tagId).run();
         }
       }
+      
+      // 🌟 触发部署
+      triggerDeploy(context);
+      
       return json({ ok: true, id: postId }, 201);
     }
 
@@ -100,6 +115,10 @@ export async function onRequest(context) {
           await context.env.DB.prepare("INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)").bind(id, tagId).run();
         }
       }
+      
+      // 🌟 触发部署
+      triggerDeploy(context);
+      
       return json({ ok: true });
     }
 
@@ -112,6 +131,10 @@ export async function onRequest(context) {
       const result = await context.env.DB.prepare("DELETE FROM posts WHERE id = ?").bind(id).run();
       
       if (!result.meta.changes) return json({ error: "文章不存在" }, 404);
+      
+      // 🌟 触发部署
+      triggerDeploy(context);
+      
       return json({ ok: true });
     }
 
