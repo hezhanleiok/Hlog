@@ -11,7 +11,6 @@
   <style>
     .upload-loading { position: absolute; inset: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; z-index: 10000; font-weight: bold; color: #0284c7; backdrop-filter: blur(2px); }
     .menu-active { background-color: #334155; color: white; border-left: 4px solid #0ea5e9; }
-    /* 优化编辑器的默认样式 */
     #editor-container { font-size: 16px; line-height: 1.6; }
     .w-e-full-screen-container { z-index: 9999; }
   </style>
@@ -171,7 +170,7 @@
     if (!auth?.token || auth.role !== 'admin') location.href = '/login.html';
     
     // 全局编辑器实例
-    let editor;
+    let editor = null;
 
     async function api(path, options = {}) {
       const headers = { ...options.headers, 'Authorization': 'Bearer ' + auth.token, 'Content-Type': 'application/json' };
@@ -181,14 +180,15 @@
       return data;
     }
 
-    // 初始化 WangEditor
+    // 初始化 WangEditor (必须在容器可见的情况下执行)
     function initEditor() {
+      if (editor) return; // 如果已经初始化，就不重复执行
+      
       const { createEditor, createToolbar } = window.wangEditor;
       
       const editorConfig = {
         placeholder: '在此编写正文 (支持 Markdown 快捷键，如输入 "# " 变成标题)...',
         MENU_CONF: {
-          // 接管图片上传逻辑，复用你已有的 /api/upload 接口
           uploadImage: {
             async customUpload(file, insertFn) {
               const status = document.getElementById('editorUploadStatus');
@@ -203,8 +203,9 @@
                 });
                 const data = await res.json();
                 if (data.url) {
-                    // insertFn(url, alt, href)
                     insertFn(data.url, file.name, data.url);
+                } else {
+                    alert('图片上传失败, 请检查后端接口');
                 }
               } catch (e) { 
                   alert('图片上传失败'); 
@@ -220,7 +221,7 @@
         selector: '#editor-container',
         html: '<p><br></p>',
         config: editorConfig,
-        mode: 'default', // default 模式拥有全部功能栏
+        mode: 'default', 
       });
 
       const toolbar = createToolbar({
@@ -231,7 +232,6 @@
       });
     }
 
-    // 封面图上传逻辑保持不变
     document.getElementById('uploadCoverBtn').onclick = () => {
       const input = document.createElement('input');
       input.setAttribute('type', 'file'); input.setAttribute('accept', 'image/*');
@@ -292,10 +292,8 @@
 
     async function submitPost(status) {
       const title = document.getElementById('titleInput').value.trim();
-      
-      // === 核心替换：从 WangEditor 获取 HTML 内容 ===
+      if (!editor) return alert('编辑器尚未加载完成');
       const content = editor.getHtml(); 
-      
       const cover_url = document.getElementById('coverInput').value;
       const hidden_content = document.getElementById('hiddenContentInput').value;
       const category_id = document.getElementById('postCategory').value;
@@ -303,7 +301,7 @@
       const id = document.getElementById('postId').value;
       
       if (!title) return alert('标题不能为空');
-      if (editor.getText().trim() === '') return alert('正文不能为空'); // 确保正文不为空
+      if (editor.getText().trim() === '') return alert('正文不能为空'); 
 
       const btn = status === 'published' ? document.getElementById('savePublishBtn') : document.getElementById('saveDraftBtn');
       const originText = btn.textContent; btn.disabled = true; btn.textContent = '处理中...';
@@ -325,7 +323,17 @@
         const data = await api(`/api/post/view?id=${id}`);
         if (!data || !data.post) throw new Error(data?.error || "无法获取文章数据");
         const p = data.post;
+        
+        // 🌟 修复关键点：先用代码强制让页面切换到发布面板，使其对浏览器可见
         location.hash = 'publish';
+        const panels = ['dashboard', 'post-list', 'drafts', 'publish', 'invites', 'notice', 'categories'];
+        panels.forEach(panel => { 
+            const el = document.getElementById(`panel-${panel}`); 
+            if (el) el.classList.toggle('hidden', panel !== 'publish'); 
+        });
+        
+        // 面板已经显示出来了，现在初始化就不会崩溃了
+        initEditor(); 
         
         document.getElementById('postId').value = p.id;
         document.getElementById('titleInput').value = p.title;
@@ -334,9 +342,7 @@
         document.getElementById('tagsInput').value = p.tags?.join(',') || '';
         setTimeout(() => { document.getElementById('postCategory').value = p.category_id || ''; }, 300); 
         
-        // === 核心替换：向 WangEditor 写入内容 ===
         editor.setHtml(p.content || '<p><br></p>');
-        
         document.getElementById('savePublishBtn').textContent = '保存修改';
       } catch (e) { alert('加载文章失败: ' + e.message); }
     }
@@ -360,8 +366,9 @@
       document.getElementById('tagsInput').value = '';
       document.getElementById('postCategory').value = '';
       
-      // === 核心替换：清空 WangEditor ===
-      editor.setHtml('<p><br></p>');
+      if (editor) {
+          editor.setHtml('<p><br></p>');
+      }
       
       document.getElementById('savePublishBtn').textContent = '发布文章';
     }
@@ -389,18 +396,27 @@
       if (hash === 'dashboard') loadDashboard();
       if (hash === 'post-list') loadPostsTable('published');
       if (hash === 'drafts') loadPostsTable('drafts');
-      if (hash === 'publish' && !document.getElementById('postId').value) resetEditor(); 
+      
+      // 🌟 修复关键点：只要进入发布页面，立刻初始化编辑器（因为此时它已经处于显示状态了）
+      if (hash === 'publish') {
+        initEditor();
+        if (!document.getElementById('postId').value) resetEditor(); 
+      }
+      
       if (hash === 'categories' || hash === 'publish') loadCategories();
     }
 
     window.addEventListener('hashchange', route);
+    
+    // 页面初次加载时执行路由分配
     window.addEventListener('load', () => { 
-      // 页面加载完成后初始化 WangEditor
-      initEditor(); 
       route(); 
     });
     
-    document.getElementById('menu-publish').addEventListener('click', resetEditor);
+    // 无论目前在不在发布页，只要点击侧边栏的“撰写新文章”，都清空并进入发文状态
+    document.getElementById('menu-publish').addEventListener('click', (e) => {
+      resetEditor(); 
+    });
 
     document.getElementById('savePublishBtn').onclick = () => submitPost('published');
     document.getElementById('saveDraftBtn').onclick = () => submitPost('drafts');
